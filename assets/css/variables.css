@@ -8,11 +8,11 @@
        CORE COLORS - Clean & Vibrant
        ============================================ */
     
-    /* Primary - iOS Blue */
-    --color-primary: hsl(210, 60%, 50%);
-    --color-primary-dim: hsl(210, 55%, 42%);
-    --color-primary-glow: hsla(210, 60%, 50%, 0.15);
-    --color-primary-light: hsl(210, 65%, 58%);
+    /* Primary - iOS Purple (different from blue!) */
+    --color-primary: hsl(265, 50%, 55%);
+    --color-primary-dim: hsl(265, 45%, 48%);
+    --color-primary-glow: hsla(265, 50%, 55%, 0.15);
+    --color-primary-light: hsl(265, 55%, 62%);
     
     /* Secondary - iOS Green */
     --color-secondary: hsl(150, 55%, 45%);
@@ -27,28 +27,28 @@
     --color-accent-light: hsl(25, 85%, 62%);
 
     /* ============================================
-       MODULE COLORS - Apple Style
+       MODULE COLORS - Apple Style (Distinctive)
        ============================================ */
     
-    /* Electrodomesticos - Blue */
-    --color-electro: hsl(210, 55%, 50%);
-    --color-electro-dim: hsl(210, 50%, 42%);
-    --color-electro-glow: hsla(210, 55%, 50%, 0.15);
+    /* Electrodomesticos - Indigo */
+    --color-electro: hsl(245, 45%, 55%);
+    --color-electro-dim: hsl(245, 40%, 48%);
+    --color-electro-glow: hsla(245, 45%, 55%, 0.15);
     
-    /* Telefonia - Green */
-    --color-telefonia: hsl(145, 50%, 45%);
-    --color-telefonia-dim: hsl(145, 45%, 38%);
-    --color-telefonia-glow: hsla(145, 50%, 45%, 0.15);
+    /* Telefonia - Teal */
+    --color-telefonia: hsl(170, 45%, 45%);
+    --color-telefonia-dim: hsl(170, 40%, 38%);
+    --color-telefonia-glow: hsla(170, 45%, 45%, 0.15);
     
-    /* Motocatrices - Orange */
-    --color-moto: hsl(25, 80%, 55%);
-    --color-moto-dim: hsl(25, 75%, 48%);
-    --color-moto-glow: hsla(25, 80%, 55%, 0.15);
+    /* Motocatrices - Coral/Red */
+    --color-moto: hsl(0, 60%, 55%);
+    --color-moto-dim: hsl(0, 55%, 48%);
+    --color-moto-glow: hsla(0, 60%, 55%, 0.15);
     
-    /* Turnos - Purple */
-    --color-turnos: hsl(270, 50%, 55%);
-    --color-turnos-dim: hsl(270, 45%, 48%);
-    --color-turnos-glow: hsla(270, 50%, 55%, 0.15);
+    /* Turnos - Pink */
+    --color-turnos: hsl(330, 50%, 55%);
+    --color-turnos-dim: hsl(330, 45%, 48%);
+    --color-turnos-glow: hsla(330, 50%, 55%, 0.15);
     
     /* Comprobantes - Yellow */
     --color-comprobantes: hsl(45, 70%, 55%);
