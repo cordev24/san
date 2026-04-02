@@ -1,9 +1,9 @@
 <?php
 // Database Configuration - Soporta variables de entorno para Docker
-$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbHost = getenv('DB_HOST') ?: 'db';  // Default to 'db' for Docker
 $dbName = getenv('DB_NAME') ?: 'mysan';
 $dbUser = getenv('DB_USER') ?: 'root';
-$dbPass = getenv('DB_PASS') ?: '';
+$dbPass = getenv('DB_PASS') ?: 'rootpassword';
 $dbCharset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
 define('DB_HOST', $dbHost);
@@ -14,7 +14,7 @@ define('DB_CHARSET', $dbCharset);
 
 // Create PDO connection
 try {
-    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+    $dsn = "mysql:host=" . DB_HOST . ";port=3306;dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
     $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
