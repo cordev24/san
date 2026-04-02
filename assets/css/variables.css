@@ -1,105 +1,105 @@
-/* MySan Design System - Updated Color Palette
- * Friendly, professional colors for financial/administrative system
- * Colors that convey trust, stability, and success
+/* MySan Design System - Fresh Color Palette
+ * Modern, warm and inviting colors for financial/savings management
+ * Inspired by modern fintech apps - friendly but professional
  */
 
 :root {
     /* ============================================
-       COLOR PALETTE - Professional & Friendly
+       CORE COLORS - Warm & Inviting
        ============================================ */
     
-    /* Primary Brand Colors - Trust & Reliability */
-    --color-primary: hsl(220, 50%, 45%);          /* Deep Blue - trust, stability */
-    --color-primary-light: hsl(220, 45%, 55%);   /* Lighter blue for hover */
-    --color-primary-dark: hsl(220, 55%, 35%);    /* Darker blue for active */
-    --color-primary-glow: hsla(220, 50%, 45%, 0.3);
-
-    /* Secondary Colors - Energy & Growth */
-    --color-secondary: hsl(150, 55%, 45%);        /* Fresh Green - growth, money */
-    --color-secondary-light: hsl(150, 50%, 55%);
-    --color-secondary-dark: hsl(150, 60%, 35%);
-    --color-secondary-glow: hsla(150, 55%, 45%, 0.3);
-
-    /* Accent - Highlight & CTAs */
-    --color-accent: hsl(35, 85%, 55%);            /* Warm Amber - attention, energy */
-    --color-accent-light: hsl(35, 80%, 65%);
-    --color-accent-dark: hsl(35, 90%, 45%);
-    --color-accent-glow: hsla(35, 85%, 55%, 0.3);
-
-    /* Module Colors - Category Identification */
-    --color-electro: hsl(220, 50%, 45%);          /* Blue - Electrodomesticos */
-    --color-electro-glow: hsla(220, 50%, 45%, 0.3);
+    /* Primary - Warm indigo/blue for trust */
+    --color-primary: hsl(225, 50%, 45%);
+    --color-primary-dim: hsl(225, 40%, 35%);
+    --color-primary-glow: hsla(225, 50%, 45%, 0.25);
+    --color-primary-light: hsl(225, 60%, 55%);
     
-    --color-telefonia: hsl(150, 55%, 45%);        /* Green - Telefonia */
-    --color-telefonia-glow: hsla(150, 55%, 45%, 0.3);
+    /* Secondary - Coral/salmon for energy and action */
+    --color-secondary: hsl(15, 75%, 60%);
+    --color-secondary-dim: hsl(15, 65%, 50%);
+    --color-secondary-glow: hsla(15, 75%, 60%, 0.25);
+    --color-secondary-light: hsl(15, 85%, 70%);
     
-    --color-moto: hsl(25, 75%, 50%);              /* Orange - Motocicletas */
-    --color-moto-glow: hsla(25, 75%, 50%, 0.3);
-    
-    --color-turnos: hsl(270, 45%, 50%);           /* Purple - Turnos */
-    --color-turnos-glow: hsla(270, 45%, 50%, 0.3);
-    
-    --color-comprobantes: hsl(180, 50%, 45%);     /* Teal - Comprobantes */
-    --color-comprobantes-glow: hsla(180, 50%, 45%, 0.3);
+    /* Accent - Teal/cyan for success/growth */
+    --color-accent: hsl(170, 55%, 45%);
+    --color-accent-dim: hsl(170, 45%, 35%);
+    --color-accent-glow: hsla(170, 55%, 45%, 0.25);
+    --color-accent-light: hsl(170, 65%, 55%);
 
-    /* Legacy Color Aliases (for backward compatibility) */
+    /* ============================================
+       MODULE COLORS - Distinct & Memorable
+       ============================================ */
+    
+    /* Electrodomesticos - Cool Blue */
+    --color-electro: hsl(210, 55%, 50%);
+    --color-electro-dim: hsl(210, 45%, 40%);
+    --color-electro-glow: hsla(210, 55%, 50%, 0.25);
+    
+    /* Telefonia - Fresh Green (money/growth) */
+    --color-telefonia: hsl(145, 50%, 45%);
+    --color-telefonia-dim: hsl(145, 40%, 35%);
+    --color-telefonia-glow: hsla(145, 50%, 45%, 0.25);
+    
+    /* Motocicletas - Bold Orange */
+    --color-moto: hsl(25, 80%, 55%);
+    --color-moto-dim: hsl(25, 70%, 45%);
+    --color-moto-glow: hsla(25, 80%, 55%, 0.25);
+    
+    /* Turnos - Royal Purple */
+    --color-turnos: hsl(265, 45%, 50%);
+    --color-turnos-dim: hsl(265, 35%, 40%);
+    --color-turnos-glow: hsla(265, 45%, 50%, 0.25);
+    
+    /* Comprobantes - Ocean Teal */
+    --color-comprobantes: hsl(185, 50%, 45%);
+    --color-comprobantes-dim: hsl(185, 40%, 35%);
+    --color-comprobantes-glow: hsla(185, 50%, 45%, 0.25);
+
+    /* ============================================
+       LEGACY ALIASES (keep for backward compatibility)
+       ============================================ */
     --color-violeta: var(--color-turnos);
-    --color-violeta-dim: var(--color-turnos-dark);
+    --color-violeta-dim: var(--color-turnos-dim);
     --color-violeta-glow: var(--color-turnos-glow);
     
-    --color-menta: var(--color-secondary);
-    --color-menta-dim: var(--color-color-secondary-dark);
-    --color-menta-glow: var(--color-secondary-glow);
+    --color-menta: var(--color-accent);
+    --color-menta-dim: var(--color-accent-dim);
+    --color-menta-glow: var(--color-accent-glow);
     
-    --color-salmon: var(--color-accent);
-    --color-salmon-dim: var(--color-accent-dark);
-    --color-salmon-glow: var(--color-accent-glow);
+    --color-salmon: var(--color-secondary);
+    --color-salmon-dim: var(--color-secondary-dim);
+    --color-salmon-glow: var(--color-secondary-glow);
 
     /* ============================================
-       SURFACES & BACKGROUNDS
+       SURFACES - Warm dark tones
        ============================================ */
     
-    /* Background - Soft dark with warmth */
-    --color-background: #1a1a1f;
-    --color-surface: #252530;
-    --color-surface-elevated: #2d2d38;
-    --color-surface-hover: #353540;
+    --color-background: #141418;
+    --color-surface: #1C1C22;
+    --color-surface-elevated: #252530;
+    --color-surface-hover: #2A2A35;
 
-    /* Glassmorphism - Modern, clean */
-    --glass-background: rgba(37, 37, 48, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-blur: blur(16px);
+    /* Glassmorphism - Warmer tones */
+    --glass-background: rgba(28, 28, 34, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-blur: blur(12px);
 
     /* ============================================
-       TEXT COLORS
+       TEXT COLORS - Easy on the eyes
        ============================================ */
     
-    --color-text-primary: #F5F5F7;
-    --color-text-secondary: #A0A0AB;
-    --color-text-tertiary: #6B6B75;
-    --color-text-inverse: #1a1a1f;
+    --color-text-primary: #F0F0F2;
+    --color-text-secondary: #9898A6;
+    --color-text-tertiary: #686876;
+    --color-text-inverse: #141418;
 
     /* ============================================
-       STATUS COLORS - Clear & Accessible
+       STATUS COLORS - Clear communication
        ============================================ */
     
-    --color-success: hsl(145, 50%, 45%);           /* Green */
-    --color-success-bg: hsla(145, 50%, 45%, 0.15);
-    --color-success-border: hsla(145, 50%, 45%, 0.3);
-    
-    --color-warning: hsl(35, 70%, 50%);           /* Amber */
-    --color-warning-bg: hsla(35, 70%, 50%, 0.15);
-    --color-warning-border: hsla(35, 70%, 50%, 0.3);
-    
-    --color-error: hsl(0, 60%, 55%);              /* Red */
-    --color-error-bg: hsla(0, 60%, 55%, 0.15);
-    --color-error-border: hsla(0, 60%, 55%, 0.3);
-    
-    --color-info: var(--color-primary);           /* Blue */
-
-    /* Legacy aliases */
-    --color-success: var(--color-secondary);
-    --color-warning: var(--color-accent);
+    --color-success: var(--color-accent);
+    --color-warning: var(--color-secondary);
+    --color-error: hsl(0, 60%, 55%);
     --color-info: var(--color-primary);
 
     /* ============================================
@@ -108,14 +108,14 @@
     
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-    --font-size-xs: 0.75rem;    /* 12px */
-    --font-size-sm: 0.875rem;   /* 14px */
-    --font-size-base: 1rem;     /* 16px */
-    --font-size-lg: 1.125rem;   /* 18px */
-    --font-size-xl: 1.25rem;    /* 20px */
-    --font-size-2xl: 1.5rem;     /* 24px */
-    --font-size-3xl: 1.875rem;  /* 30px */
-    --font-size-4xl: 2.25rem;    /* 36px */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
 
     --font-weight-regular: 400;
     --font-weight-medium: 500;
@@ -123,20 +123,20 @@
     --font-weight-bold: 700;
 
     /* ============================================
-       SPACING SCALE (4px base)
+       SPACING
        ============================================ */
     
-    --space-1: 0.25rem;   /* 4px */
-    --space-2: 0.5rem;    /* 8px */
-    --space-3: 0.75rem;   /* 12px */
-    --space-4: 1rem;      /* 16px */
-    --space-5: 1.25rem;   /* 20px */
-    --space-6: 1.5rem;    /* 24px */
-    --space-8: 2rem;      /* 32px */
-    --space-10: 2.5rem;   /* 40px */
-    --space-12: 3rem;     /* 48px */
-    --space-16: 4rem;      /* 64px */
-    --space-20: 5rem;     /* 80px */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
 
     /* ============================================
        BORDER RADIUS
@@ -145,26 +145,25 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
-    --radius-bento: 20px;
+    --radius-bento: 18px;
     --radius-full: 9999px;
 
     /* ============================================
-       SHADOWS - Softer, more refined
+       SHADOWS
        ============================================ */
     
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
     
-    /* Glows - Subtle, not overwhelming */
-    --shadow-glow-primary: 0 0 16px var(--color-primary-glow);
-    --shadow-glow-secondary: 0 0 16px var(--color-secondary-glow);
-    --shadow-glow-accent: 0 0 16px var(--color-accent-glow);
+    --shadow-glow-primary: 0 0 20px var(--color-primary-glow);
+    --shadow-glow-secondary: 0 0 20px var(--color-secondary-glow);
+    --shadow-glow-accent: 0 0 20px var(--color-accent-glow);
     
-    /* Legacy aliases */
-    --shadow-glow-violeta: 0 0 16px var(--color-turnos-glow);
-    --shadow-glow-menta: 0 0 16px var(--color-secondary-glow);
-    --shadow-glow-salmon: 0 0 16px var(--color-accent-glow);
+    /* Legacy */
+    --shadow-glow-violeta: 0 0 20px var(--color-turnos-glow);
+    --shadow-glow-menta: 0 0 20px var(--color-accent-glow);
+    --shadow-glow-salmon: 0 0 20px var(--color-secondary-glow);
 
     /* ============================================
        TRANSITIONS
@@ -175,7 +174,7 @@
     --transition-slow: 350ms ease;
 
     /* ============================================
-       Z-INDEX SCALE
+       Z-INDEX
        ============================================ */
     
     --z-base: 1;
