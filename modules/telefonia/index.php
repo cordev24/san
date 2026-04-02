@@ -4,7 +4,7 @@ requireLogin();
 $user = getCurrentUser();
 
 // Get categoria ID
-$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Telefonía'");
+$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Telefonia'");
 $stmt->execute();
 $categoria = $stmt->fetch();
 $categoria_id = $categoria['id'];
@@ -14,7 +14,7 @@ $stmt = $pdo->prepare("
     SELECT p.*, c.nombre as categoria_nombre, c.color
     FROM productos p
     JOIN categorias c ON p.categoria_id = c.id
-    WHERE c.nombre = 'Telefonía' AND p.activo = TRUE
+    WHERE c.nombre = 'Telefonia' AND p.activo = TRUE
 ");
 $stmt->execute();
 $productos = $stmt->fetchAll();
@@ -25,7 +25,7 @@ $stmt = $pdo->prepare("
     FROM grupos_san gs
     JOIN productos p ON gs.producto_id = p.id
     JOIN categorias c ON p.categoria_id = c.id
-    WHERE c.nombre = 'Telefonía' AND gs.estado != 'finalizado'
+    WHERE c.nombre = 'Telefonia' AND gs.estado != 'finalizado'
 ");
 $stmt->execute();
 $grupos = $stmt->fetchAll();
@@ -36,7 +36,7 @@ $grupos = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - Telefonía</title>
+    <title>MySan - Telefonia</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
@@ -256,13 +256,13 @@ $grupos = $stmt->fetchAll();
             <div class="breadcrumb">
                 <a href="../../dashboard.php">Dashboard</a>
                 <span>/</span>
-                <span>Telefonía</span>
+                <span>Telefonia</span>
             </div>
             <h1 class="page-title">
                 <svg class="icon-xl" style="stroke: var(--color-menta);">
                     <use href="#icon-smartphone"></use>
                 </svg>
-                Telefonía
+                Telefonia
             </h1>
             <p style="color: var(--color-text-secondary); margin-top: var(--space-2);">
                 Administración de grupos para smartphones y accesorios.

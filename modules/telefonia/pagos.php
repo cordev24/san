@@ -3,8 +3,8 @@ require_once '../../config/database.php';
 requireLogin();
 $user = getCurrentUser();
 
-// Get category ID for Telefonía
-$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Telefonía'");
+// Get category ID for Telefonia
+$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Telefonia'");
 $stmt->execute();
 $categoria = $stmt->fetch();
 $categoria_id = $categoria['id'];
@@ -42,7 +42,7 @@ if ($grupo_seleccionado) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - Pagos Telefonía</title>
+    <title>MySan - Pagos Telefonia</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
@@ -148,7 +148,7 @@ if ($grupo_seleccionado) {
             <div class="breadcrumb">
                 <a href="../../dashboard.php">Dashboard</a>
                 <span>/</span>
-                <a href="index.php">Telefonía</a>
+                <a href="index.php">Telefonia</a>
                 <span>/</span>
                 <span>Pagos</span>
             </div>
@@ -156,7 +156,7 @@ if ($grupo_seleccionado) {
                 <svg class="icon-xl" style="stroke: var(--color-menta);">
                     <use href="#icon-dollar"></use>
                 </svg>
-                Gestión de Pagos - Telefonía
+                Gestión de Pagos - Telefonia
             </h1>
         </div>
 

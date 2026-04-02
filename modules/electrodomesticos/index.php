@@ -4,7 +4,7 @@ requireLogin();
 $user = getCurrentUser();
 
 // Get categoria ID
-$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Electrodomésticos'");
+$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Electrodomesticos'");
 $stmt->execute();
 $categoria = $stmt->fetch();
 $categoria_id = $categoria['id'];
@@ -14,7 +14,7 @@ $stmt = $pdo->prepare("
     SELECT p.*, c.nombre as categoria_nombre, c.color
     FROM productos p
     JOIN categorias c ON p.categoria_id = c.id
-    WHERE c.nombre = 'Electrodomésticos' AND p.activo = TRUE
+    WHERE c.nombre = 'Electrodomesticos' AND p.activo = TRUE
 ");
 $stmt->execute();
 $productos = $stmt->fetchAll();
@@ -25,7 +25,7 @@ $stmt = $pdo->prepare("
     FROM grupos_san gs
     JOIN productos p ON gs.producto_id = p.id
     JOIN categorias c ON p.categoria_id = c.id
-    WHERE c.nombre = 'Electrodomésticos' AND gs.estado != 'finalizado'
+    WHERE c.nombre = 'Electrodomesticos' AND gs.estado != 'finalizado'
 ");
 $stmt->execute();
 $grupos = $stmt->fetchAll();
@@ -36,7 +36,7 @@ $grupos = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - Electrodomésticos</title>
+    <title>MySan - Electrodomesticos</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
@@ -260,13 +260,13 @@ $grupos = $stmt->fetchAll();
             <div class="breadcrumb">
                 <a href="../../dashboard.php">Dashboard</a>
                 <span>/</span>
-                <span>Electrodomésticos</span>
+                <span>Electrodomesticos</span>
             </div>
             <h1 class="page-title">
                 <svg class="icon-xl" style="stroke: var(--color-violeta);">
                     <use href="#icon-package"></use>
                 </svg>
-                Electrodomésticos
+                Electrodomesticos
             </h1>
             <p style="color: var(--color-text-secondary); margin-top: var(--space-2);">
                 Gestión de grupos para neveras, lavadoras, televisores y más.

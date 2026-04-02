@@ -3,8 +3,8 @@ require_once '../../config/database.php';
 requireLogin();
 $user = getCurrentUser();
 
-// Get category ID for Electrodomésticos
-$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Electrodomésticos'");
+// Get category ID for Electrodomesticos
+$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Electrodomesticos'");
 $stmt->execute();
 $categoria = $stmt->fetch();
 $categoria_id = $categoria['id'];
@@ -42,7 +42,7 @@ if ($grupo_seleccionado) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - Pagos Electrodomésticos</title>
+    <title>MySan - Pagos Electrodomesticos</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
@@ -148,7 +148,7 @@ if ($grupo_seleccionado) {
             <div class="breadcrumb">
                 <a href="../../dashboard.php">Dashboard</a>
                 <span>/</span>
-                <a href="index.php">Electrodomésticos</a>
+                <a href="index.php">Electrodomesticos</a>
                 <span>/</span>
                 <span>Pagos</span>
             </div>
