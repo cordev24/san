@@ -1,14 +1,10 @@
 <?php
 /**
- * Shared Layout Component for MySan Modules
- * Provides consistent header, sidebar, and navigation across all admin modules
+ * Sidebar Component - Include in all admin module pages
+ * Provides consistent navigation across all modules
  * 
- * Usage: include this file at the beginning of each module page after require_login()
+ * Usage: include this at the top of each module's <body>, before main-content
  */
-
-if (!isset($user)) {
-    $user = getCurrentUser();
-}
 
 $currentModule = basename(dirname($_SERVER['PHP_SELF']));
 $moduleTitles = [
@@ -18,46 +14,16 @@ $moduleTitles = [
     'turnos' => 'Turnos',
     'comprobantes' => 'Comprobantes'
 ];
-$moduleTitle = $moduleTitles[$currentModule] ?? 'Modulo';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - <?php echo $moduleTitle; ?></title>
-
-    <!-- Shared Styles -->
-    <link rel="stylesheet" href="../../assets/fonts/inter.css">
-    <link rel="stylesheet" href="../../assets/css/reset.css">
-    <link rel="stylesheet" href="../../assets/css/variables.css">
-    <link rel="stylesheet" href="../../assets/css/bento-grid.css">
-    <link rel="stylesheet" href="../../assets/css/main.css">
-    
-    <!-- Layout Styles -->
-    <link rel="stylesheet" href="../../assets/css/layout.css">
-
-    <style>
-        /* Module-specific overrides can go here */
-        <?php echo isset($extraStyles) ? $extraStyles : ''; ?>
-    </style>
-</head>
-
-<body>
-    <!-- Icon Sprite -->
-    <?php include '../../assets/icons/feather-sprite.svg'; ?>
-
-    <!-- Sidebar Navigation -->
+<div class="page-layout">
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <a href="../../dashboard.php" class="sidebar-logo">
-                MySan
-            </a>
+            <a href="../../dashboard.php" class="sidebar-logo">MySan</a>
         </div>
         
         <nav class="sidebar-nav">
-            <a href="../../dashboard.php" class="sidebar-link <?php echo ($currentModule === 'dashboard') ? 'active' : ''; ?>">
+            <a href="../../dashboard.php" class="sidebar-link">
                 <svg class="icon"><use href="#icon-grid"></use></svg>
                 Dashboard
             </a>
@@ -100,29 +66,29 @@ $moduleTitle = $moduleTitles[$currentModule] ?? 'Modulo';
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <div class="main-wrapper">
+    <!-- Main Content -->
+    <div class="main-content-with-sidebar">
         <!-- Top Header -->
         <header class="top-header">
-            <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
-                <svg class="icon"><use href="#icon-menu"></use></svg>
-            </button>
-            
-            <div class="header-title">
-                <h1><?php echo $moduleTitle; ?></h1>
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Toggle menu">
+                    <svg class="icon"><use href="#icon-menu"></use></svg>
+                </button>
+                <div class="header-title">
+                    <h1><?php echo $moduleTitles[$currentModule] ?? 'Modulo'; ?></h1>
+                </div>
             </div>
             
-            <div class="header-user">
+            <div class="header-right">
                 <div class="user-info">
                     <span class="user-name"><?php echo htmlspecialchars($user['nombre'] ?? 'Usuario'); ?></span>
                     <span class="user-role">Administrador</span>
                 </div>
                 <a href="../../logout.php" class="btn btn-outline btn-sm">
-                    <svg class="icon"><use href="#icon-log-out"></use></svg>
-                    Salir
+                    <svg class="icon" style="width:16px;height:16px;"><use href="#icon-log-out"></use></svg>
                 </a>
             </div>
         </header>
 
         <!-- Page Content -->
-        <main class="page-content">
+        <div class="main-content" style="padding: var(--space-6);">
