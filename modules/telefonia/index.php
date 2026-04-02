@@ -79,15 +79,15 @@ $grupos = $stmt->fetchAll();
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: var(--space-6);
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--space-4);
         }
 
         .product-card {
             background: var(--color-surface);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-6);
+            padding: var(--space-4);
             transition: all var(--transition-base);
             cursor: pointer;
             position: relative;
@@ -181,8 +181,8 @@ $grupos = $stmt->fetchAll();
 
         .group-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: var(--space-3);
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-2);
             padding-top: var(--space-2);
             border-top: 1px solid var(--glass-border);
         }
