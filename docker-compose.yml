@@ -1,0 +1,71 @@
+# MySan - Docker Compose para desarrollo local
+# Versiones: PHP 8.2 + Apache + MySQL 8.0
+
+services:
+  # Servidor Web con PHP
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mysan-web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./uploads:/var/www/html/uploads
+    environment:
+      - TZ=America/Caracas
+    depends_on:
+      - db
+    networks:
+      - mysan-network
+    restart: unless-stopped
+
+  # Base de Datos MySQL 8.0
+  db:
+    image: mysql:8.0
+    container_name: mysan-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mysan
+      MYSQL_USER: mysan_user
+      MYSQL_PASSWORD: mysan_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+    networks:
+      - mysan-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # phpMyAdmin para administración de DB
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: mysan-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      PMA_DATABASE: mysan
+    depends_on:
+      - db
+    networks:
+      - mysan-network
+    restart: unless-stopped
+
+networks:
+  mysan-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
