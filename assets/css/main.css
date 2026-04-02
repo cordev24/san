@@ -7,22 +7,8 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Pattern */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(circle at 20% 30%, var(--color-violeta-glow) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, var(--color-menta-glow) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, var(--color-salmon-glow) 0%, transparent 50%);
-    opacity: 0.15;
-    pointer-events: none;
-    z-index: 0;
-}
+/* Background Pattern - Removed for light theme */
+/* body::before removed - light theme doesn't need gradients */
 
 .main-content {
     position: relative;
@@ -63,47 +49,45 @@ body::before {
 }
 
 .btn-violeta {
-    background: var(--color-violeta);
+    background: var(--color-primary);
     color: white;
 }
 
 .btn-violeta:hover {
-    background: var(--color-violeta-dim);
-    box-shadow: var(--shadow-glow-violeta);
+    background: var(--color-primary-dim);
     transform: translateY(-2px);
 }
 
 .btn-menta {
-    background: var(--color-menta);
-    color: #1a1a1a;
+    background: var(--color-secondary);
+    color: white;
 }
 
 .btn-menta:hover {
-    background: var(--color-menta-dim);
-    box-shadow: var(--shadow-glow-menta);
+    background: var(--color-secondary-dim);
     transform: translateY(-2px);
-    color: #000000;
+    color: white;
 }
 
 .btn-salmon {
-    background: var(--color-salmon);
-    color: #1a1a1a;
+    background: var(--color-accent);
+    color: white;
 }
 
 .btn-salmon:hover {
-    background: var(--color-salmon-dim);
-    box-shadow: var(--shadow-glow-salmon);
+    background: var(--color-accent-dim);
     transform: translateY(-2px);
 }
 
 .btn-outline {
     background: transparent;
-    border: 2px solid currentColor;
-    color: var(--color-text-primary);
+    border: 2px solid var(--color-text-tertiary);
+    color: var(--color-text-secondary);
 }
 
 .btn-outline:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary);
 }
 
 /* Form Elements */
@@ -239,18 +223,17 @@ body::before {
 }
 
 .card-item {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: var(--space-4);
-    color: #ffffff;
+    color: var(--color-text-primary);
     transition: all var(--transition-base);
     cursor: pointer;
 }
 
 .card-item:hover {
-    border-color: var(--color-violeta);
+    border-color: var(--color-primary);
     transform: translateX(4px);
 }
 
@@ -263,18 +246,17 @@ body::before {
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    color: var(--color-text-secondary);
     transition: all var(--transition-base);
     cursor: pointer;
 }
 
 .btn-action:hover {
-    background: #ffffff;
-    border-color: #ffffff;
-    color: #000000;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
     transform: translateY(-2px);
 }
 
@@ -282,9 +264,6 @@ body::before {
     border-color: #ff6464;
     color: #ff6464;
     background: rgba(255, 100, 100, 0.1);
-}
-
-transform: translateY(-2px);
 }
 
 .card-item-header {
@@ -329,9 +308,7 @@ transform: translateY(-2px);
 }
 
 .modal-content {
-    background: var(--glass-background);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: var(--color-surface);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-bento);
     padding: var(--space-8);
@@ -341,6 +318,7 @@ transform: translateY(-2px);
     overflow-y: auto;
     transform: scale(0.9);
     transition: transform var(--transition-base);
+    box-shadow: var(--shadow-lg);
 }
 
 .modal-overlay.active .modal-content {

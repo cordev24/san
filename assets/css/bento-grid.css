@@ -11,15 +11,14 @@
 
 /* Bento Box Base Component */
 .bento-box {
-    background: var(--glass-background);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: var(--color-surface);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-bento);
     padding: var(--space-6);
     transition: all var(--transition-base);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .bento-box::before {
@@ -31,14 +30,13 @@
     height: 1px;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.1),
+            rgba(0, 0, 0, 0.05),
             transparent);
 }
 
 .bento-box:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 /* Grid Sizes */
@@ -184,7 +182,7 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-violeta), var(--color-menta));
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
     border-radius: var(--radius-full);
     transition: width var(--transition-slow);
     position: relative;
@@ -200,7 +198,7 @@
     bottom: 0;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.3),
+            rgba(255, 255, 255, 0.4),
             transparent);
     animation: shimmer 2s infinite;
 }

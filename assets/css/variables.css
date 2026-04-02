@@ -1,62 +1,62 @@
-/* MySan Design System - Wealth & Prosperity Palette
- * Elegant gold-green theme for savings/financial group management
- * Sophisticated, distinctive, and unique - stands apart from typical dark themes
+/* MySan Design System - Apple-inspired Light Theme
+ * Clean, minimal, flat design - like iOS/macOS
+ * White/gray surfaces with colorful accents
  */
 
 :root {
     /* ============================================
-       CORE COLORS - Elegant & Distinctive
+       CORE COLORS - Clean & Vibrant
        ============================================ */
     
-    /* Primary - Rich Gold (wealth, prosperity, achievement) */
-    --color-primary: hsl(45, 55%, 50%);
-    --color-primary-dim: hsl(45, 50%, 42%);
-    --color-primary-glow: hsla(45, 55%, 50%, 0.25);
-    --color-primary-light: hsl(45, 60%, 58%);
+    /* Primary - iOS Blue */
+    --color-primary: hsl(210, 60%, 50%);
+    --color-primary-dim: hsl(210, 55%, 42%);
+    --color-primary-glow: hsla(210, 60%, 50%, 0.15);
+    --color-primary-light: hsl(210, 65%, 58%);
     
-    /* Secondary - Deep Emerald (money, growth, stability) */
-    --color-secondary: hsl(160, 40%, 35%);
-    --color-secondary-dim: hsl(160, 35%, 28%);
-    --color-secondary-glow: hsla(160, 40%, 35%, 0.25);
-    --color-secondary-light: hsl(160, 45%, 42%);
+    /* Secondary - iOS Green */
+    --color-secondary: hsl(150, 55%, 45%);
+    --color-secondary-dim: hsl(150, 50%, 38%);
+    --color-secondary-glow: hsla(150, 55%, 45%, 0.15);
+    --color-secondary-light: hsl(150, 60%, 52%);
     
-    /* Accent - Warm Bronze (community, trust, tradition) */
-    --color-accent: hsl(25, 45%, 45%);
-    --color-accent-dim: hsl(25, 40%, 38%);
-    --color-accent-glow: hsla(25, 45%, 45%, 0.25);
-    --color-accent-light: hsl(25, 50%, 52%);
+    /* Accent - iOS Orange */
+    --color-accent: hsl(25, 80%, 55%);
+    --color-accent-dim: hsl(25, 75%, 48%);
+    --color-accent-glow: hsla(25, 80%, 55%, 0.15);
+    --color-accent-light: hsl(25, 85%, 62%);
 
     /* ============================================
-       MODULE COLORS - Financial & Distinctive
+       MODULE COLORS - Apple Style
        ============================================ */
     
-    /* Electrodomesticos - Deep Teal */
-    --color-electro: hsl(175, 35%, 35%);
-    --color-electro-dim: hsl(175, 30%, 28%);
-    --color-electro-glow: hsla(175, 35%, 35%, 0.25);
+    /* Electrodomesticos - Blue */
+    --color-electro: hsl(210, 55%, 50%);
+    --color-electro-dim: hsl(210, 50%, 42%);
+    --color-electro-glow: hsla(210, 55%, 50%, 0.15);
     
-    /* Telefonia - Rich Emerald */
-    --color-telefonia: hsl(145, 35%, 38%);
-    --color-telefonia-dim: hsl(145, 30%, 30%);
-    --color-telefonia-glow: hsla(145, 35%, 38%, 0.25);
+    /* Telefonia - Green */
+    --color-telefonia: hsl(145, 50%, 45%);
+    --color-telefonia-dim: hsl(145, 45%, 38%);
+    --color-telefonia-glow: hsla(145, 50%, 45%, 0.15);
     
-    /* Motociculares - Warm Amber */
-    --color-moto: hsl(35, 55%, 50%);
-    --color-moto-dim: hsl(35, 50%, 42%);
-    --color-moto-glow: hsla(35, 55%, 50%, 0.25);
+    /* Motocatrices - Orange */
+    --color-moto: hsl(25, 80%, 55%);
+    --color-moto-dim: hsl(25, 75%, 48%);
+    --color-moto-glow: hsla(25, 80%, 55%, 0.15);
     
-    /* Turnos - Elegant Burgundy */
-    --color-turnos: hsl(355, 40%, 40%);
-    --color-turnos-dim: hsl(355, 35%, 32%);
-    --color-turnos-glow: hsla(355, 40%, 40%, 0.25);
+    /* Turnos - Purple */
+    --color-turnos: hsl(270, 50%, 55%);
+    --color-turnos-dim: hsl(270, 45%, 48%);
+    --color-turnos-glow: hsla(270, 50%, 55%, 0.15);
     
-    /* Comprobantes - Silver Gold */
-    --color-comprobantes: hsl(50, 30%, 55%);
-    --color-comprobantes-dim: hsl(50, 25%, 45%);
-    --color-comprobantes-glow: hsla(50, 30%, 55%, 0.25);
+    /* Comprobantes - Yellow */
+    --color-comprobantes: hsl(45, 70%, 55%);
+    --color-comprobantes-dim: hsl(45, 65%, 48%);
+    --color-comprobantes-glow: hsla(45, 70%, 55%, 0.15);
 
     /* ============================================
-       LEGACY ALIASES - Wealth theme
+       LEGACY ALIASES - Apple colors
        ============================================ */
     --color-violeta: var(--color-turnos);
     --color-violeta-dim: var(--color-turnos-dim);
@@ -66,47 +66,47 @@
     --color-menta-dim: var(--color-secondary-dim);
     --color-menta-glow: var(--color-secondary-glow);
     
-    --color-salmon: var(--color-primary);
-    --color-salmon-dim: var(--color-primary-dim);
-    --color-salmon-glow: var(--color-primary-glow);
+    --color-salmon: var(--color-accent);
+    --color-salmon-dim: var(--color-accent-dim);
+    --color-salmon-glow: var(--color-accent-glow);
 
     /* ============================================
-       SURFACES - Rich dark
+       SURFACES - Light Apple Style
        ============================================ */
     
-    --color-background: #161614;
-    --color-surface: #1f1e1c;
-    --color-surface-elevated: #282724;
-    --color-surface-hover: #32302e;
+    --color-background: #f5f5f7;
+    --color-surface: #ffffff;
+    --color-surface-elevated: #fafafa;
+    --color-surface-hover: #f0f0f2;
 
-    /* Glassmorphism */
-    --glass-background: rgba(31, 30, 28, 0.92);
-    --glass-border: rgba(255, 248, 230, 0.06);
-    --glass-blur: blur(10px);
+    /* Glassmorphism - Subtle (not needed in light) */
+    --glass-background: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-blur: blur(20px);
 
     /* ============================================
-       TEXT COLORS
+       TEXT COLORS - High contrast on white
        ============================================ */
     
-    --color-text-primary: #f8f5f0;
-    --color-text-secondary: #b5b0a5;
-    --color-text-tertiary: #757068;
-    --color-text-inverse: #161614;
+    --color-text-primary: #1d1d1f;
+    --color-text-secondary: #6e6e73;
+    --color-text-tertiary: #aeaeb2;
+    --color-text-inverse: #f5f5f7;
 
     /* ============================================
        STATUS COLORS
        ============================================ */
     
     --color-success: var(--color-secondary);
-    --color-warning: var(--color-primary);
-    --color-error: hsl(0, 45%, 50%);
-    --color-info: var(--color-accent);
+    --color-warning: var(--color-accent);
+    --color-error: hsl(0, 60%, 50%);
+    --color-info: var(--color-primary);
 
     /* ============================================
        TYPOGRAPHY
        ============================================ */
     
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
 
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
@@ -139,7 +139,7 @@
     --space-20: 5rem;
 
     /* ============================================
-       BORDER RADIUS
+       BORDER RADIUS - Apple style (smooth)
        ============================================ */
     
     --radius-sm: 8px;
@@ -149,29 +149,29 @@
     --radius-full: 9999px;
 
     /* ============================================
-       SHADOWS
+       SHADOWS - Subtle, like iOS
        ============================================ */
     
-    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
     
-    --shadow-glow-primary: 0 0 20px var(--color-primary-glow);
-    --shadow-glow-secondary: 0 0 20px var(--color-secondary-glow);
-    --shadow-glow-accent: 0 0 20px var(--color-accent-glow);
+    --shadow-glow-primary: 0 0 0 transparent;
+    --shadow-glow-secondary: 0 0 0 transparent;
+    --shadow-glow-accent: 0 0 0 transparent;
     
     /* Legacy glows */
-    --shadow-glow-violeta: 0 0 20px var(--color-turnos-glow);
-    --shadow-glow-menta: 0 0 20px var(--color-secondary-glow);
-    --shadow-glow-salmon: 0 0 20px var(--color-primary-glow);
+    --shadow-glow-violeta: 0 0 0 transparent;
+    --shadow-glow-menta: 0 0 0 transparent;
+    --shadow-glow-salmon: 0 0 0 transparent;
 
     /* ============================================
-       TRANSITIONS
+       TRANSITIONS - Smooth like Apple
        ============================================ */
     
-    --transition-fast: 150ms ease;
-    --transition-base: 250ms ease;
-    --transition-slow: 350ms ease;
+    --transition-fast: 200ms ease-out;
+    --transition-base: 300ms ease-out;
+    --transition-slow: 400ms ease-out;
 
     /* ============================================
        Z-INDEX
