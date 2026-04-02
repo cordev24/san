@@ -1,62 +1,62 @@
-/* MySan Design System - Modern Light-Fresh Palette
- * Clean, bright, and distinctive - not your typical dark theme
- * Inspired by modern SaaS apps with personality
+/* MySan Design System - Warm Earth Tones Palette
+ * Completely different direction - warm, inviting, distinctive
+ * Terracotta, sand, and cream tones - unique and memorable
  */
 
 :root {
     /* ============================================
-       CORE COLORS - Bright & Distinctive
+       CORE COLORS - Warm & Distinctive
        ============================================ */
     
-    /* Primary - Electric Indigo (vibrant but professional) */
-    --color-primary: hsl(240, 60%, 55%);
-    --color-primary-dim: hsl(240, 55%, 45%);
-    --color-primary-glow: hsla(240, 60%, 55%, 0.25);
-    --color-primary-light: hsl(240, 65%, 65%);
+    /* Primary - Terracotta (warmth, community, trust) */
+    --color-primary: hsl(15, 55%, 50%);
+    --color-primary-dim: hsl(15, 50%, 42%);
+    --color-primary-glow: hsla(15, 55%, 50%, 0.25);
+    --color-primary-light: hsl(15, 60%, 58%);
     
-    /* Secondary - Coral Pink (friendly, warm) */
-    --color-secondary: hsl(350, 65%, 60%);
-    --color-secondary-dim: hsl(350, 55%, 50%);
-    --color-secondary-glow: hsla(350, 65%, 60%, 0.25);
-    --color-secondary-light: hsl(350, 70%, 70%);
+    /* Secondary - Sand/Camel (stability, grounded) */
+    --color-secondary: hsl(35, 30%, 55%);
+    --color-secondary-dim: hsl(35, 25%, 45%);
+    --color-secondary-glow: hsla(35, 30%, 55%, 0.25);
+    --color-secondary-light: hsl(35, 35%, 65%);
     
-    /* Accent - Mint Cyan (fresh, modern) */
-    --color-accent: hsl(170, 55%, 55%);
-    --color-accent-dim: hsl(170, 45%, 45%);
-    --color-accent-glow: hsla(170, 55%, 55%, 0.25);
-    --color-accent-light: hsl(170, 60%, 65%);
+    /* Accent - Teal Aqua (contrast, freshness) */
+    --color-accent: hsl(175, 45%, 45%);
+    --color-accent-dim: hsl(175, 40%, 38%);
+    --color-accent-glow: hsla(175, 45%, 45%, 0.25);
+    --color-accent-light: hsl(175, 50%, 55%);
 
     /* ============================================
-       MODULE COLORS - Modern & Memorable
+       MODULE COLORS - Warm & Distinctive
        ============================================ */
     
-    /* Electrodomesticos - Soft Indigo */
-    --color-electro: hsl(235, 50%, 55%);
-    --color-electro-dim: hsl(235, 45%, 45%);
-    --color-electro-glow: hsla(235, 50%, 55%, 0.25);
+    /* Electrodomesticos - Burnt Orange */
+    --color-electro: hsl(20, 60%, 50%);
+    --color-electro-dim: hsl(20, 50%, 42%);
+    --color-electro-glow: hsla(20, 60%, 50%, 0.25);
     
-    /* Telefonia - Fresh Cyan */
-    --color-telefonia: hsl(165, 50%, 50%);
-    --color-telefonia-dim: hsl(165, 40%, 40%);
-    --color-telefonia-glow: hsla(165, 50%, 50%, 0.25);
+    /* Telefonia - Sage Green (natural, growth) */
+    --color-telefonia: hsl(120, 25%, 45%);
+    --color-telefonia-dim: hsl(120, 20%, 38%);
+    --color-telefonia-glow: hsla(120, 25%, 45%, 0.25);
     
-    /* Motocicletas - Energetic Orange */
-    --color-moto: hsl(20, 75%, 55%);
-    --color-moto-dim: hsl(20, 65%, 45%);
-    --color-moto-glow: hsla(20, 75%, 55%, 0.25);
+    /* Motocicletas - Rust Red */
+    --color-moto: hsl(10, 50%, 45%);
+    --color-moto-dim: hsl(10, 45%, 38%);
+    --color-moto-glow: hsla(10, 50%, 45%, 0.25);
     
-    /* Turnos - Lavender Purple */
-    --color-turnos: hsl(270, 45%, 60%);
-    --color-turnos-dim: hsl(270, 40%, 50%);
-    --color-turnos-glow: hsla(270, 45%, 60%, 0.25);
+    /* Turnos - Dusty Rose */
+    --color-turnos: hsl(340, 30%, 55%);
+    --color-turnos-dim: hsl(340, 25%, 45%);
+    --color-turnos-glow: hsla(340, 30%, 55%, 0.25);
     
-    /* Comprobantes - Golden Yellow */
-    --color-comprobantes: hsl(45, 70%, 55%);
-    --color-comprobantes-dim: hsl(45, 60%, 45%);
-    --color-comprobantes-glow: hsla(45, 70%, 55%, 0.25);
+    /* Comprobantes - Warm Gold */
+    --color-comprobantes: hsl(45, 50%, 50%);
+    --color-comprobantes-dim: hsl(45, 45%, 42%);
+    --color-comprobantes-glow: hsla(45, 50%, 50%, 0.25);
 
     /* ============================================
-       LEGACY ALIASES
+       LEGACY ALIASES - Warm tones
        ============================================ */
     --color-violeta: var(--color-turnos);
     --color-violeta-dim: var(--color-turnos-dim);
@@ -66,41 +66,41 @@
     --color-menta-dim: var(--color-accent-dim);
     --color-menta-glow: var(--color-accent-glow);
     
-    --color-salmon: var(--color-secondary);
-    --color-salmon-dim: var(--color-secondary-dim);
-    --color-salmon-glow: var(--color-secondary-glow);
+    --color-salmon: var(--color-primary);
+    --color-salmon-dim: var(--color-primary-dim);
+    --color-salmon-glow: var(--color-primary-glow);
 
     /* ============================================
-       SURFACES - Lighter & Warmer
+       SURFACES - Warm dark
        ============================================ */
     
-    --color-background: #1c1e26;
-    --color-surface: #252830;
-    --color-surface-elevated: #2e313a;
-    --color-surface-hover: #363942;
+    --color-background: #1a1816;
+    --color-surface: #242220;
+    --color-surface-elevated: #2e2b28;
+    --color-surface-hover: #383430;
 
-    /* Glassmorphism - Brighter */
-    --glass-background: rgba(37, 40, 48, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    /* Glassmorphism - Warm tint */
+    --glass-background: rgba(36, 34, 32, 0.9);
+    --glass-border: rgba(255, 255, 255, 0.06);
     --glass-blur: blur(10px);
 
     /* ============================================
        TEXT COLORS
        ============================================ */
     
-    --color-text-primary: #f0f0f4;
-    --color-text-secondary: #a0a0b0;
-    --color-text-tertiary: #707080;
-    --color-text-inverse: #1c1e26;
+    --color-text-primary: #f5f3f0;
+    --color-text-secondary: #b5b0a8;
+    --color-text-tertiary: #858078;
+    --color-text-inverse: #1a1816;
 
     /* ============================================
        STATUS COLORS
        ============================================ */
     
     --color-success: var(--color-accent);
-    --color-warning: var(--color-secondary);
-    --color-error: hsl(0, 60%, 60%);
-    --color-info: var(--color-primary);
+    --color-warning: var(--color-primary);
+    --color-error: hsl(0, 45%, 55%);
+    --color-info: var(--color-secondary);
 
     /* ============================================
        TYPOGRAPHY
@@ -152,9 +152,9 @@
        SHADOWS
        ============================================ */
     
-    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
     
     --shadow-glow-primary: 0 0 20px var(--color-primary-glow);
     --shadow-glow-secondary: 0 0 20px var(--color-secondary-glow);
@@ -163,7 +163,7 @@
     /* Legacy glows */
     --shadow-glow-violeta: 0 0 20px var(--color-turnos-glow);
     --shadow-glow-menta: 0 0 20px var(--color-accent-glow);
-    --shadow-glow-salmon: 0 0 20px var(--color-secondary-glow);
+    --shadow-glow-salmon: 0 0 20px var(--color-primary-glow);
 
     /* ============================================
        TRANSITIONS
