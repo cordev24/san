@@ -69,12 +69,12 @@ $grupos = $stmt->fetchAll();
         }
 
         .breadcrumb a {
-            color: var(--color-violeta);
+            color: var(--color-electro);
             transition: color var(--transition-base);
         }
 
         .breadcrumb a:hover {
-            color: var(--color-menta);
+            color: var(--color-secondary);
         }
 
         .product-grid {
@@ -93,9 +93,9 @@ $grupos = $stmt->fetchAll();
         }
 
         .product-card:hover {
-            border-color: var(--color-violeta);
+            border-color: var(--color-electro);
             transform: translateY(-4px);
-            box-shadow: var(--shadow-glow-violeta);
+            box-shadow: var(--shadow-glow-primary);
         }
 
         .product-header {
@@ -108,7 +108,7 @@ $grupos = $stmt->fetchAll();
         .product-icon {
             width: 48px;
             height: 48px;
-            background: var(--color-violeta-glow);
+            background: var(--color-electro-glow);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
@@ -131,7 +131,7 @@ $grupos = $stmt->fetchAll();
         .product-price {
             font-size: var(--font-size-2xl);
             font-weight: var(--font-weight-bold);
-            color: var(--color-violeta);
+            color: var(--color-electro);
             margin: var(--space-2) 0;
         }
 
@@ -149,9 +149,9 @@ $grupos = $stmt->fetchAll();
         }
 
         .group-card:hover {
-            border-color: var(--color-menta);
+            border-color: var(--color-secondary);
             transform: translateX(4px);
-            box-shadow: var(--shadow-glow-menta);
+            box-shadow: var(--shadow-glow-secondary);
         }
 
         .group-header {
@@ -163,7 +163,7 @@ $grupos = $stmt->fetchAll();
         .group-icon {
             width: 44px;
             height: 44px;
-            background: var(--color-menta-glow);
+            background: var(--color-secondary-glow);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
