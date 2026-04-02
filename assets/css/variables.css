@@ -1,105 +1,106 @@
-/* MySan Design System - Fresh Color Palette
- * Modern, warm and inviting colors for financial/savings management
- * Inspired by modern fintech apps - friendly but professional
+/* MySan Design System - Complete Color Transformation
+ * Fresh, modern colors for a friendly savings/financial app
+ * Distinct, vibrant colors that are clearly different from the original
  */
 
 :root {
     /* ============================================
-       CORE COLORS - Warm & Inviting
+       CORE COLORS - Bold & Different
        ============================================ */
     
-    /* Primary - Warm indigo/blue for trust */
-    --color-primary: hsl(225, 50%, 45%);
-    --color-primary-dim: hsl(225, 40%, 35%);
-    --color-primary-glow: hsla(225, 50%, 45%, 0.25);
-    --color-primary-light: hsl(225, 60%, 55%);
+    /* Primary - Ocean Blue */
+    --color-primary: hsl(210, 65%, 50%);
+    --color-primary-dim: hsl(210, 55%, 40%);
+    --color-primary-glow: hsla(210, 65%, 50%, 0.3);
+    --color-primary-light: hsl(210, 75%, 60%);
     
-    /* Secondary - Coral/salmon for energy and action */
-    --color-secondary: hsl(15, 75%, 60%);
-    --color-secondary-dim: hsl(15, 65%, 50%);
-    --color-secondary-glow: hsla(15, 75%, 60%, 0.25);
-    --color-secondary-light: hsl(15, 85%, 70%);
+    /* Secondary - Sunset Orange */
+    --color-secondary: hsl(25, 90%, 55%);
+    --color-secondary-dim: hsl(25, 80%, 45%);
+    --color-secondary-glow: hsla(25, 90%, 55%, 0.3);
+    --color-secondary-light: hsl(25, 95%, 65%);
     
-    /* Accent - Teal/cyan for success/growth */
-    --color-accent: hsl(170, 55%, 45%);
-    --color-accent-dim: hsl(170, 45%, 35%);
-    --color-accent-glow: hsla(170, 55%, 45%, 0.25);
-    --color-accent-light: hsl(170, 65%, 55%);
+    /* Accent - Lime Green (money/growth) */
+    --color-accent: hsl(100, 55%, 50%);
+    --color-accent-dim: hsl(100, 45%, 40%);
+    --color-accent-glow: hsla(100, 55%, 50%, 0.3);
+    --color-accent-light: hsl(100, 65%, 60%);
 
     /* ============================================
-       MODULE COLORS - Distinct & Memorable
+       MODULE COLORS - Very Distinct
        ============================================ */
     
-    /* Electrodomesticos - Cool Blue */
-    --color-electro: hsl(210, 55%, 50%);
-    --color-electro-dim: hsl(210, 45%, 40%);
-    --color-electro-glow: hsla(210, 55%, 50%, 0.25);
+    /* Electrodomesticos - Deep Blue */
+    --color-electro: hsl(220, 60%, 50%);
+    --color-electro-dim: hsl(220, 50%, 40%);
+    --color-electro-glow: hsla(220, 60%, 50%, 0.3);
     
-    /* Telefonia - Fresh Green (money/growth) */
-    --color-telefonia: hsl(145, 50%, 45%);
-    --color-telefonia-dim: hsl(145, 40%, 35%);
-    --color-telefonia-glow: hsla(145, 50%, 45%, 0.25);
+    /* Telefonia - Emerald Green */
+    --color-telefonia: hsl(145, 55%, 45%);
+    --color-telefonia-dim: hsl(145, 45%, 35%);
+    --color-telefonia-glow: hsla(145, 55%, 45%, 0.3);
     
-    /* Motocicletas - Bold Orange */
-    --color-moto: hsl(25, 80%, 55%);
-    --color-moto-dim: hsl(25, 70%, 45%);
-    --color-moto-glow: hsla(25, 80%, 55%, 0.25);
+    /* Motocicletas - Sunset Orange */
+    --color-moto: hsl(30, 85%, 55%);
+    --color-moto-dim: hsl(30, 75%, 45%);
+    --color-moto-glow: hsla(30, 85%, 55%, 0.3);
     
-    /* Turnos - Royal Purple */
-    --color-turnos: hsl(265, 45%, 50%);
-    --color-turnos-dim: hsl(265, 35%, 40%);
-    --color-turnos-glow: hsla(265, 45%, 50%, 0.25);
+    /* Turnos - Magenta/Pink */
+    --color-turnos: hsl(320, 60%, 55%);
+    --color-turnos-dim: hsl(320, 50%, 45%);
+    --color-turnos-glow: hsla(320, 60%, 55%, 0.3);
     
-    /* Comprobantes - Ocean Teal */
-    --color-comprobantes: hsl(185, 50%, 45%);
-    --color-comprobantes-dim: hsl(185, 40%, 35%);
-    --color-comprobantes-glow: hsla(185, 50%, 45%, 0.25);
+    /* Comprobantes - Golden Yellow */
+    --color-comprobantes: hsl(45, 75%, 50%);
+    --color-comprobantes-dim: hsl(45, 65%, 40%);
+    --color-comprobantes-glow: hsla(45, 75%, 50%, 0.3);
 
     /* ============================================
-       LEGACY ALIASES (keep for backward compatibility)
+       LEGACY ALIASES - Different from original!
        ============================================ */
-    --color-violeta: var(--color-turnos);
+    /* These now map to completely different colors */
+    --color-violeta: var(--color-turnos);        /* Magenta - was purple */
     --color-violeta-dim: var(--color-turnos-dim);
     --color-violeta-glow: var(--color-turnos-glow);
     
-    --color-menta: var(--color-accent);
+    --color-menta: var(--color-accent);          /* Lime green - was mint */
     --color-menta-dim: var(--color-accent-dim);
     --color-menta-glow: var(--color-accent-glow);
     
-    --color-salmon: var(--color-secondary);
+    --color-salmon: var(--color-secondary);      /* Sunset orange - was salmon/coral */
     --color-salmon-dim: var(--color-secondary-dim);
     --color-salmon-glow: var(--color-secondary-glow);
 
     /* ============================================
-       SURFACES - Warm dark tones
+       SURFACES - Clean dark theme
        ============================================ */
     
-    --color-background: #141418;
-    --color-surface: #1C1C22;
-    --color-surface-elevated: #252530;
-    --color-surface-hover: #2A2A35;
+    --color-background: #0f0f14;
+    --color-surface: #1a1a24;
+    --color-surface-elevated: #24242e;
+    --color-surface-hover: #2e2e3a;
 
-    /* Glassmorphism - Warmer tones */
-    --glass-background: rgba(28, 28, 34, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.06);
-    --glass-blur: blur(12px);
+    /* Glassmorphism */
+    --glass-background: rgba(26, 26, 36, 0.9);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: blur(10px);
 
     /* ============================================
-       TEXT COLORS - Easy on the eyes
+       TEXT COLORS
        ============================================ */
     
-    --color-text-primary: #F0F0F2;
-    --color-text-secondary: #9898A6;
-    --color-text-tertiary: #686876;
-    --color-text-inverse: #141418;
+    --color-text-primary: #e8e8ec;
+    --color-text-secondary: #9898a8;
+    --color-text-tertiary: #686878;
+    --color-text-inverse: #0f0f14;
 
     /* ============================================
-       STATUS COLORS - Clear communication
+       STATUS COLORS
        ============================================ */
     
     --color-success: var(--color-accent);
     --color-warning: var(--color-secondary);
-    --color-error: hsl(0, 60%, 55%);
+    --color-error: hsl(0, 65%, 55%);
     --color-info: var(--color-primary);
 
     /* ============================================
@@ -152,15 +153,15 @@
        SHADOWS
        ============================================ */
     
-    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
     
     --shadow-glow-primary: 0 0 20px var(--color-primary-glow);
     --shadow-glow-secondary: 0 0 20px var(--color-secondary-glow);
     --shadow-glow-accent: 0 0 20px var(--color-accent-glow);
     
-    /* Legacy */
+    /* Legacy glows */
     --shadow-glow-violeta: 0 0 20px var(--color-turnos-glow);
     --shadow-glow-menta: 0 0 20px var(--color-accent-glow);
     --shadow-glow-salmon: 0 0 20px var(--color-secondary-glow);
