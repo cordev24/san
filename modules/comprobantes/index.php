@@ -97,140 +97,163 @@ $user = getCurrentUser();
             font-size: var(--font-size-xs);
         }
     </style>
-</head>
 
-<style>
-    .report-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: var(--space-4);
-    }
+    <!-- Additional styles for comprobantes -->
+    <style>
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+        }
 
-    .search-results {
-        margin-top: var(--space-4);
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-md);
-    }
+        .search-results {
+            margin-top: var(--space-4);
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+        }
 
-    .result-item {
-        padding: var(--space-3) var(--space-4);
-        border-bottom: 1px solid var(--glass-border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: background var(--transition-base);
-    }
+        .result-item {
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-base);
+        }
 
-    .result-item:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
+        .result-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
 
-    .result-item:last-child {
-        border-bottom: none;
-    }
+        .result-item:last-child {
+            border-bottom: none;
+        }
 
-    .report-box {
-        background: var(--color-surface);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-lg);
-        padding: var(--space-6);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-4);
-    }
+        .report-box {
+            background: var(--color-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
 
-    .report-box .icon-xl {
-        stroke: var(--color-violeta);
-        margin-bottom: var(--space-2);
-    }
-</style>
+        .report-box .icon-xl {
+            stroke: var(--color-violeta);
+            margin-bottom: var(--space-2);
+        }
+    </style>
 </head>
 
 <body>
     <?php include '../../assets/icons/feather-sprite.svg'; ?>
-
+    
     <div class="main-content">
-        <div class="page-header">
-            <div class="breadcrumb">
-                <a href="../../dashboard.php">Dashboard</a>
-                <span>/</span>
-                <span>Comprobantes y Reportes</span>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="../../dashboard.php" class="header-logo">MySan</a>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-name">
+                            <?php echo htmlspecialchars($user['nombre']); ?>
+                        </div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                    <a href="../../logout.php" class="btn btn-outline">
+                        <svg class="icon">
+                            <use href="#icon-log-out"></use>
+                        </svg>
+                        Salir
+                    </a>
+                </div>
             </div>
-            <h1 class="page-title">
-                <svg class="icon-xl" style="stroke: var(--color-menta);">
+        </header>
+        
+        <!-- Back Button -->
+        <div style="padding: var(--space-4) var(--space-6);">
+            <a href="../../dashboard.php" class="btn btn-outline">
+                <svg class="icon"><use href="#icon-arrow-left"></use></svg>
+                Volver
+            </a>
+        </div>
+
+        <div class="page-header" style="padding: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--glass-border);">
+            <h1 class="page-title" style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); display: flex; align-items: center; gap: var(--space-3);">
+                <svg class="icon-xl" style="width: 40px; height: 40px; stroke: var(--color-menta);">
                     <use href="#icon-printer"></use>
                 </svg>
                 Documentación y Finanzas
             </h1>
         </div>
-
-        <div class="bento-container">
-            <!-- Search Payments for Receipts -->
-            <div class="bento-6">
-                <div class="bento-box">
-                    <div class="bento-header">
-                        <div class="bento-title">Generar Recibo de Pago</div>
+    
+    <div class="bento-container">
+        <!-- Search Payments for Receipts -->
+        <div class="bento-6">
+            <div class="bento-box">
+                <div class="bento-header">
+                    <div class="bento-title">Generar Recibo de Pago</div>
+                </div>
+                <div class="bento-content">
+                    <div class="form-group">
+                        <label class="form-label">Buscar Pago (Nombre o Cedula)</label>
+                        <input type="text" id="searchPago" class="form-input" placeholder="Buscar..."
+                            onkeyup="buscarPagos()">
                     </div>
-                    <div class="bento-content">
-                        <div class="form-group">
-                            <label class="form-label">Buscar Pago (Nombre o Cedula)</label>
-                            <input type="text" id="searchPago" class="form-input" placeholder="Buscar..."
-                                onkeyup="buscarPagos()">
-                        </div>
-                        <div id="pagoResults" class="search-results">
-                            <div
-                                style="padding: var(--space-4); text-align: center; color: var(--color-text-tertiary);">
-                                Ingresa un nombre para buscar pagos realizados
-                            </div>
+                    <div id="pagoResults" class="search-results">
+                        <div
+                            style="padding: var(--space-4); text-align: center; color: var(--color-text-tertiary);">
+                            Ingresa un nombre para buscar pagos realizados
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Certificates of Delivery -->
-            <div class="bento-6">
-                <div class="bento-box">
-                    <div class="bento-header">
-                        <div class="bento-title">Certificado de Entrega</div>
+        <!-- Certificates of Delivery -->
+        <div class="bento-6">
+            <div class="bento-box">
+                <div class="bento-header">
+                    <div class="bento-title">Certificado de Entrega</div>
+                </div>
+                <div class="bento-content">
+                    <div class="form-group">
+                        <label class="form-label">Buscar Ganador (Nombre o Cedula)</label>
+                        <input type="text" id="searchGanador" class="form-input" placeholder="Buscar..."
+                            onkeyup="buscarGanadores()">
                     </div>
-                    <div class="bento-content">
-                        <div class="form-group">
-                            <label class="form-label">Buscar Ganador (Nombre o Cedula)</label>
-                            <input type="text" id="searchGanador" class="form-input" placeholder="Buscar..."
-                                onkeyup="buscarGanadores()">
-                        </div>
-                        <div id="ganadorResults" class="search-results">
-                            <div
-                                style="padding: var(--space-4); text-align: center; color: var(--color-text-tertiary);">
-                                Busca participantes que ya recibieron su producto
-                            </div>
+                    <div id="ganadorResults" class="search-results">
+                        <div
+                            style="padding: var(--space-4); text-align: center; color: var(--color-text-tertiary);">
+                            Busca participantes que ya recibieron su producto
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Financial Report -->
-            <div class="bento-12">
-                <div class="bento-box report-box" style="align-items: center; text-align: center;">
-                    <svg class="icon-xl" style="width: 64px; height: 64px;">
-                        <use href="#icon-trending-up"></use>
+        <!-- Financial Report -->
+        <div class="bento-12">
+            <div class="bento-box report-box" style="align-items: center; text-align: center;">
+                <svg class="icon-xl" style="width: 64px; height: 64px;">
+                    <use href="#icon-trending-up"></use>
+                </svg>
+                <div>
+                    <h2 style="font-size: var(--font-size-2xl); font-weight: bold;">Reporte Financiero General</h2>
+                    <p style="color: var(--color-text-secondary); margin-top: var(--space-2);">
+                        Genera un balance detallado de ingresos por cuotas vs egresos por entregas para ver tus
+                        ganancias reales.
+                    </p>
+                </div>
+                <button class="btn btn-menta" onclick="generarReporteFinanciero()">
+                    <svg class="icon">
+                        <use href="#icon-file-text"></use>
                     </svg>
-                    <div>
-                        <h2 style="font-size: var(--font-size-2xl); font-weight: bold;">Reporte Financiero General</h2>
-                        <p style="color: var(--color-text-secondary); margin-top: var(--space-2);">
-                            Genera un balance detallado de ingresos por cuotas vs egresos por entregas para ver tus
-                            ganancias reales.
-                        </p>
-                    </div>
-                    <button class="btn btn-menta" onclick="generarReporteFinanciero()">
-                        <svg class="icon">
-                            <use href="#icon-file-text"></use>
-                        </svg>
-                        Descargar Reporte Completo (PDF)
-                    </button>
-                </div>
+                    Descargar Reporte Completo (PDF)
+                </button>
             </div>
         </div>
     </div>
@@ -342,8 +365,7 @@ $user = getCurrentUser();
             window.open(`../../api/comprobantes.php?action=reporte_financiero`, '_blank');
         }
     </script>
+    
+    <!-- Shared Scripts -->
+    <script src="../../assets/js/shared.js"></script>
 </body>
-
-</html>
-
-</html>

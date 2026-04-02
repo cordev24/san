@@ -176,26 +176,50 @@ $grupos = $stmt->fetchAll();
 
 <body>
     <?php include '../../assets/icons/feather-sprite.svg'; ?>
-
+    
     <div class="main-content">
-        <div class="page-header">
-            <div class="breadcrumb">
-                <a href="../../dashboard.php">Dashboard</a>
-                <span>/</span>
-                <span>Gestión de Turnos</span>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="../../dashboard.php" class="header-logo">MySan</a>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-name">
+                            <?php echo htmlspecialchars($user['nombre']); ?>
+                        </div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                    <a href="../../logout.php" class="btn btn-outline">
+                        <svg class="icon">
+                            <use href="#icon-log-out"></use>
+                        </svg>
+                        Salir
+                    </a>
+                </div>
             </div>
-            <h1 class="page-title">
-                <svg class="icon-xl" style="stroke: var(--color-violeta);">
+        </header>
+        
+        <!-- Back Button -->
+        <div style="padding: var(--space-4) var(--space-6);">
+            <a href="../../dashboard.php" class="btn btn-outline">
+                <svg class="icon"><use href="#icon-arrow-left"></use></svg>
+                Volver
+            </a>
+        </div>
+        
+        <div class="page-header" style="padding: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--glass-border);">
+            <h1 class="page-title" style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); display: flex; align-items: center; gap: var(--space-3);">
+                <svg class="icon-xl" style="width: 40px; height: 40px; stroke: var(--color-violeta);">
                     <use href="#icon-dice"></use>
                 </svg>
                 Asignación de Turnos y Fechas
             </h1>
         </div>
-
-        <div class="bento-container">
-            <!-- Sorteo Section -->
-            <div class="bento-7">
-                <div class="bento-box sorteo-box">
+    
+    <div class="bento-container">
+        <!-- Sorteo Section -->
+        <div class="bento-7">
+            <div class="bento-box sorteo-box">
                     <h2
                         style="font-size: var(--font-size-xl); margin-bottom: var(--space-4); width: 100%; text-align: left;">
                         Configurar Orden</h2>
@@ -437,9 +461,7 @@ $grupos = $stmt->fetchAll();
             return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
         }
     </script>
+    
+    <!-- Shared Scripts -->
+    <script src="../../assets/js/shared.js"></script>
 </body>
-
-</html>
-</body>
-
-</html>

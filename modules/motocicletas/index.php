@@ -234,25 +234,49 @@ $grupos = $stmt->fetchAll();
 
 <body>
     <?php include '../../assets/icons/feather-sprite.svg'; ?>
-
+    
     <div class="main-content">
-        <div class="page-header">
-            <div class="breadcrumb">
-                <a href="../../dashboard.php">Dashboard</a>
-                <span>/</span>
-                <span>Motocicletas</span>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="../../dashboard.php" class="header-logo">MySan</a>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-name">
+                            <?php echo htmlspecialchars($user['nombre']); ?>
+                        </div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                    <a href="../../logout.php" class="btn btn-outline">
+                        <svg class="icon">
+                            <use href="#icon-log-out"></use>
+                        </svg>
+                        Salir
+                    </a>
+                </div>
             </div>
-            <h1 class="page-title">
-                <svg class="icon-xl" style="stroke: var(--color-salmon);">
-                    <use href="#icon-motorcycle"></use>
+        </header>
+        
+        <!-- Back Button -->
+        <div style="padding: var(--space-4) var(--space-6);">
+            <a href="../../dashboard.php" class="btn btn-outline">
+                <svg class="icon"><use href="#icon-arrow-left"></use></svg>
+                Volver
+            </a>
+        </div>
+        
+        <div class="page-header" style="padding: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--glass-border);">
+            <h1 class="page-title" style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); display: flex; align-items: center; gap: var(--space-3);">
+                <svg class="icon-xl" style="width: 40px; height: 40px; stroke: var(--color-salmon);">
+                    <use href="#icon-motocycle"></use>
                 </svg>
                 Motocicletas
             </h1>
             <p style="color: var(--color-text-secondary); margin-top: var(--space-2);">
-                Control de marcas, cilindradas y cuotas. Módulo de mayor valor.
+                Administración de grupos para motocicletas.
             </p>
         </div>
-
+        
         <div class="bento-container">
             <!-- Action Buttons -->
             <div class="bento-12"
@@ -418,8 +442,9 @@ $grupos = $stmt->fetchAll();
                 </div>
             </div>
         </div>
-    </div>
 
+    <?php include '../../modules/shared/sidebar-footer.php'; ?>
+    
     <!-- Modal: Nuevo Grupo San -->
     <div id="nuevoGrupoModal" class="modal-overlay">
         <div class="modal-content">

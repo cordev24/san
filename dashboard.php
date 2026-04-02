@@ -111,7 +111,7 @@ $user = getCurrentUser();
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="header-logo">MySan</div>
+                <a href="dashboard.php" class="header-logo">MySan</a>
                 <div class="header-user">
                     <div class="user-info">
                         <div class="user-name">

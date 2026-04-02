@@ -446,6 +446,60 @@ body {
     animation: slideUp var(--transition-base);
 }
 
+/* Header - Base styles */
+.header {
+    padding: var(--space-6) var(--space-8);
+    background: var(--glass-background);
+    backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-dropdown);
+}
+
+.header-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-logo {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    background: linear-gradient(135deg, var(--color-violeta), var(--color-menta));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+    transition: opacity var(--transition-base);
+}
+
+.header-logo:hover {
+    opacity: 0.8;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.user-role {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+}
+
 /* ============================================
    RESPONSIVE STYLES - Enhanced Mobile Support
    ============================================ */
@@ -493,6 +547,27 @@ body {
     .header-user .btn span {
         display: none;
     }
+}
+
+/* Page Header - Base styles */
+.page-header {
+    padding: var(--space-6) var(--space-8);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.page-title .icon-xl {
+    width: 40px;
+    height: 40px;
 }
 
 /* Page Header Responsive */

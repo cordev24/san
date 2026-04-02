@@ -102,36 +102,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/main.css">
     
     <style>
-        .header {
-            padding: var(--space-6) var(--space-8);
-            background: var(--glass-background);
-            backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: var(--z-dropdown);
+        .icon-xl {
+            width: 32px;
+            height: 32px;
         }
         
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header-logo {
-            font-size: var(--font-size-2xl);
-            font-weight: var(--font-weight-bold);
-            background: linear-gradient(135deg, var(--color-violeta), var(--color-menta));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .form-container {
+        .form-card {
             max-width: 800px;
             margin: 0 auto;
+            background: var(--color-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-8);
+        }
+        
+        .form-title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
         }
         
         .message {
@@ -177,49 +168,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'assets/icons/feather-sprite.svg'; ?>
     
     <div class="main-content">
+        <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="header-logo">MySan</div>
+                <a href="dashboard.php" class="header-logo">MySan</a>
                 <a href="dashboard.php" class="btn btn-outline">
-                    <svg class="icon">
-                        <use href="#icon-home"></use>
-                    </svg>
-                    Volver al Dashboard
+                    <svg class="icon"><use href="#icon-arrow-left"></use></svg>
+                    Volver
                 </a>
             </div>
         </header>
         
-        <div class="bento-container" style="padding-top: var(--space-8);">
-            <div class="form-container">
-                <div class="bento-box">
-                    <div class="bento-header">
-                        <div class="bento-title">
-                            <svg class="bento-icon" style="stroke: var(--color-violeta);">
-                                <use href="#icon-user"></use>
-                            </svg>
-                            Crear Nuevo Usuario
-                        </div>
+        <div class="page-content" style="padding: var(--space-8);">
+            <div class="form-card">
+                <h2 class="form-title">
+                    <svg class="icon-xl" style="stroke: var(--color-violeta);">
+                        <use href="#icon-user"></use>
+                    </svg>
+                    Crear Nuevo Usuario
+                </h2>
+                
+                <?php if (isset($errors) && !empty($errors)): ?>
+                    <div class="message error-message">
+                        <ul style="margin: 0; padding-left: var(--space-4);">
+                            <?php foreach ($errors as $error): ?>
+                                <li><?php echo htmlspecialchars($error); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
-                    
-                    <div class="bento-content">
-                        <?php if (isset($errors) && !empty($errors)): ?>
-                            <div class="message error-message">
-                                <ul style="margin: 0; padding-left: var(--space-4);">
-                                    <?php foreach ($errors as $error): ?>
-                                        <li><?php echo htmlspecialchars($error); ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($success)): ?>
-                            <div class="message success-message">
-                                <?php echo htmlspecialchars($success); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <form method="POST">
-                            <div class="form-grid">
+                <?php endif; ?>
+                
+                <?php if (isset($success)): ?>
+                    <div class="message success-message">
+                        <?php echo htmlspecialchars($success); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <form method="POST">
+                    <div class="form-grid">
                                 <div>
                                     <div class="form-group">
                                         <label class="form-label" for="username">Usuario *</label>
@@ -345,7 +331,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </a>
                             </div>
                         </form>
-                    </div>
                 </div>
             </div>
         </div>
