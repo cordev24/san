@@ -33,11 +33,45 @@ CREATE TABLE productos (
     marca VARCHAR(50),
     modelo VARCHAR(50),
     descripcion TEXT,
-    valor_total DECIMAL(10, 2) NOT NULL,
+    precio_usd DECIMAL(10, 2) NOT NULL,
+    valor_bs DECIMAL(12, 2) DEFAULT NULL,
     imagen VARCHAR(255),
     activo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Tabla de Configuración del Sistema
+CREATE TABLE configuracion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clave VARCHAR(50) UNIQUE NOT NULL,
+    valor VARCHAR(255) NOT NULL,
+    descripcion VARCHAR(255),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Insertar configuración inicial
+INSERT INTO configuracion (clave, valor, descripcion) VALUES
+('tasa_bcv', '1', 'Tasa de cambio BCV (1 USD = X Bs)'),
+('tasa_manual', '0', 'Usar tasa manual (1) o automática BCV (0)'),
+('tasa_default', '36.50', 'Tasa manual por defecto');
+
+-- Tabla de Pagos
+CREATE TABLE pagos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    participante_id INT NOT NULL,
+    numero_cuota INT NOT NULL,
+    monto_usd DECIMAL(10, 2) NOT NULL,
+    monto_bs DECIMAL(12, 2) NOT NULL,
+    tasa_cambio DECIMAL(10, 2) NOT NULL,
+    fecha_pago DATE NOT NULL,
+    fecha_vencimiento DATE NOT NULL,
+    estado ENUM('pendiente', 'pagado', 'atrasado') DEFAULT 'pendiente',
+    metodo_pago VARCHAR(50),
+    comprobante VARCHAR(255),
+    notas TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (participante_id) REFERENCES participantes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Tabla de Grupos San
@@ -50,7 +84,8 @@ CREATE TABLE grupos_san (
     numero_cuotas INT NOT NULL,
     cupos_totales INT NOT NULL,
     cupos_ocupados INT DEFAULT 0,
-    monto_cuota DECIMAL(10, 2) NOT NULL,
+    monto_cuota_usd DECIMAL(10, 2) NOT NULL,
+    monto_cuota_bs DECIMAL(12, 2) NOT NULL,
     estado ENUM('abierto', 'en_curso', 'finalizado') DEFAULT 'abierto',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE
@@ -129,13 +164,13 @@ INSERT INTO categorias (nombre, descripcion, color) VALUES
 INSERT INTO usuarios (username, password, nombre, email, pregunta_secreta, respuesta_secreta) VALUES
 ('admin', '$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Administrador', 'admin@mysan.local', '¿Cuál es tu color favorito?', 'azul');
 
--- Productos de ejemplo
-INSERT INTO productos (categoria_id, nombre, marca, modelo, valor_total) VALUES
-(1, 'Nevera Samsung', 'Samsung', 'RT38K5930SL', 15000.00),
-(1, 'Lavadora LG', 'LG', 'WM3900HWA', 12000.00),
-(1, 'Televisor 55"', 'Sony', 'XBR-55X900H', 18000.00),
-(2, 'iPhone 15 Pro Max', 'Apple', '256GB', 35000.00),
-(2, 'Samsung Galaxy S24 Ultra', 'Samsung', '512GB', 32000.00),
-(3, 'Yamaha FZ', 'Yamaha', 'FZ-150', 45000.00),
-(3, 'Honda CB190R', 'Honda', 'CB190R', 42000.00),
-(3, 'Suzuki Gixxer', 'Suzuki', 'Gixxer 250', 48000.00);
+-- Productos de ejemplo (precios en USD)
+INSERT INTO productos (categoria_id, nombre, marca, modelo, precio_usd) VALUES
+(1, 'Nevera Samsung', 'Samsung', 'RT38K5930SL', 399.00),
+(1, 'Lavadora LG', 'LG', 'WM3900HWA', 349.00),
+(1, 'Televisor 55"', 'Sony', 'XBR-55X900H', 499.00),
+(2, 'iPhone 15 Pro Max', 'Apple', '256GB', 1199.00),
+(2, 'Samsung Galaxy S24 Ultra', 'Samsung', '512GB', 999.00),
+(3, 'Yamaha FZ', 'Yamaha', 'FZ-150', 1899.00),
+(3, 'Honda CB190R', 'Honda', 'CB190R', 1699.00),
+(3, 'Suzuki Gixxer', 'Suzuki', 'Gixxer 250', 2199.00);

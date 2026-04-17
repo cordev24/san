@@ -23,11 +23,69 @@ try {
         case 'delete':
             deleteProducto();
             break;
+        case 'get_tasa':
+            getTasaCambio();
+            break;
+        case 'set_tasa':
+            setTasaCambio();
+            break;
         default:
             jsonResponse(false, 'Acción no válida');
     }
 } catch (Exception $e) {
     jsonResponse(false, 'Error: ' . $e->getMessage());
+}
+
+// ============================================
+// Funciones de Tasa de Cambio
+// ============================================
+
+function getTasaCambio()
+{
+    global $pdo;
+    
+    $stmt = $pdo->query("SELECT valor, descripcion FROM configuracion WHERE clave = 'tasa_bcv'");
+    $tasa = $stmt->fetch();
+    
+    $tasa_manual = 36.50; // Default
+    $stmt = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'tasa_default'");
+    if ($row = $stmt->fetch()) {
+        $tasa_manual = floatval($row['valor']);
+    }
+    
+    jsonResponse(true, 'Tasa de cambio', [
+        'tasa' => $tasa ? floatval($tasa['valor']) : $tasa_manual,
+        'tasa_manual' => $tasa_manual
+    ]);
+}
+
+function setTasaCambio()
+{
+    global $pdo;
+    
+    $tasa = floatval($_POST['tasa'] ?? 0);
+    $usar_manual = $_POST['usar_manual'] ?? '1';
+    
+    if ($tasa <= 0) {
+        jsonResponse(false, 'La tasa debe ser mayor a 0');
+        return;
+    }
+    
+    $stmt = $pdo->prepare("UPDATE configuracion SET valor = ? WHERE clave = 'tasa_bcv'");
+    $stmt->execute([$tasa]);
+    
+    $stmt = $pdo->prepare("UPDATE configuracion SET valor = ? WHERE clave = 'tasa_default'");
+    $stmt->execute([$tasa]);
+    
+    $stmt = $pdo->prepare("UPDATE configuracion SET valor = ? WHERE clave = 'tasa_manual'");
+    $stmt->execute([$usar_manual]);
+    
+    jsonResponse(true, 'Tasa de cambio actualizada');
+}
+
+function precioToBs($precio_usd, $tasa)
+{
+    return round($precio_usd * $tasa, 2);
 }
 
 function createProducto()
@@ -39,16 +97,16 @@ function createProducto()
     $marca = trim($_POST['marca'] ?? '');
     $modelo = trim($_POST['modelo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
-    $valor_total = floatval($_POST['valor_total'] ?? 0);
+    $precio_usd = floatval($_POST['precio_usd'] ?? $_POST['valor_total'] ?? 0);
 
     // Validations
-    if (!$categoria_id || !$nombre || !$valor_total) {
-        jsonResponse(false, 'Categoría, nombre y valor son requeridos');
+    if (!$categoria_id || !$nombre || !$precio_usd) {
+        jsonResponse(false, 'Categoría, nombre y precio USD (valor_total) son requeridos');
         return;
     }
 
-    if ($valor_total <= 0) {
-        jsonResponse(false, 'El valor debe ser mayor a 0');
+    if ($precio_usd <= 0) {
+        jsonResponse(false, 'El precio debe ser mayor a 0');
         return;
     }
 
@@ -64,10 +122,29 @@ function createProducto()
         $marca,
         $modelo,
         $descripcion,
-        $valor_total
+        $precio_usd
     ]);
 
     jsonResponse(true, 'Producto creado exitosamente', ['id' => $pdo->lastInsertId()]);
+}
+
+function getTasaActual()
+{
+    global $pdo;
+    
+    $stmt = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'tasa_manual'");
+    $usar_manual = $stmt->fetch();
+    
+    if ($usar_manual && $usar_manual['valor'] == '1') {
+        $stmt = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'tasa_default'");
+        $tasa = $stmt->fetch();
+        return $tasa ? floatval($tasa['valor']) : 36.50;
+    }
+    
+    // Usar tasa del BCV
+    $stmt = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'tasa_bcv'");
+    $tasa = $stmt->fetch();
+    return $tasa ? floatval($tasa['valor']) : 36.50;
 }
 
 function listProductos()
@@ -76,6 +153,7 @@ function listProductos()
 
     $categoria_id = $_GET['categoria_id'] ?? null;
     $activo = $_GET['activo'] ?? 1;
+    $tasa = getTasaActual();
 
     $sql = "
         SELECT p.*, c.nombre as categoria_nombre, c.color
@@ -97,7 +175,7 @@ function listProductos()
     $stmt->execute($params);
     $productos = $stmt->fetchAll();
 
-    jsonResponse(true, 'Productos obtenidos', ['productos' => $productos]);
+    jsonResponse(true, 'Productos obtenidos', ['productos' => $productos, 'tasa_cambio' => $tasa]);
 }
 
 function getProducto()
@@ -138,7 +216,7 @@ function updateProducto()
     $marca = trim($_POST['marca'] ?? '');
     $modelo = trim($_POST['modelo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
-    $valor_total = floatval($_POST['valor_total'] ?? 0);
+    $valor_total = floatval($_POST['valor_total'] ?? $_POST['precio_usd'] ?? 0);
 
     if (!$id) {
         jsonResponse(false, 'ID requerido');

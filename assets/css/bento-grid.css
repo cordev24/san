@@ -12,13 +12,14 @@
 /* Bento Box Base Component */
 .bento-box {
     background: var(--color-surface);
+    backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-bento);
-    padding: var(--space-6);
+    padding: var(--space-8); /* Increased padding */
     transition: all var(--transition-base);
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md); /* Stronger default shadow */
 }
 
 .bento-box::before {
@@ -30,13 +31,15 @@
     height: 1px;
     background: linear-gradient(90deg,
             transparent,
-            rgba(0, 0, 0, 0.05),
+            rgba(0, 0, 0, 0.06),
             transparent);
 }
 
 .bento-box:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+    background: var(--color-surface-hover);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(0, 0, 0, 0.14);
 }
 
 /* Grid Sizes */

@@ -72,23 +72,36 @@ function createParticipante()
         return;
     }
 
-    // Insert participant
-    $stmt = $pdo->prepare("
-        INSERT INTO participantes (grupo_san_id, nombre, apellido, cedula, telefono, direccion, fecha_inscripcion) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
+    try {
+        $pdo->beginTransaction();
 
-    $stmt->execute([
-        $grupo_san_id,
-        $nombre,
-        $apellido,
-        $cedula,
-        $telefono,
-        $direccion,
-        $fecha_inscripcion
-    ]);
+        // 1. Create User account for Participant (Username: cedula, Password: hash(cedula))
+        $password_hash = password_hash($cedula, PASSWORD_DEFAULT);
+        $nombre_completo = $nombre . ' ' . $apellido;
+        
+        $stmtUser = $pdo->prepare("INSERT INTO usuarios (username, password, nombre, rol) VALUES (?, ?, ?, 'participante')");
+        $stmtUser->execute([$cedula, $password_hash, $nombre_completo]);
+        
+        $usuario_id = $pdo->lastInsertId();
 
-    $participante_id = $pdo->lastInsertId();
+        // 2. Insert participant linked to user account
+        $stmt = $pdo->prepare("
+            INSERT INTO participantes (grupo_san_id, nombre, apellido, cedula, telefono, direccion, fecha_inscripcion, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $grupo_san_id,
+            $nombre,
+            $apellido,
+            $cedula,
+            $telefono,
+            $direccion,
+            $fecha_inscripcion,
+            $usuario_id
+        ]);
+
+        $participante_id = $pdo->lastInsertId();
 
     // Update group cupos_ocupados
     $stmt = $pdo->prepare("UPDATE grupos_san SET cupos_ocupados = cupos_ocupados + 1 WHERE id = ?");
@@ -122,7 +135,13 @@ function createParticipante()
         $fecha_base->modify("+{$dias_incremento} days");
     }
 
+    $pdo->commit();
     jsonResponse(true, 'Participante inscrito exitosamente', ['id' => $participante_id]);
+    
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Error al inscribir participante: ' . $e->getMessage());
+    }
 }
 
 function listParticipantes()

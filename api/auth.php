@@ -15,7 +15,7 @@ if (empty($username) || empty($password)) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, password, nombre FROM usuarios WHERE username = ?");
+    $stmt = $pdo->prepare("SELECT id, username, password, nombre, rol FROM usuarios WHERE username = ?");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
@@ -27,10 +27,12 @@ try {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['nombre'] = $user['nombre'];
+        $_SESSION['rol'] = $user['rol'] ?? 'admin';
 
         jsonResponse(true, 'Inicio de sesión exitoso', [
             'username' => $user['username'],
-            'nombre' => $user['nombre']
+            'nombre' => $user['nombre'],
+            'rol' => $_SESSION['rol']
         ]);
     } else {
         jsonResponse(false, 'Usuario o contraseña incorrectos');

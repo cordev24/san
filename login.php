@@ -139,7 +139,11 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    window.location.href = 'dashboard.php';
+                    if (data.data.rol === 'participante') {
+                        window.location.href = 'dashboard_participante.php';
+                    } else {
+                        window.location.href = 'dashboard.php';
+                    }
                 } else {
                     showError(data.message);
                 }

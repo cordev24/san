@@ -57,10 +57,12 @@ function createPago()
         return;
     }
 
+    $tasa_aplicada = getBcvRate();
+
     // Update payment
     $stmt = $pdo->prepare("
         UPDATE pagos 
-        SET fecha_pago = ?, estado = 'pagado', metodo_pago = ?, notas = ? 
+        SET fecha_pago = ?, estado = 'pagado', metodo_pago = ?, notas = ?, tasa_aplicada = ? 
         WHERE id = ?
     ");
 
@@ -68,6 +70,7 @@ function createPago()
         $fecha_pago,
         $metodo_pago,
         $notas,
+        $tasa_aplicada,
         $pago_id
     ]);
 
@@ -163,11 +166,11 @@ function getStats()
     $sql = "
         SELECT 
             COUNT(*) as total_pagos,
-            SUM(CASE WHEN estado = 'pagado' THEN 1 ELSE 0 END) as pagados,
-            SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) as pendientes,
-            SUM(CASE WHEN estado = 'pendiente' AND fecha_vencimiento < CURDATE() THEN 1 ELSE 0 END) as atrasados,
-            SUM(CASE WHEN estado = 'pagado' THEN monto ELSE 0 END) as total_recaudado,
-            SUM(monto) as total_esperado
+            COALESCE(SUM(CASE WHEN estado = 'pagado' THEN 1 ELSE 0 END), 0) as pagados,
+            COALESCE(SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END), 0) as pendientes,
+            COALESCE(SUM(CASE WHEN estado = 'pendiente' AND fecha_vencimiento < CURDATE() THEN 1 ELSE 0 END), 0) as atrasados,
+            COALESCE(SUM(CASE WHEN estado = 'pagado' THEN monto ELSE 0 END), 0) as total_recaudado,
+            COALESCE(SUM(monto), 0) as total_esperado
         FROM pagos p
         JOIN participantes part ON p.participante_id = part.id
         WHERE 1=1

@@ -2,6 +2,7 @@
 require_once 'config/database.php';
 requireLogin();
 $user = getCurrentUser();
+$tasa_bcv = getBcvRate();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -109,210 +110,292 @@ $user = getCurrentUser();
 
     <div class="main-content">
         <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <a href="dashboard.php" class="header-logo">MySan</a>
-                <div class="header-user">
-                    <div class="user-info">
-                        <div class="user-name">
-                            <?php echo htmlspecialchars($user['nombre']); ?>
+        <?php
+        $headerLogoHref         = 'dashboard.php';
+        $headerLogoutHref       = 'logout.php';
+        $headerCrearUsuarioHref = 'crear-usuario.php';
+        $showCrearUsuario       = true;
+        include 'includes/header.php';
+        ?>
+
+        <!-- User Dashboard Content -->
+        <div style="padding: var(--space-8); max-width: 1600px; margin: 0 auto;">
+
+            <!-- SECTION: CATEGORÍAS DE GRUPOS SAN -->
+            <div class="dashboard-section" style="margin-bottom: var(--space-10);">
+                <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                    <svg class="icon" style="width: 24px; height: 24px; color: var(--color-text-secondary);"><use href="#icon-users"></use></svg>
+                    <h2 style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary);">Últimos Grupos San Activos</h2>
+                </div>
+                
+                <div class="bento-container">
+                    <!-- Dynamic Groups Loop -->
+                    <?php
+                    $stmt = $pdo->query("
+                        SELECT gs.*, p.nombre as producto_nombre, p.categoria_id, c.nombre as categoria_nombre, c.color as categoria_color
+                        FROM grupos_san gs
+                        JOIN productos p ON gs.producto_id = p.id
+                        JOIN categorias c ON p.categoria_id = c.id
+                        WHERE gs.estado != 'finalizado'
+                        ORDER BY gs.fecha_inicio DESC
+                        LIMIT 6
+                    ");
+                    $grupos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    if (empty($grupos)):
+                    ?>
+                        <div class="bento-box bento-12" style="text-align: center; color: var(--color-text-tertiary); padding: var(--space-8);">
+                            No hay grupos San activos en este momento. Dirígete a la sección de categorías para crear uno.
                         </div>
-                        <div class="user-role">Administrador</div>
-                    </div>
-                    <a href="crear-usuario.php" class="btn btn-violeta">
-                        <svg class="icon">
-                            <use href="#icon-user"></use>
-                        </svg>
-                        Crear Usuario
-                    </a>
-                    <a href="logout.php" class="btn btn-outline">
-                        <svg class="icon">
-                            <use href="#icon-log-out"></use>
-                        </svg>
-                        Salir
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <!-- Bento Grid Dashboard -->
-        <div class="bento-container" style="padding-top: var(--space-8);">
-
-            <!-- Electrodomésticos Module -->
-            <div class="bento-box bento-6 module-card animate-slide-up"
-                onclick="location.href='modules/electrodomesticos/index.php'">
-                <div class="bento-header">
-                    <div class="bento-title">
-                        <svg class="module-icon bento-icon" style="stroke: var(--color-violeta);">
-                            <use href="#icon-package"></use>
-                        </svg>
-                        Electrodomésticos
-                    </div>
-                </div>
-                <div class="bento-content">
-                    Gestión de grupos para neveras, lavadoras, televisores y más.
-                </div>
-                <div class="module-stats">
                     <?php
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM grupos_san gs JOIN productos p ON gs.producto_id = p.id JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Electrodomésticos' AND gs.estado != 'finalizado'");
-                    $stmt->execute();
-                    $grupos_count = $stmt->fetch()['count'];
+                    endif;
 
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM participantes part JOIN grupos_san gs ON part.grupo_san_id = gs.id JOIN productos p ON gs.producto_id = p.id JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Electrodomésticos' AND part.activo = TRUE");
-                    $stmt->execute();
-                    $part_count = $stmt->fetch()['count'];
+                    $delay = 0;
+                    foreach ($grupos as $grupo):
+                        $cat_id = $grupo['categoria_id'];
+                        $grupo_id = $grupo['id'];
+                        $cat_color = htmlspecialchars($grupo['categoria_color']);
+                        
+                        $bento_class = 'bento-4';
+                        if ($cat_color == 'salmon') {
+                            $bento_class .= ' bento-box--salmon';
+                        } elseif ($cat_color == 'menta') {
+                            $bento_class .= ' bento-box--menta';
+                        }
                     ?>
-                    <div class="stat-item">
-                        <span class="stat-label">Grupos Activos</span>
-                        <span class="stat-value"><?php echo $grupos_count; ?></span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Participantes</span>
-                        <span class="stat-value"><?php echo $part_count; ?></span>
-                    </div>
-                </div>
-            </div>
+                        <!-- <?php echo htmlspecialchars($grupo['nombre']); ?> Group -->
+                        <div class="bento-box <?php echo $bento_class; ?> module-card animate-slide-up"
+                            style="animation-delay: <?php echo $delay; ?>ms; cursor: pointer;"
+                            onclick="location.href='modules/categoria/pagos.php?id=<?php echo $cat_id; ?>&grupo_id=<?php echo $grupo_id; ?>'">
 
-            <!-- Telefonía Module -->
-            <div class="bento-box bento-6 bento-box--menta module-card animate-slide-up" style="animation-delay: 100ms;"
-                onclick="location.href='modules/telefonia/index.php'">
-                <div class="bento-header">
-                    <div class="bento-title">
-                        <svg class="module-icon bento-icon" style="stroke: var(--color-menta);">
-                            <use href="#icon-smartphone"></use>
-                        </svg>
-                        Telefonía
-                    </div>
-                </div>
-                <div class="bento-content">
-                    Administración de Sans para smartphones de alta gama.
-                </div>
-                <div class="module-stats">
+                            <div class="bento-header">
+                                <div class="bento-title">
+                                    <svg class="module-icon bento-icon" style="stroke: var(--color-<?php echo $cat_color ? $cat_color : 'violeta'; ?>);">
+                                        <use href="#icon-users"></use>
+                                    </svg>
+                                    <?php echo htmlspecialchars($grupo['nombre']); ?>
+                                </div>
+                                <?php if ($grupo['estado'] == 'abierto'): ?>
+                                    <span class="badge badge-success">
+                                        <span class="badge-dot"></span>
+                                        Abierto
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge badge-warning">
+                                        <span class="badge-dot"></span>
+                                        <?php echo ucfirst($grupo['estado']); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="bento-content" style="color: var(--color-<?php echo $cat_color ? $cat_color : 'violeta'; ?>);">
+                                <?php echo htmlspecialchars($grupo['categoria_nombre']); ?> &raquo; <?php echo htmlspecialchars($grupo['producto_nombre']); ?>
+                            </div>
+                            <div class="module-stats">
+                                <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                    <span class="stat-label">Cupos Llenos</span>
+                                    <span class="stat-value" style="font-size: var(--font-size-xl);">
+                                        <?php echo $grupo['cupos_ocupados']; ?> / <?php echo $grupo['cupos_totales']; ?>
+                                    </span>
+                                </div>
+                                <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                    <span class="stat-label">Cuota</span>
+                                    <span class="stat-value" style="font-size: var(--font-size-xl);">
+                                        $<?php echo number_format($grupo['monto_cuota'], 2); ?>
+                                    </span>
+                                </div>
+                                <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                    <span class="stat-label">Frecuencia</span>
+                                    <span class="stat-value" style="font-size: var(--font-size-xl);">
+                                        <?php echo ucfirst($grupo['frecuencia']); ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     <?php
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM grupos_san gs JOIN productos p ON gs.producto_id = p.id JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Telefonía' AND gs.estado != 'finalizado'");
-                    $stmt->execute();
-                    $grupos_count = $stmt->fetch()['count'];
-
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM participantes part JOIN grupos_san gs ON part.grupo_san_id = gs.id JOIN productos p ON gs.producto_id = p.id JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Telefonía' AND part.activo = TRUE");
-                    $stmt->execute();
-                    $part_count = $stmt->fetch()['count'];
+                        $delay += 100;
+                    endforeach;
                     ?>
-                    <div class="stat-item">
-                        <span class="stat-label">Grupos Activos</span>
-                        <span class="stat-value"><?php echo $grupos_count; ?></span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Participantes</span>
-                        <span class="stat-value"><?php echo $part_count; ?></span>
-                    </div>
                 </div>
             </div>
 
-            <!-- Motocicletas Module (Double Width) -->
-            <div class="bento-box bento-12 bento-box--salmon module-card animate-slide-up"
-                style="animation-delay: 200ms;" onclick="location.href='modules/motocicletas/index.php'">
-                <div class="bento-header">
-                    <div class="bento-title">
-                        <div class="bento-icon-container"
-                            style="background: rgba(255, 128, 128, 0.1); color: var(--color-salmon);">
-                            <svg class="icon-xl">
-                                <use href="#icon-motorcycle"></use>
-                            </svg>
-                        </div> Motocicletas
-                    </div>
-                    <span class="badge badge-warning">
-                        <span class="badge-dot"></span>
-                        Alto Valor
-                    </span>
-                </div>
-                <div class="bento-content">
-                    Control de marcas, cilindradas y cuotas para motocicletas. El módulo de mayor valor del sistema.
-                </div>
-                <div class="module-stats"
-                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4);">
-                    <?php
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM grupos_san gs JOIN productos p ON gs.producto_id = p.id JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Motocicletas' AND gs.estado != 'finalizado'");
-                    $stmt->execute();
-                    $grupos_count = $stmt->fetch()['count'];
 
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM participantes part JOIN grupos_san gs ON part.grupo_san_id = gs.id JOIN productos p ON gs.producto_id = p.id JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Motocicletas' AND part.activo = TRUE");
-                    $stmt->execute();
-                    $part_count = $stmt->fetch()['count'];
+            <!-- SECTION: ADMINISTRACIÓN Y UTILIDADES -->
+            <div class="dashboard-section">
+                <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                    <svg class="icon" style="width: 24px; height: 24px; color: var(--color-text-secondary);"><use href="#icon-settings"></use></svg>
+                    <h2 style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary);">Administración</h2>
+                </div>
+                
+                <div class="bento-container">
+                    <!-- Catálogo de Productos Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay; ?>ms;"
+                        onclick="location.href='modules/productos/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-electro);">
+                                    <use href="#icon-package"></use>
+                                </svg>
+                                Catálogo de Productos
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Administra todos los productos financiables.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Total Productos</span>
+                                <?php
+                                $stmtProdCount = $pdo->query("SELECT COUNT(*) FROM productos WHERE activo = TRUE");
+                                $countProd = $stmtProdCount->fetchColumn();
+                                ?>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countProd; ?></span>
+                            </div>
+                        </div>
+                    </div>
 
-                    $stmt = $pdo->prepare("SELECT SUM(p.valor_total) as total FROM productos p JOIN categorias c ON p.categoria_id = c.id WHERE c.nombre = 'Motocicletas' AND p.activo = TRUE");
-                    $stmt->execute();
-                    $valor_total = $stmt->fetch()['total'] ?? 0;
-                    ?>
-                    <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                        <span class="stat-label">Grupos Activos</span>
-                        <span class="stat-value"
-                            style="font-size: var(--font-size-xl);"><?php echo $grupos_count; ?></span>
+                    <!-- Gestión de Grupos San Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 100; ?>ms;"
+                        onclick="location.href='modules/grupos/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-secondary);">
+                                    <use href="#icon-users"></use>
+                                </svg>
+                                Gestión de Grupos San
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Administra todos los San, participantes y pagos.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Grupos Activos</span>
+                                <?php
+                                $stmtGroupCount = $pdo->query("SELECT COUNT(*) FROM grupos_san WHERE estado != 'finalizado'");
+                                $countGroup = $stmtGroupCount->fetchColumn();
+                                ?>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countGroup; ?></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                        <span class="stat-label">Participantes</span>
-                        <span class="stat-value"
-                            style="font-size: var(--font-size-xl);"><?php echo $part_count; ?></span>
+
+                    <!-- Mensajería Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay; ?>ms;"
+                        onclick="location.href='modules/mensajeria/inbox.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-violeta);">
+                                    <use href="#icon-mail"></use>
+                                </svg>
+                                Bandeja de Mensajes
+                            </div>
+                            <?php
+                            $stmtUnreadMsg = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE receiver_id = ? AND leido = 0");
+                            $stmtUnreadMsg->execute([$user['id']]);
+                            $unreadMsgAdmin = $stmtUnreadMsg->fetchColumn();
+                            if ($unreadMsgAdmin > 0):
+                            ?>
+                                <span class="badge badge-warning">
+                                    <span class="badge-dot"></span>
+                                    <?php echo $unreadMsgAdmin; ?> nuevos
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="bento-content">
+                            Comunícate con todos los participantes del sistema.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Mensajes Recibidos</span>
+                                <?php
+                                $stmtMsgCount = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE receiver_id = ?");
+                                $stmtMsgCount->execute([$user['id']]);
+                                $countMsg = $stmtMsgCount->fetchColumn();
+                                ?>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countMsg; ?></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                        <span class="stat-label">Valor Total</span>
-                        <span class="stat-value" style="font-size: var(--font-size-xl);">Bs
-                            <?php echo number_format($valor_total, 2); ?></span>
+
+                    <!-- Gestión de Categorias Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay; ?>ms;"
+                        onclick="location.href='modules/categorias_admin/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-menta);">
+                                    <use href="#icon-grid"></use>
+                                </svg>
+                                Configurar Categorías
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Añade, edita, cambia colores y elimina categorías.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Categorías Activas</span>
+                                <?php
+                                $stmtCountCat = $pdo->query("SELECT COUNT(*) FROM categorias");
+                                $countCat = $stmtCountCat->fetchColumn();
+                                ?>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countCat; ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gestión de Turnos Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 100; ?>ms;"
+                        onclick="location.href='modules/turnos/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-violeta);">
+                                    <use href="#icon-dice"></use>
+                                </svg>
+                                Sorteos de Turnos
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Sistema de sorteo y asignación de turnos.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Pendientes</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);">7</span>
+                            </div>
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Próximo</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);">15 Feb</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comprobantes Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 200; ?>ms;"
+                        onclick="location.href='modules/comprobantes/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-salmon);">
+                                    <use href="#icon-printer"></use>
+                                </svg>
+                                Recibos y Comprobantes
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Generación de recibos y certificados.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Generados</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);">156</span>
+                            </div>
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Mes Acual</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);">23</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Gestión de Turnos Module -->
-            <div class="bento-box bento-6 module-card animate-slide-up" style="animation-delay: 300ms;"
-                onclick="location.href='modules/turnos/index.php'">
-                <div class="bento-header">
-                    <div class="bento-title">
-                        <svg class="module-icon bento-icon" style="stroke: var(--color-violeta);">
-                            <use href="#icon-dice"></use>
-                        </svg>
-                        Gestión de Turnos
-                    </div>
-                </div>
-                <div class="bento-content">
-                    Sistema de sorteo y asignación de turnos para entrega de productos.
-                </div>
-                <div class="module-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Sorteos Pendientes</span>
-                        <span class="stat-value">7</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Próximo Sorteo</span>
-                        <span class="stat-value">15 Feb</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Comprobantes Module -->
-            <div class="bento-box bento-6 module-card animate-slide-up" style="animation-delay: 400ms;"
-                onclick="location.href='modules/comprobantes/index.php'">
-                <div class="bento-header">
-                    <div class="bento-title">
-                        <svg class="module-icon bento-icon" style="stroke: var(--color-menta);">
-                            <use href="#icon-printer"></use>
-                        </svg>
-                        Comprobantes
-                    </div>
-                </div>
-                <div class="bento-content">
-                    Generación de recibos de pago y certificados de entrega.
-                </div>
-                <div class="module-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Recibos Generados</span>
-                        <span class="stat-value">156</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Este Mes</span>
-                        <span class="stat-value">23</span>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </body>

@@ -141,7 +141,7 @@ function generarRecibo()
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Arial', 'B', 14);
     $pdf->Cell(100, 15, ' TOTAL PAGADO:', 0, 0, 'L', true);
-    $pdf->Cell(0, 15, 'Bs ' . number_format($pago['monto'], 2) . ' ', 0, 1, 'R', true);
+    $pdf->Cell(0, 15, formatMoneyCustomRate($pago['monto'], $pago['tasa_aplicada'] ?? 0) . ' ', 0, 1, 'R', true);
 
     $pdf->Ln(30);
     // Signature
@@ -247,7 +247,7 @@ function generarReporteFinanciero()
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Arial', 'B', 12);
     $pdf->Cell(130, 12, ' Descripcion del Concepto', 1, 0, 'L', true);
-    $pdf->Cell(60, 12, 'Monto (Bs) ', 1, 1, 'R', true);
+    $pdf->Cell(60, 12, 'Monto ', 1, 1, 'R', true);
 
     // Table Content
     $pdf->SetTextColor(33, 37, 41);
@@ -266,7 +266,7 @@ function generarReporteFinanciero()
     $pdf->SetFillColor(56, 217, 169);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->Cell(130, 15, ' UTILIDAD NETA DEL PERIODO', 0, 0, 'L', true);
-    $pdf->Cell(60, 15, 'Bs ' . number_format($ganancias, 2) . ' ', 0, 1, 'R', true);
+    $pdf->Cell(60, 15, formatMoneyBcv($ganancias) . ' ', 0, 1, 'R', true);
 
     $pdf->Ln(20);
     $pdf->SetTextColor(100, 100, 100);

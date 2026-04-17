@@ -144,6 +144,15 @@ if ($grupo_seleccionado) {
     <?php include '../../assets/icons/feather-sprite.svg'; ?>
 
     <div class="main-content">
+        <!-- Header -->
+        <?php
+        $headerLogoHref     = '../../dashboard.php';
+        $headerLogoutHref   = '../../logout.php';
+        $headerBackUrl      = 'index.php';
+        $headerBackLabel    = 'Volver a Telefonia';
+        include '../../includes/header.php';
+        ?>
+
         <div class="page-header">
             <div class="breadcrumb">
                 <a href="../../dashboard.php">Dashboard</a>
@@ -166,7 +175,7 @@ if ($grupo_seleccionado) {
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
                         <div class="stat-label">Total Recaudado</div>
-                        <div class="stat-value" style="color: var(--color-menta);" id="totalRecaudado">Bs 0.00</div>
+                        <div class="stat-value" style="color: var(--color-menta);" id="totalRecaudado">$0.00 (Bs 0.00)</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Pagos Pendientes</div>
@@ -178,7 +187,7 @@ if ($grupo_seleccionado) {
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Total Esperado</div>
-                        <div class="stat-value" id="totalEsperado">Bs 0.00</div>
+                        <div class="stat-value" id="totalEsperado">$0.00 (Bs 0.00)</div>
                     </div>
                 </div>
             </div>
@@ -234,7 +243,7 @@ if ($grupo_seleccionado) {
                                         <th>Participante</th>
                                         <th>Cédula</th>
                                         <th>Cuota #</th>
-                                        <th>Monto (Bs)</th>
+                                        <th>Monto</th>
                                         <th>Vencimiento</th>
                                         <th>Fecha Pago</th>
                                         <th>Estado</th>

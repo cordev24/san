@@ -257,33 +257,13 @@ $grupos = $stmt->fetchAll();
     
     <div class="main-content">
         <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <a href="../../dashboard.php" class="header-logo">MySan</a>
-                <div class="header-user">
-                    <div class="user-info">
-                        <div class="user-name">
-                            <?php echo htmlspecialchars($user['nombre']); ?>
-                        </div>
-                        <div class="user-role">Administrador</div>
-                    </div>
-                    <a href="../../logout.php" class="btn btn-outline">
-                        <svg class="icon">
-                            <use href="#icon-log-out"></use>
-                        </svg>
-                        Salir
-                    </a>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Back Button -->
-        <div style="padding: var(--space-4) var(--space-6);">
-            <a href="../../dashboard.php" class="btn btn-outline">
-                <svg class="icon"><use href="#icon-arrow-left"></use></svg>
-                Volver
-            </a>
-        </div>
+        <?php
+        $headerLogoHref     = '../../dashboard.php';
+        $headerLogoutHref   = '../../logout.php';
+        $headerBackUrl      = '../../dashboard.php';
+        $headerBackLabel    = 'Volver al Dashboard';
+        include '../../includes/header.php';
+        ?>
 
         <div class="page-header" style="padding: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--glass-border);">
             <h1 class="page-title" style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); display: flex; align-items: center; gap: var(--space-3);">
@@ -390,7 +370,7 @@ $grupos = $stmt->fetchAll();
                                                 <svg class="icon" style="stroke: var(--color-text-tertiary);">
                                                     <use href="#icon-dollar"></use>
                                                 </svg>
-                                                <span>Bs <?php echo number_format($grupo['monto_cuota'], 2); ?></span>
+                                                <span><?php echo formatMoneyBcv($grupo['monto_cuota']); ?></span>
                                             </div>
                                             <div class="detail-item">
                                                 <svg class="icon" style="stroke: var(--color-text-tertiary);">
@@ -448,7 +428,7 @@ $grupos = $stmt->fetchAll();
                                         </div>
                                     </div>
                                     <div class="product-price">
-                                        Bs <?php echo number_format($producto['valor_total'], 2); ?>
+                                        <?php echo formatMoneyBcv($producto['valor_total']); ?>
                                     </div>
                                     <?php if ($producto['descripcion']): ?>
                                         <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
@@ -484,7 +464,7 @@ $grupos = $stmt->fetchAll();
                             <option value="<?php echo $producto['id']; ?>"
                                 data-valor="<?php echo $producto['valor_total']; ?>">
                                 <?php echo htmlspecialchars($producto['nombre']); ?> -
-                                Bs <?php echo number_format($producto['valor_total'], 2); ?>
+                                <?php echo formatMoneyBcv($producto['valor_total']); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

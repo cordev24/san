@@ -3,20 +3,25 @@ require_once '../../config/database.php';
 requireLogin();
 $user = getCurrentUser();
 
-// Get categoria ID
-$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Motocicletas'");
-$stmt->execute();
+// Get categoria ID from URL
+$categoria_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$stmt = $pdo->prepare("SELECT * FROM categorias WHERE id = ?");
+$stmt->execute([$categoria_id]);
 $categoria = $stmt->fetch();
-$categoria_id = $categoria['id'];
 
-// Get motocicletas products
+if (!$categoria) {
+    header("Location: ../../dashboard.php");
+    exit;
+}
+
+// Get category products
 $stmt = $pdo->prepare("
     SELECT p.*, c.nombre as categoria_nombre, c.color
     FROM productos p
     JOIN categorias c ON p.categoria_id = c.id
-    WHERE c.nombre = 'Motocicletas' AND p.activo = TRUE
+    WHERE p.categoria_id = ? AND p.activo = TRUE
 ");
-$stmt->execute();
+$stmt->execute([$categoria_id]);
 $productos = $stmt->fetchAll();
 
 // Get active groups
@@ -24,10 +29,9 @@ $stmt = $pdo->prepare("
     SELECT gs.*, p.nombre as producto_nombre, p.marca as producto_marca, p.modelo as producto_modelo
     FROM grupos_san gs
     JOIN productos p ON gs.producto_id = p.id
-    JOIN categorias c ON p.categoria_id = c.id
-    WHERE c.nombre = 'Motocicletas' AND gs.estado != 'finalizado'
+    WHERE p.categoria_id = ? AND gs.estado != 'finalizado'
 ");
-$stmt->execute();
+$stmt->execute([$categoria_id]);
 $grupos = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -36,7 +40,7 @@ $grupos = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - Motocicletas</title>
+    <title>MySan - <?php echo htmlspecialchars($categoria['nombre']); ?></title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
@@ -69,12 +73,12 @@ $grupos = $stmt->fetchAll();
         }
 
         .breadcrumb a {
-            color: var(--color-violeta);
+            color: var(--color-electro);
             transition: color var(--transition-base);
         }
 
         .breadcrumb a:hover {
-            color: var(--color-menta);
+            color: var(--color-secondary);
         }
 
         .product-grid {
@@ -90,14 +94,12 @@ $grupos = $stmt->fetchAll();
             padding: var(--space-4);
             transition: all var(--transition-base);
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
         }
 
         .product-card:hover {
-            border-color: var(--color-salmon);
+            border-color: var(--color-electro);
             transform: translateY(-4px);
-            box-shadow: var(--shadow-glow-salmon);
+            box-shadow: var(--shadow-glow-primary);
         }
 
         .product-header {
@@ -110,14 +112,12 @@ $grupos = $stmt->fetchAll();
         .product-icon {
             width: 48px;
             height: 48px;
-            background: rgba(255, 128, 128, 0.1);
-            /* Salmon glow manually defined if variable not ready */
+            background: var(--color-electro-glow);
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            color: var(--color-salmon);
         }
 
         .product-info h3 {
@@ -135,76 +135,243 @@ $grupos = $stmt->fetchAll();
         .product-price {
             font-size: var(--font-size-2xl);
             font-weight: var(--font-weight-bold);
-            color: var(--color-salmon);
+            color: var(--color-electro);
             margin: var(--space-2) 0;
         }
 
-        /* Group Card Styles */
+        /* ── Group Card Premium ── */
+        .card-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-5);
+        }
+
         .group-card {
             background: var(--color-surface);
             border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-5);
-            transition: all var(--transition-base);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: all 0.25s ease;
+            position: relative;
             display: flex;
             flex-direction: column;
-            gap: var(--space-4);
-            position: relative;
         }
 
         .group-card:hover {
-            border-color: var(--color-salmon);
-            transform: translateX(4px);
-            box-shadow: var(--shadow-glow-salmon);
+            border-color: var(--color-violeta);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(170, 100, 255, 0.18);
+        }
+
+        .group-card-banner {
+            height: 6px;
+            background: linear-gradient(90deg, var(--color-violeta), var(--color-menta));
+        }
+
+        .group-card-body {
+            padding: var(--space-5);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+            flex: 1;
         }
 
         .group-header {
             display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-3);
+        }
+
+        .group-header-left {
+            display: flex;
             align-items: center;
-            gap: var(--space-4);
+            gap: var(--space-3);
+            flex: 1;
+            min-width: 0;
         }
 
         .group-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 128, 128, 0.1);
-            border-radius: var(--radius-md);
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, rgba(170,100,255,0.15), rgba(100,220,170,0.1));
+            border: 1px solid rgba(170,100,255,0.25);
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            color: var(--color-salmon);
+        }
+
+        .group-title-wrap {
+            min-width: 0;
         }
 
         .group-title {
-            font-size: var(--font-size-lg);
-            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-bold);
             color: var(--color-text-primary);
-        }
-
-        .group-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: var(--space-2);
-            padding-top: var(--space-2);
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
-        }
-
-        .detail-item span {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Card Actions Premium */
+        .group-product-name {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-tertiary);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Status badge on card */
+        .group-status-badge {
+            flex-shrink: 0;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(100, 220, 170, 0.12);
+            color: var(--color-menta);
+            border: 1px solid rgba(100, 220, 170, 0.35);
+        }
+
+        /* Stats row */
+        .group-stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+        }
+
+        .group-stat {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+        }
+
+        .group-stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--space-1);
+        }
+
+        .group-stat-value {
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+        }
+
+        /* Cupos progress bar */
+        .group-cupos-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .group-cupos-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+        }
+
+        .progress-bar-track {
+            height: 6px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--color-violeta), var(--color-menta));
+            transition: width 0.6s ease;
+        }
+
+        /* Card action strip */
+        .group-card-actions {
+            display: flex;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-5);
+            border-top: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .btn-card-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn-card-participants {
+            background: rgba(100, 220, 170, 0.1);
+            color: var(--color-menta);
+            border-color: rgba(100, 220, 170, 0.25);
+        }
+
+        .btn-card-participants:hover {
+            background: rgba(100, 220, 170, 0.2);
+            border-color: var(--color-menta);
+            transform: translateY(-1px);
+        }
+
+        .btn-card-payments {
+            background: rgba(170, 100, 255, 0.1);
+            color: var(--color-violeta);
+            border-color: rgba(170, 100, 255, 0.25);
+        }
+
+        .btn-card-payments:hover {
+            background: rgba(170, 100, 255, 0.2);
+            border-color: var(--color-violeta);
+            transform: translateY(-1px);
+        }
+
+        .btn-card-edit {
+            width: 32px;
+            flex: none;
+            background: rgba(255,255,255,0.04);
+            color: var(--color-text-secondary);
+            border-color: var(--glass-border);
+        }
+
+        .btn-card-edit:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--color-text-primary);
+        }
+
+        .btn-card-delete {
+            width: 32px;
+            flex: none;
+            background: rgba(255,100,100,0.07);
+            color: #ff8080;
+            border-color: rgba(255,100,100,0.2);
+        }
+
+        .btn-card-delete:hover {
+            background: rgba(255,100,100,0.15);
+            color: #ff6464;
+            border-color: #ff6464;
+        }
+
+        /* Product card actions (keep existing) */
         .card-actions {
             position: absolute;
             top: var(--space-3);
@@ -216,18 +383,42 @@ $grupos = $stmt->fetchAll();
             z-index: 20;
         }
 
-        .product-card:hover .card-actions,
-        .group-card:hover .card-actions {
+        .product-card:hover .card-actions {
             opacity: 1;
         }
 
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            background: var(--glass-background);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-secondary);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
 
+        .btn-action:hover {
+            background: var(--color-surface);
+            border-color: var(--color-violeta);
+            color: var(--color-violeta);
+            transform: translateY(-2px);
+        }
 
-        /* High Value Badge */
-        .badge-high-value {
-            background: rgba(255, 200, 100, 0.1);
-            color: var(--color-gold, #ffc107);
-            border: 1px solid var(--color-gold, #ffc107);
+        .btn-action-danger:hover {
+            border-color: #ff6464;
+            color: #ff6464;
+        }
+
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2;
         }
     </style>
 </head>
@@ -244,36 +435,36 @@ $grupos = $stmt->fetchAll();
         $headerBackLabel    = 'Volver al Dashboard';
         include '../../includes/header.php';
         ?>
-        
+
         <div class="page-header" style="padding: var(--space-6); margin-bottom: var(--space-4); border-bottom: 1px solid var(--glass-border);">
             <h1 class="page-title" style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); display: flex; align-items: center; gap: var(--space-3);">
-                <svg class="icon-xl" style="width: 40px; height: 40px; stroke: var(--color-salmon);">
-                    <use href="#icon-motocycle"></use>
+                <svg class="icon-xl" style="width: 40px; height: 40px; stroke: var(--color-<?php echo htmlspecialchars($categoria['color']); ?>);">
+                    <use href="#icon-cpu"></use>
                 </svg>
-                Motocicletas
+                <?php echo htmlspecialchars($categoria['nombre']); ?>
             </h1>
             <p style="color: var(--color-text-secondary); margin-top: var(--space-2);">
-                Administración de grupos para motocicletas.
+                Administración de grupos para <?php echo htmlspecialchars(strtolower($categoria['nombre'])); ?>.
             </p>
         </div>
-        
+
         <div class="bento-container">
             <!-- Action Buttons -->
             <div class="bento-12"
                 style="display: flex; gap: var(--space-4); margin-bottom: var(--space-4); flex-wrap: wrap;">
-                <button class="btn btn-salmon" onclick="openModal('nuevoGrupoModal')">
+                <button class="btn btn-violeta" onclick="openModal('nuevoGrupoModal')">
                     <svg class="icon">
                         <use href="#icon-plus"></use>
                     </svg>
                     Nuevo Grupo San
                 </button>
-                <button class="btn btn-violeta" onclick="openModal('nuevoParticipanteModal')">
+                <button class="btn btn-menta" onclick="openModal('nuevoParticipanteModal')">
                     <svg class="icon">
                         <use href="#icon-users"></use>
                     </svg>
                     Inscribir Participante
                 </button>
-                <button class="btn btn-menta" onclick="location.href='pagos.php'">
+                <button class="btn btn-salmon" onclick="location.href='pagos.php?id=<?php echo $categoria_id; ?>'">
                     <svg class="icon">
                         <use href="#icon-dollar"></use>
                     </svg>
@@ -283,16 +474,16 @@ $grupos = $stmt->fetchAll();
                     <svg class="icon">
                         <use href="#icon-package"></use>
                     </svg>
-                    Agregar Motocicleta
+                    Agregar Producto
                 </button>
             </div>
 
             <!-- Active Groups -->
             <div class="bento-12">
-                <div class="bento-box bento-box--salmon">
+                <div class="bento-box">
                     <div class="bento-header">
                         <div class="bento-title">Grupos Activos</div>
-                        <span class="badge badge-warning">
+                        <span class="badge badge-success">
                             <span class="badge-dot"></span>
                             <?php echo count($grupos); ?> grupos
                         </span>
@@ -304,64 +495,83 @@ $grupos = $stmt->fetchAll();
                             </p>
                         <?php else: ?>
                             <div class="card-list">
-                                <?php foreach ($grupos as $grupo): ?>
-                                    <div class="group-card"
-                                        onclick="location.href='pagos.php?grupo_id=<?php echo $grupo['id']; ?>'">
-                                        <div class="card-actions">
-                                            <button class="btn-action"
-                                                onclick="event.stopPropagation(); editGrupo(<?php echo $grupo['id']; ?>)"
-                                                title="Editar Grupo">
-                                                <svg class="icon">
-                                                    <use href="#icon-edit"></use>
-                                                </svg>
-                                            </button>
-                                            <button class="btn-action btn-action-danger"
-                                                onclick="event.stopPropagation(); eliminarGrupo(<?php echo $grupo['id']; ?>)"
-                                                title="Eliminar Grupo">
-                                                <svg class="icon">
-                                                    <use href="#icon-trash-2"></use>
-                                                </svg>
-                                            </button>
+                                <?php foreach ($grupos as $grupo):
+                                    $pct = $grupo['cupos_totales'] > 0
+                                        ? round(($grupo['cupos_ocupados'] / $grupo['cupos_totales']) * 100)
+                                        : 0;
+                                    $lleno = $grupo['cupos_ocupados'] >= $grupo['cupos_totales'];
+                                ?>
+                                    <div class="group-card">
+                                        <div class="group-card-banner"></div>
+                                        <!-- Clickable body → grupo detail page -->
+                                        <div class="group-card-body"
+                                             style="cursor:pointer;"
+                                             onclick="location.href='grupo.php?id=<?php echo $categoria_id; ?>&grupo_id=<?php echo $grupo['id']; ?>'">
+                                            <!-- Header -->
+                                            <div class="group-header">
+                                                <div class="group-header-left">
+                                                    <div class="group-icon">
+                                                        <svg class="icon-lg" style="stroke: var(--color-violeta);">
+                                                            <use href="#icon-users"></use>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="group-title-wrap">
+                                                        <div class="group-title"><?php echo htmlspecialchars($grupo['nombre']); ?></div>
+                                                        <div class="group-product-name"><?php echo htmlspecialchars($grupo['producto_nombre']); ?></div>
+                                                    </div>
+                                                </div>
+                                                <span class="group-status-badge"><?php echo ucfirst($grupo['estado'] ?? 'activo'); ?></span>
+                                            </div>
+
+                                            <!-- Stats row -->
+                                            <div class="group-stats-row">
+                                                <div class="group-stat">
+                                                    <div class="group-stat-label">Cuota</div>
+                                                    <div class="group-stat-value" style="color: var(--color-violeta); font-size: var(--font-size-sm);"><?php echo formatMoneyBcv($grupo['monto_cuota']); ?></div>
+                                                </div>
+                                                <div class="group-stat">
+                                                    <div class="group-stat-label">Frecuencia</div>
+                                                    <div class="group-stat-value" style="font-size: var(--font-size-sm);"><?php echo ucfirst($grupo['frecuencia']); ?></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Cupos progress -->
+                                            <div class="group-cupos-section">
+                                                <div class="group-cupos-label">
+                                                    <span>Cupos ocupados</span>
+                                                    <span style="font-weight: 600; color: <?php echo $lleno ? 'var(--color-error)' : 'var(--color-primary)'; ?>">
+                                                        <?php echo $grupo['cupos_ocupados']; ?> / <?php echo $grupo['cupos_totales']; ?>
+                                                    </span>
+                                                </div>
+                                                <div class="progress-bar-track">
+                                                    <div class="progress-bar-fill" style="width: <?php echo $pct; ?>%; background: <?php echo $lleno ? 'var(--color-error)' : 'linear-gradient(90deg, var(--color-primary), var(--color-secondary))'; ?>;"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Ver detalles hint -->
+                                            <div style="display:flex;align-items:center;justify-content:flex-end;gap:4px;
+                                                        font-size:11px;color:var(--color-text-tertiary);margin-top:var(--space-1);">
+                                                Ver detalles
+                                                <svg style="width:11px;height:11px;stroke:currentColor;stroke-width:2.5;"><use href="#icon-arrow-right"></use></svg>
+                                            </div>
                                         </div>
-                                        <div class="group-header">
-                                            <div class="group-icon">
-                                                <svg class="icon-lg" style="stroke: var(--color-salmon);">
-                                                    <use href="#icon-motorcycle"></use>
-                                                </svg>
-                                            </div>
-                                            <div class="group-title"><?php echo htmlspecialchars($grupo['nombre']); ?></div>
-                                        </div>
-                                        <div class="group-details">
-                                            <div class="detail-item">
-                                                <svg class="icon" style="stroke: var(--color-text-tertiary);">
-                                                    <use href="#icon-package"></use>
-                                                </svg>
-                                                <span
-                                                    title="<?php echo htmlspecialchars($grupo['producto_nombre']); ?>"><?php echo htmlspecialchars($grupo['producto_nombre']); ?></span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <svg class="icon" style="stroke: var(--color-text-tertiary);">
-                                                    <use href="#icon-users"></use>
-                                                </svg>
-                                                <span><?php echo $grupo['cupos_ocupados']; ?>/<?php echo $grupo['cupos_totales']; ?>
-                                                    Cupos</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <svg class="icon" style="stroke: var(--color-text-tertiary);">
-                                                    <use href="#icon-dollar"></use>
-                                                </svg>
-                                                <span><?php echo formatMoneyBcv($grupo['monto_cuota']); ?></span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <svg class="icon" style="stroke: var(--color-text-tertiary);">
-                                                    <use href="#icon-calendar"></use>
-                                                </svg>
-                                                <span><?php echo ucfirst($grupo['frecuencia']); ?></span>
-                                            </div>
+
+                                        <!-- Action strip -->
+                                        <div class="group-card-actions">
+                                            <a href="pagos.php?id=<?php echo $categoria_id; ?>&grupo_id=<?php echo $grupo['id']; ?>" class="btn-card-action btn-card-payments">
+                                                <svg style="width:13px;height:13px;stroke-width:2.5;"><use href="#icon-dollar"></use></svg>
+                                                Ver Pagos
+                                            </a>
+                                            <button class="btn-card-action btn-card-edit" onclick="editGrupo(<?php echo $grupo['id']; ?>)" title="Editar">
+                                                <svg style="width:13px;height:13px;stroke-width:2.5;"><use href="#icon-edit"></use></svg>
+                                            </button>
+                                            <button class="btn-card-action btn-card-delete" onclick="eliminarGrupo(<?php echo $grupo['id']; ?>)" title="Eliminar">
+                                                <svg style="width:13px;height:13px;stroke-width:2.5;"><use href="#icon-trash-2"></use></svg>
+                                            </button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                            </div>
+                            </div><!-- /.card-list -->
                         <?php endif; ?>
                     </div>
                 </div>
@@ -371,32 +581,32 @@ $grupos = $stmt->fetchAll();
             <div class="bento-12">
                 <div class="bento-box">
                     <div class="bento-header">
-                        <div class="bento-title">Motocicletas Disponibles</div>
+                        <div class="bento-title">Productos Disponibles</div>
                     </div>
                     <div class="bento-content">
                         <div class="product-grid">
                             <?php foreach ($productos as $producto): ?>
-                                <div class="product-card">
+                                <div class="product-card" style="position: relative; overflow: hidden;">
                                     <div class="card-actions">
                                         <button class="btn-action"
                                             onclick="event.stopPropagation(); loadProductoForEdit(<?php echo $producto['id']; ?>)"
                                             title="Editar">
-                                            <svg class="icon" style="width: 16px; height: 16px;">
+                                            <svg class="icon-sm">
                                                 <use href="#icon-edit"></use>
                                             </svg>
                                         </button>
                                         <button class="btn-action btn-action-danger"
                                             onclick="event.stopPropagation(); deleteProducto(<?php echo $producto['id']; ?>)"
                                             title="Eliminar">
-                                            <svg class="icon" style="width: 16px; height: 16px;">
+                                            <svg class="icon-sm">
                                                 <use href="#icon-trash-2"></use>
                                             </svg>
                                         </button>
                                     </div>
                                     <div class="product-header">
                                         <div class="product-icon">
-                                            <svg class="icon-lg" style="stroke: var(--color-salmon);">
-                                                <use href="#icon-truck"></use>
+                                            <svg class="icon-lg" style="stroke: var(--color-violeta);">
+                                                <use href="#icon-package"></use>
                                             </svg>
                                         </div>
                                         <div class="product-info">
@@ -422,9 +632,8 @@ $grupos = $stmt->fetchAll();
                 </div>
             </div>
         </div>
+    </div>
 
-    <?php include '../../modules/shared/sidebar-footer.php'; ?>
-    
     <!-- Modal: Nuevo Grupo San -->
     <div id="nuevoGrupoModal" class="modal-overlay">
         <div class="modal-content">
@@ -438,9 +647,9 @@ $grupos = $stmt->fetchAll();
             </div>
             <form id="nuevoGrupoForm">
                 <div class="form-group">
-                    <label class="form-label">Motocicleta *</label>
+                    <label class="form-label">Producto *</label>
                     <select id="producto_id" name="producto_id" class="form-select" required>
-                        <option value="">-- Selecciona una motocicleta --</option>
+                        <option value="">-- Selecciona un producto --</option>
                         <?php foreach ($productos as $producto): ?>
                             <option value="<?php echo $producto['id']; ?>"
                                 data-valor="<?php echo $producto['valor_total']; ?>">
@@ -453,7 +662,8 @@ $grupos = $stmt->fetchAll();
 
                 <div class="form-group">
                     <label class="form-label">Nombre del Grupo *</label>
-                    <input type="text" name="nombre" class="form-input" required placeholder="Ej: Grupo Bera 2026">
+                    <input type="text" name="nombre" class="form-input" required
+                        placeholder="Ej: Grupo Neveras Enero 2026">
                 </div>
 
                 <div class="form-group">
@@ -479,12 +689,12 @@ $grupos = $stmt->fetchAll();
                 <div class="form-group">
                     <label class="form-label">Monto por Cuota (Calculado)</label>
                     <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); 
-                                color: var(--color-salmon); padding: var(--space-3);" id="monto_cuota_display">$0.00
+                                color: var(--color-violeta); padding: var(--space-3);" id="monto_cuota_display">$0.00
                     </div>
                 </div>
 
                 <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-salmon" style="flex: 1;">
+                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
                         <svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
@@ -554,7 +764,7 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
+                    <button type="submit" class="btn btn-menta" style="flex: 1;">
                         <svg class="icon">
                             <use href="#icon-user-plus"></use>
                         </svg>
@@ -573,7 +783,7 @@ $grupos = $stmt->fetchAll();
     <div id="nuevoProductoModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Agregar Motocicleta</h2>
+                <h2 class="modal-title">Agregar Producto</h2>
                 <button class="modal-close" onclick="closeModal('nuevoProductoModal')">
                     <svg class="icon">
                         <use href="#icon-x"></use>
@@ -584,18 +794,18 @@ $grupos = $stmt->fetchAll();
                 <input type="hidden" name="categoria_id" value="<?php echo $categoria_id; ?>">
 
                 <div class="form-group">
-                    <label class="form-label">Modelo/Nombre *</label>
-                    <input type="text" name="nombre" class="form-input" required placeholder="Ej: Bera SBR">
+                    <label class="form-label">Nombre del Producto *</label>
+                    <input type="text" name="nombre" class="form-input" required placeholder="Ej: Nevera Samsung">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Marca</label>
-                    <input type="text" name="marca" class="form-input" placeholder="Ej: Bera">
+                    <input type="text" name="marca" class="form-input" placeholder="Ej: Samsung">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Cilindrada/Detalles</label>
-                    <input type="text" name="modelo" class="form-input" placeholder="Ej: 150cc">
+                    <label class="form-label">Modelo</label>
+                    <input type="text" name="modelo" class="form-input" placeholder="Ej: RT38K5930SL">
                 </div>
 
                 <div class="form-group">
@@ -607,11 +817,11 @@ $grupos = $stmt->fetchAll();
                 <div class="form-group">
                     <label class="form-label">Valor Total *</label>
                     <input type="number" name="valor_total" class="form-input" required min="1" step="0.01"
-                        placeholder="18000.00">
+                        placeholder="15000.00">
                 </div>
 
                 <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-salmon" style="flex: 1;">
+                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
                         <svg class="icon">
                             <use href="#icon-plus"></use>
                         </svg>
@@ -630,7 +840,7 @@ $grupos = $stmt->fetchAll();
     <div id="editarProductoModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Editar Motocicleta</h2>
+                <h2 class="modal-title">Editar Producto</h2>
                 <button class="modal-close" onclick="closeModal('editarProductoModal')">
                     <svg class="icon">
                         <use href="#icon-x"></use>
@@ -642,7 +852,7 @@ $grupos = $stmt->fetchAll();
                 <input type="hidden" name="action" value="update">
 
                 <div class="form-group">
-                    <label class="form-label">Modelo/Nombre *</label>
+                    <label class="form-label">Nombre del Producto *</label>
                     <input type="text" id="edit_nombre" name="nombre" class="form-input" required>
                 </div>
 
@@ -652,7 +862,7 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Cilindrada/Detalles</label>
+                    <label class="form-label">Modelo</label>
                     <input type="text" id="edit_modelo" name="modelo" class="form-input">
                 </div>
 
@@ -668,7 +878,7 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-salmon" style="flex: 1;">
+                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
                         <svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
@@ -716,7 +926,7 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-salmon" style="flex: 1;">
+                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
                         <svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
@@ -731,6 +941,7 @@ $grupos = $stmt->fetchAll();
         </div>
     </div>
 
+    <!-- Shared Scripts -->
     <script src="../../assets/js/shared.js"></script>
     <script src="../../assets/js/grupos.js?v=3"></script>
     <script src="../../assets/js/participantes.js"></script>

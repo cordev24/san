@@ -1,184 +1,188 @@
-/* MySan Design System - Apple-inspired Light Theme
- * Clean, minimal, flat design - like iOS/macOS
- * White/gray surfaces with colorful accents
+/* MySan Design System — Warm Prosperity Theme
+ * Confianza, crecimiento y comunidad.
+ * Paleta: Esmeralda + Dorado sobre fondo Arena/Crema
  */
 
 :root {
     /* ============================================
-       CORE COLORS - Clean & Vibrant
+       BRAND COLORS — Warm Prosperity
        ============================================ */
-    
-    /* Primary - Cyan/Turquoise (fresh & distinctive) */
-    --color-primary: hsl(175, 55%, 45%);
-    --color-primary-dim: hsl(175, 50%, 38%);
-    --color-primary-glow: hsla(175, 55%, 45%, 0.15);
-    --color-primary-light: hsl(175, 60%, 52%);
-    
-    /* Secondary - iOS Green */
-    --color-secondary: hsl(150, 55%, 45%);
-    --color-secondary-dim: hsl(150, 50%, 38%);
-    --color-secondary-glow: hsla(150, 55%, 45%, 0.15);
-    --color-secondary-light: hsl(150, 60%, 52%);
-    
-    /* Accent - iOS Orange */
-    --color-accent: hsl(25, 80%, 55%);
-    --color-accent-dim: hsl(25, 75%, 48%);
-    --color-accent-glow: hsla(25, 80%, 55%, 0.15);
-    --color-accent-light: hsl(25, 85%, 62%);
+
+    /* Primary: Esmeralda (confianza, dinero, crecimiento) */
+    --color-primary:       hsl(161, 88%, 20%);   /* #065F46 */
+    --color-primary-mid:   hsl(161, 94%, 30%);   /* #059669 */
+    --color-primary-light: hsl(161, 94%, 42%);   /* #10B981 */
+    --color-primary-dim:   hsl(161, 88%, 16%);   /* más oscuro para hover */
+    --color-primary-glow:  hsla(161, 88%, 20%, 0.18);
+    --color-primary-tint:  hsl(160, 84%, 96%);   /* #ECFDF5 fondo suave */
+
+    /* Secondary: Dorado ámbar (prosperidad, valor) */
+    --color-secondary:       hsl(32, 95%, 36%);   /* #B45309 */
+    --color-secondary-mid:   hsl(38, 97%, 48%);   /* #F59E0B */
+    --color-secondary-light: hsl(43, 100%, 63%);  /* #FCD34D */
+    --color-secondary-dim:   hsl(32, 95%, 28%);
+    --color-secondary-glow:  hsla(32, 95%, 36%, 0.15);
+    --color-secondary-tint:  hsl(46, 100%, 95%);  /* #FEF9C3 */
+
+    /* Accent: Pizarra cálida (neutral pero amigable) */
+    --color-accent:       hsl(24, 57%, 40%);     /* terracota */
+    --color-accent-dim:   hsl(24, 57%, 32%);
+    --color-accent-glow:  hsla(24, 57%, 40%, 0.15);
+    --color-accent-light: hsl(24, 57%, 52%);
+    --color-accent-tint:  hsl(24, 100%, 96%);    /* #FFF7ED */
 
     /* ============================================
-       MODULE COLORS - Apple Style (Distinctive)
+       MODULE COLORS — Warm Vibrant
        ============================================ */
-    
-    /* Electrodomesticos - Ocean Blue */
-    --color-electro: hsl(200, 50%, 45%);
-    --color-electro-dim: hsl(200, 45%, 38%);
-    --color-electro-glow: hsla(200, 50%, 45%, 0.15);
-    
-    /* Telefonia - Fresh Mint */
-    --color-telefonia: hsl(160, 45%, 50%);
-    --color-telefonia-dim: hsl(160, 40%, 42%);
-    --color-telefonia-glow: hsla(160, 45%, 50%, 0.15);
-    
-    /* Motocicletas - Coral Orange */
-    --color-moto: hsl(15, 75%, 55%);
-    --color-moto-dim: hsl(15, 70%, 48%);
-    --color-moto-glow: hsla(15, 75%, 55%, 0.15);
-    
-    /* Turnos - Lavender */
-    --color-turnos: hsl(260, 40%, 60%);
-    --color-turnos-dim: hsl(260, 35%, 52%);
-    --color-turnos-glow: hsla(260, 40%, 60%, 0.15);
-    
-    /* Comprobantes - Yellow */
-    --color-comprobantes: hsl(45, 70%, 55%);
-    --color-comprobantes-dim: hsl(45, 65%, 48%);
-    --color-comprobantes-glow: hsla(45, 70%, 55%, 0.15);
 
-    /* ============================================
-       LEGACY ALIASES - Apple colors
-       ============================================ */
-    --color-violeta: var(--color-turnos);
-    --color-violeta-dim: var(--color-turnos-dim);
-    --color-violeta-glow: var(--color-turnos-glow);
-    
-    --color-menta: var(--color-secondary);
-    --color-menta-dim: var(--color-secondary-dim);
+    --color-electro:      hsl(213, 94%, 48%);    /* azul cobalto */
+    --color-electro-dim:  hsl(213, 94%, 38%);
+    --color-electro-glow: hsla(213, 94%, 48%, 0.18);
+    --color-electro-tint: hsl(213, 100%, 96%);   /* #EFF6FF */
+
+    --color-telefonia:      hsl(161, 94%, 30%);  /* mismo esmeralda */
+    --color-telefonia-dim:  hsl(161, 94%, 22%);
+    --color-telefonia-glow: hsla(161, 94%, 30%, 0.18);
+
+    --color-moto:      hsl(14, 86%, 48%);        /* naranja intenso */
+    --color-moto-dim:  hsl(14, 86%, 38%);
+    --color-moto-glow: hsla(14, 86%, 48%, 0.18);
+
+    --color-turnos:      hsl(258, 80%, 55%);     /* violeta suave */
+    --color-turnos-dim:  hsl(258, 80%, 44%);
+    --color-turnos-glow: hsla(258, 80%, 55%, 0.18);
+    --color-turnos-tint: hsl(258, 100%, 96%);
+
+    --color-comprobantes:      hsl(32, 95%, 36%); /* dorado */
+    --color-comprobantes-dim:  hsl(32, 95%, 28%);
+    --color-comprobantes-glow: hsla(32, 95%, 36%, 0.18);
+
+    /* LEGACY ALIASES — mantiene compatibilidad con código existente */
+    --color-violeta:      var(--color-primary);
+    --color-violeta-dim:  var(--color-primary-dim);
+    --color-violeta-glow: var(--color-primary-glow);
+
+    --color-menta:      var(--color-secondary);
+    --color-menta-dim:  var(--color-secondary-dim);
     --color-menta-glow: var(--color-secondary-glow);
-    
-    --color-salmon: var(--color-accent);
-    --color-salmon-dim: var(--color-accent-dim);
+
+    --color-salmon:      var(--color-accent);
+    --color-salmon-dim:  var(--color-accent-dim);
     --color-salmon-glow: var(--color-accent-glow);
 
     /* ============================================
-       SURFACES - Light Apple Style
+       SURFACES — Light / Warm
        ============================================ */
-    
-    --color-background: #f5f5f7;
-    --color-surface: #ffffff;
-    --color-surface-elevated: #fafafa;
-    --color-surface-hover: #f0f0f2;
 
-    /* Glassmorphism - Subtle (not needed in light) */
-    --glass-background: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(0, 0, 0, 0.08);
-    --glass-blur: blur(20px);
+    --color-background:         #FAF7F2;   /* arena cálida */
+    --color-surface:            #FFFFFF;   /* cards blancas */
+    --color-surface-elevated:   #FFFFFF;
+    --color-surface-hover:      #F5F3EE;   /* hover sutil */
+    --color-surface-section:    #F3EEE7;   /* sección secundaria */
+
+    /* Glassmorphism adaptado a modo claro */
+    --glass-background: rgba(255, 255, 255, 0.85);
+    --glass-border:     rgba(0, 0, 0, 0.07);
+    --glass-blur:       blur(16px);
 
     /* ============================================
-       TEXT COLORS - High contrast on white
+       TEXT COLORS — Dark on Light
        ============================================ */
-    
-    --color-text-primary: #1d1d1f;
-    --color-text-secondary: #6e6e73;
-    --color-text-tertiary: #aeaeb2;
-    --color-text-inverse: #f5f5f7;
+
+    --color-text-primary:   #1C1917;   /* casi negro cálido */
+    --color-text-secondary: #44403C;   /* marrón oscuro */
+    --color-text-tertiary:  #78716C;   /* marrón medio */
+    --color-text-inverse:   #FAFAF9;   /* texto sobre fondos oscuros */
 
     /* ============================================
        STATUS COLORS
        ============================================ */
-    
-    --color-success: var(--color-secondary);
-    --color-warning: var(--color-accent);
-    --color-error: hsl(0, 60%, 50%);
-    --color-info: var(--color-primary);
+
+    --color-success: var(--color-primary-mid);
+    --color-warning: var(--color-secondary);
+    --color-error:   hsl(0, 72%, 51%);
+    --color-info:    var(--color-electro);
 
     /* ============================================
        TYPOGRAPHY
        ============================================ */
-    
-    --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
 
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --font-sans:   var(--font-family);
+
+    --font-size-xs:   0.75rem;
+    --font-size-sm:   0.875rem;
     --font-size-base: 1rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 1.875rem;
-    --font-size-4xl: 2.25rem;
+    --font-size-md:   1rem;
+    --font-size-lg:   1.125rem;
+    --font-size-xl:   1.25rem;
+    --font-size-2xl:  1.5rem;
+    --font-size-3xl:  1.875rem;
+    --font-size-4xl:  2.25rem;
 
-    --font-weight-regular: 400;
-    --font-weight-medium: 500;
+    --font-weight-regular:  400;
+    --font-weight-medium:   500;
     --font-weight-semibold: 600;
-    --font-weight-bold: 700;
+    --font-weight-bold:     700;
 
     /* ============================================
        SPACING
        ============================================ */
-    
-    --space-1: 0.25rem;
-    --space-2: 0.5rem;
-    --space-3: 0.75rem;
-    --space-4: 1rem;
-    --space-5: 1.25rem;
-    --space-6: 1.5rem;
-    --space-8: 2rem;
+
+    --space-1:  0.25rem;
+    --space-2:  0.5rem;
+    --space-3:  0.75rem;
+    --space-4:  1rem;
+    --space-5:  1.25rem;
+    --space-6:  1.5rem;
+    --space-8:  2rem;
     --space-10: 2.5rem;
     --space-12: 3rem;
     --space-16: 4rem;
     --space-20: 5rem;
 
     /* ============================================
-       BORDER RADIUS - Apple style (smooth)
+       BORDER RADIUS
        ============================================ */
-    
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
+
+    --radius-sm:    8px;
+    --radius-md:    12px;
+    --radius-lg:    16px;
+    --radius-xl:    24px;
     --radius-bento: 20px;
-    --radius-full: 9999px;
+    --radius-full:  9999px;
 
     /* ============================================
-       SHADOWS - Subtle, like iOS
+       SHADOWS — Light mode warm shadows
        ============================================ */
-    
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-    
-    --shadow-glow-primary: 0 0 0 transparent;
-    --shadow-glow-secondary: 0 0 0 transparent;
-    --shadow-glow-accent: 0 0 0 transparent;
-    
-    /* Legacy glows */
-    --shadow-glow-violeta: 0 0 0 transparent;
-    --shadow-glow-menta: 0 0 0 transparent;
-    --shadow-glow-salmon: 0 0 0 transparent;
+
+    --shadow-sm: 0 1px 4px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,.10), 0 20px 48px rgba(0,0,0,.08);
+
+    --shadow-glow-primary:   0 0 24px var(--color-primary-glow);
+    --shadow-glow-secondary: 0 0 24px var(--color-secondary-glow);
+    --shadow-glow-accent:    0 0 24px var(--color-accent-glow);
+
+    /* Legacy glow aliases */
+    --shadow-glow-violeta: var(--shadow-glow-primary);
+    --shadow-glow-menta:   var(--shadow-glow-secondary);
+    --shadow-glow-salmon:  var(--shadow-glow-accent);
 
     /* ============================================
-       TRANSITIONS - Smooth like Apple
+       TRANSITIONS
        ============================================ */
-    
-    --transition-fast: 200ms ease-out;
-    --transition-base: 300ms ease-out;
-    --transition-slow: 400ms ease-out;
+
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 
     /* ============================================
        Z-INDEX
        ============================================ */
-    
-    --z-base: 1;
+
+    --z-base:     1;
     --z-dropdown: 100;
-    --z-modal: 200;
-    --z-toast: 300;
+    --z-modal:    200;
+    --z-toast:    300;
 }

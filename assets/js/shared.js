@@ -42,9 +42,27 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
-// Format currency - CHANGED TO Bs
+window.TASA_BCV = 50.00; // Fallback inicial
+
+// Intentar cargar la tasa de cambio globalmente
+fetch('/api/tasa_bcv.php')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.data && data.data.tasa) {
+            window.TASA_BCV = parseFloat(data.data.tasa);
+            // Si hay elementos renderizados previamente que deban actualizarse, 
+            // se podría disparar un evento custom aquí.
+        }
+    })
+    .catch(console.error);
+
+// Format currency - CHANGED TO USD and Bs
 function formatCurrency(amount) {
-    return 'Bs ' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    const num = parseFloat(amount);
+    const safe = isNaN(num) ? 0 : num;
+    let usd = safe.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    let bs = (safe * window.TASA_BCV).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    return '$' + usd + ' (Bs ' + bs + ')';
 }
 
 // Format date

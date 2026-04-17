@@ -3,15 +3,20 @@ require_once '../../config/database.php';
 requireLogin();
 $user = getCurrentUser();
 
-// Get category ID for Electrodomesticos
-$stmt = $pdo->prepare("SELECT id FROM categorias WHERE nombre = 'Electrodomesticos'");
-$stmt->execute();
+// Get category ID from URL
+$categoria_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$stmt = $pdo->prepare("SELECT * FROM categorias WHERE id = ?");
+$stmt->execute([$categoria_id]);
 $categoria = $stmt->fetch();
-$categoria_id = $categoria['id'];
+
+if (!$categoria) {
+    header("Location: ../../dashboard.php");
+    exit;
+}
 
 // Get all grupos for this category
 $stmt = $pdo->prepare("
-    SELECT gs.id, gs.nombre
+    SELECT gs.id, gs.nombre, gs.ronda_actual, gs.numero_cuotas
     FROM grupos_san gs
     JOIN productos p ON gs.producto_id = p.id
     WHERE p.categoria_id = ? AND gs.estado != 'finalizado'
@@ -20,12 +25,35 @@ $stmt = $pdo->prepare("
 $stmt->execute([$categoria_id]);
 $grupos = $stmt->fetchAll();
 
+// Handle Advance Round
+if (isset($_POST['action']) && $_POST['action'] === 'avanzar_ronda') {
+    $grupo_id_avanzar = (int)$_POST['grupo_id'];
+    $ronda_actual_avanzar = (int)$_POST['ronda_actual'];
+    $max_cuotas_avanzar = (int)$_POST['numero_cuotas'];
+    
+    if ($ronda_actual_avanzar < $max_cuotas_avanzar) {
+        $stmtAdv = $pdo->prepare("UPDATE grupos_san SET ronda_actual = ronda_actual + 1 WHERE id = ?");
+        $stmtAdv->execute([$grupo_id_avanzar]);
+    }
+    
+    header("Location: pagos.php?id=" . $categoria_id . "&grupo_id=" . $grupo_id_avanzar);
+    exit;
+}
+
 // Get selected group
 $grupo_seleccionado = $_GET['grupo_id'] ?? $_GET['grupo'] ?? ($grupos[0]['id'] ?? null);
 
 // Get participants for selected group
 $participantes = [];
+$grupo_actual_datos = null;
 if ($grupo_seleccionado) {
+    foreach($grupos as $g) {
+        if ($g['id'] == $grupo_seleccionado) {
+            $grupo_actual_datos = $g;
+            break;
+        }
+    }
+    
     $stmt = $pdo->prepare("
         SELECT id, nombre, apellido, cedula
         FROM participantes
@@ -42,7 +70,7 @@ if ($grupo_seleccionado) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySan - Pagos Electrodomesticos</title>
+    <title>MySan - Pagos <?php echo htmlspecialchars($categoria['nombre']); ?></title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
     <link rel="stylesheet" href="../../assets/css/reset.css">
@@ -148,25 +176,48 @@ if ($grupo_seleccionado) {
         <?php
         $headerLogoHref     = '../../dashboard.php';
         $headerLogoutHref   = '../../logout.php';
-        $headerBackUrl      = 'index.php';
-        $headerBackLabel    = 'Volver a Electrodomesticos';
+        $headerBackUrl      = 'index.php?id=' . $categoria_id;
+        $headerBackLabel    = 'Volver a ' . htmlspecialchars($categoria['nombre']);
         include '../../includes/header.php';
         ?>
 
-        <div class="page-header">
-            <div class="breadcrumb">
-                <a href="../../dashboard.php">Dashboard</a>
-                <span>/</span>
-                <a href="index.php">Electrodomesticos</a>
-                <span>/</span>
-                <span>Pagos</span>
+        <div class="page-header" style="justify-content: space-between; align-items: center; display: flex;">
+            <div>
+                <div class="breadcrumb">
+                    <a href="../../dashboard.php">Dashboard</a>
+                    <span>/</span>
+                    <a href="index.php?id=<?php echo $categoria_id; ?>"><?php echo htmlspecialchars($categoria['nombre']); ?></a>
+                    <span>/</span>
+                    <span>Pagos</span>
+                </div>
+                <h1 class="page-title" style="display: flex; align-items: center; gap: 8px;">
+                    <svg class="icon-xl" style="stroke: var(--color-<?php echo htmlspecialchars($categoria['color']); ?>);">
+                        <use href="#icon-dollar"></use>
+                    </svg>
+                    Gestión de Pagos
+                    <?php if ($grupo_actual_datos): ?>
+                        <span class="badge" style="background: rgba(175, 100, 255, 0.2); color: var(--color-violeta); font-size: var(--font-size-md);">
+                            Ronda #<?php echo $grupo_actual_datos['ronda_actual']; ?> / <?php echo $grupo_actual_datos['numero_cuotas']; ?>
+                        </span>
+                    <?php endif; ?>
+                </h1>
             </div>
-            <h1 class="page-title">
-                <svg class="icon-xl" style="stroke: var(--color-violeta);">
-                    <use href="#icon-dollar"></use>
-                </svg>
-                Gestión de Pagos
-            </h1>
+            <?php if ($grupo_actual_datos && $grupo_actual_datos['ronda_actual'] < $grupo_actual_datos['numero_cuotas']): ?>
+                <form method="POST" style="margin: 0;" onsubmit="return confirm('¿Estás seguro que deseas cerrar la ronda actual? Esto avanzará a todos los participantes a la siguiente cuota.');">
+                    <input type="hidden" name="action" value="avanzar_ronda">
+                    <input type="hidden" name="grupo_id" value="<?php echo $grupo_actual_datos['id']; ?>">
+                    <input type="hidden" name="ronda_actual" value="<?php echo $grupo_actual_datos['ronda_actual']; ?>">
+                    <input type="hidden" name="numero_cuotas" value="<?php echo $grupo_actual_datos['numero_cuotas']; ?>">
+                    <button type="submit" class="btn btn-outline" style="border-color: var(--color-violeta); color: var(--color-violeta);">
+                        <svg class="icon"><use href="#icon-arrow-right"></use></svg>
+                        Cerrar Ronda Actual
+                    </button>
+                </form>
+            <?php elseif ($grupo_actual_datos && $grupo_actual_datos['ronda_actual'] == $grupo_actual_datos['numero_cuotas']): ?>
+                <div class="badge" style="background: rgba(100,255,150,0.1); color: var(--color-menta); font-size: var(--font-size-sm); border: 1px solid var(--color-menta);">
+                    Última Ronda
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="bento-container">
