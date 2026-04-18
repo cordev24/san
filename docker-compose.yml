@@ -1,5 +1,11 @@
 # MySan - Docker Compose para desarrollo local
 # Versiones: PHP 8.2 + Apache + MySQL 8.0
+#
+# ⚠️  MIGRACIÓN AUTOMÁTICA:
+#   Los archivos en docker/init/ se ejecutan en orden alfabético SOLO cuando
+#   el volumen mysql_data está vacío (primera vez o después de: docker-compose down -v)
+#   01_mysan_schema_data.sql → schema + datos de prueba
+#   02_tasas_cambio.sql      → tabla de tasas BCV + configuración
 
 services:
   # Servidor Web con PHP
@@ -16,7 +22,8 @@ services:
     environment:
       - TZ=America/Caracas
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - mysan-network
     restart: unless-stopped
@@ -34,7 +41,8 @@ services:
       MYSQL_PASSWORD: mysan_password
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+      # Directorio de inicialización: todos los .sql se ejecutan en orden alfabético
+      - ./docker/init:/docker-entrypoint-initdb.d
     networks:
       - mysan-network
     restart: unless-stopped

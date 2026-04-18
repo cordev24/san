@@ -5,57 +5,57 @@
 
 :root {
     /* ============================================
-       BRAND COLORS — Warm Prosperity
+       BRAND COLORS
        ============================================ */
 
-    /* Primary: Esmeralda (confianza, dinero, crecimiento) */
-    --color-primary:       hsl(161, 88%, 20%);   /* #065F46 */
-    --color-primary-mid:   hsl(161, 94%, 30%);   /* #059669 */
-    --color-primary-light: hsl(161, 94%, 42%);   /* #10B981 */
-    --color-primary-dim:   hsl(161, 88%, 16%);   /* más oscuro para hover */
-    --color-primary-glow:  hsla(161, 88%, 20%, 0.18);
-    --color-primary-tint:  hsl(160, 84%, 96%);   /* #ECFDF5 fondo suave */
+    /* Primary (El Azul preferido) */
+    --color-primary:       #1960c3;
+    --color-primary-mid:   #1f78f0;
+    --color-primary-light: #4994f5;
+    --color-primary-dim:   #104085;
+    --color-primary-glow:  rgba(25, 96, 195, 0.18);
+    --color-primary-tint:  rgba(25, 96, 195, 0.05);
 
-    /* Secondary: Dorado ámbar (prosperidad, valor) */
-    --color-secondary:       hsl(32, 95%, 36%);   /* #B45309 */
-    --color-secondary-mid:   hsl(38, 97%, 48%);   /* #F59E0B */
-    --color-secondary-light: hsl(43, 100%, 63%);  /* #FCD34D */
-    --color-secondary-dim:   hsl(32, 95%, 28%);
-    --color-secondary-glow:  hsla(32, 95%, 36%, 0.15);
-    --color-secondary-tint:  hsl(46, 100%, 95%);  /* #FEF9C3 */
+    /* Secondary (El Verde original) */
+    --color-secondary:       #06543f;
+    --color-secondary-mid:   #087557;
+    --color-secondary-light: #0a9670;
+    --color-secondary-dim:   #043628;
+    --color-secondary-glow:  rgba(6, 84, 63, 0.15);
+    --color-secondary-tint:  rgba(6, 84, 63, 0.05);
 
-    /* Accent: Pizarra cálida (neutral pero amigable) */
-    --color-accent:       hsl(24, 57%, 40%);     /* terracota */
-    --color-accent-dim:   hsl(24, 57%, 32%);
-    --color-accent-glow:  hsla(24, 57%, 40%, 0.15);
-    --color-accent-light: hsl(24, 57%, 52%);
-    --color-accent-tint:  hsl(24, 100%, 96%);    /* #FFF7ED */
+    /* Accent (El Amarillo) */
+    --color-accent:       #fcd34d;
+    --color-accent-dim:   #d97706; /* Oscurecido a Ámbar/Naranja para mejor contraste en fondos claros */
+    --color-accent-glow:  rgba(252, 211, 77, 0.15);
+    --color-accent-light: #fde68a;
+    --color-accent-tint:  rgba(252, 211, 77, 0.05);
 
     /* ============================================
-       MODULE COLORS — Warm Vibrant
+       MODULE COLORS — Harmonized
        ============================================ */
 
-    --color-electro:      hsl(213, 94%, 48%);    /* azul cobalto */
-    --color-electro-dim:  hsl(213, 94%, 38%);
-    --color-electro-glow: hsla(213, 94%, 48%, 0.18);
-    --color-electro-tint: hsl(213, 100%, 96%);   /* #EFF6FF */
+    --color-electro:      var(--color-primary);    /* Usa el azul principal */
+    --color-electro-dim:  var(--color-primary-dim);
+    --color-electro-glow: var(--color-primary-glow);
+    --color-electro-tint: var(--color-primary-tint);
 
-    --color-telefonia:      hsl(161, 94%, 30%);  /* mismo esmeralda */
-    --color-telefonia-dim:  hsl(161, 94%, 22%);
-    --color-telefonia-glow: hsla(161, 94%, 30%, 0.18);
+    --color-telefonia:      var(--color-secondary); /* Usa el verde secundario */
+    --color-telefonia-dim:  var(--color-secondary-dim);
+    --color-telefonia-glow: var(--color-secondary-glow);
 
-    --color-moto:      hsl(14, 86%, 48%);        /* naranja intenso */
-    --color-moto-dim:  hsl(14, 86%, 38%);
-    --color-moto-glow: hsla(14, 86%, 48%, 0.18);
+    --color-moto:      var(--color-accent-dim);     /* Usa el ámbar */
+    --color-moto-dim:  #b45309;
+    --color-moto-glow: var(--color-accent-glow);
 
-    --color-turnos:      hsl(258, 80%, 55%);     /* violeta suave */
-    --color-turnos-dim:  hsl(258, 80%, 44%);
-    --color-turnos-glow: hsla(258, 80%, 55%, 0.18);
-    --color-turnos-tint: hsl(258, 100%, 96%);
+    --color-turnos:      #6366f1;                   /* Índigo que armoniza con ambos */
+    --color-turnos-dim:  #4f46e5;
+    --color-turnos-glow: rgba(99, 102, 241, 0.18);
+    --color-turnos-tint: rgba(99, 102, 241, 0.05);
 
-    --color-comprobantes:      hsl(32, 95%, 36%); /* dorado */
-    --color-comprobantes-dim:  hsl(32, 95%, 28%);
-    --color-comprobantes-glow: hsla(32, 95%, 36%, 0.18);
+    --color-comprobantes:      #0ea5e9;             /* Sky blue para comprobantes */
+    --color-comprobantes-dim:  #0284c7;
+    --color-comprobantes-glow: rgba(14, 165, 233, 0.18);
 
     /* LEGACY ALIASES — mantiene compatibilidad con código existente */
     --color-violeta:      var(--color-primary);
@@ -71,28 +71,28 @@
     --color-salmon-glow: var(--color-accent-glow);
 
     /* ============================================
-       SURFACES — Light / Warm
+       SURFACES
        ============================================ */
 
-    --color-background:         #FAF7F2;   /* arena cálida */
-    --color-surface:            #FFFFFF;   /* cards blancas */
-    --color-surface-elevated:   #FFFFFF;
-    --color-surface-hover:      #F5F3EE;   /* hover sutil */
-    --color-surface-section:    #F3EEE7;   /* sección secundaria */
+    --color-background:         #f8fafc;   /* Slate/White background for blue harmony */
+    --color-surface:            #ffffff;   /* Pure white cards */
+    --color-surface-elevated:   #ffffff;
+    --color-surface-hover:      #f1f5f9;   /* Slate tint for hover */
+    --color-surface-section:    #e2e8f0;
 
-    /* Glassmorphism adaptado a modo claro */
+    /* Glassmorphism */
     --glass-background: rgba(255, 255, 255, 0.85);
-    --glass-border:     rgba(0, 0, 0, 0.07);
+    --glass-border:     rgba(0, 0, 0, 0.08);
     --glass-blur:       blur(16px);
 
     /* ============================================
-       TEXT COLORS — Dark on Light
+       TEXT COLORS
        ============================================ */
 
-    --color-text-primary:   #1C1917;   /* casi negro cálido */
-    --color-text-secondary: #44403C;   /* marrón oscuro */
-    --color-text-tertiary:  #78716C;   /* marrón medio */
-    --color-text-inverse:   #FAFAF9;   /* texto sobre fondos oscuros */
+    --color-text-primary:   #0a1c3a;   /* Dark navy blue for high contrast */
+    --color-text-secondary: #334155;   /* Slate 700 for secondary text */
+    --color-text-tertiary:  #64748b;   
+    --color-text-inverse:   #fcd34d;   /* Yellow accent text intended for dark backgrounds */
 
     /* ============================================
        STATUS COLORS

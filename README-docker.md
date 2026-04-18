@@ -18,14 +18,20 @@
 
 ```
 mysan/
-├── Dockerfile              # Imagen PHP + Apache
-├── docker-compose.yml      # Orquestación de servicios
-├── .dockerignore           # Archivos a excluir
-├── .env.example            # Variables de entorno ejemplo
+├── Dockerfile                       # Imagen PHP + Apache
+├── docker-compose.yml               # Orquestación de servicios
+├── .dockerignore                    # Archivos a excluir
+├── .env.example                     # Variables de entorno ejemplo
+├── docker/
+│   └── init/                        # Scripts de migración automática
+│       ├── 01_mysan_schema_data.sql # Schema + datos de prueba
+│       └── 02_tasas_cambio.sql      # Tabla BCV + configuración
 ├── config/
-│   └── database.php        # Configuración de BD (actualizada para Docker)
+│   └── database.php                 # Configuración de BD (soporta Docker)
 └── ...
 ```
+
+> **⚠️ Importante**: Los scripts en `docker/init/` se ejecutan **automáticamente** en orden alfabético solo cuando el volumen `mysql_data` está vacío (primera instalación o después de `docker-compose down -v`).
 
 ## Pasos de Instalación
 
@@ -134,7 +140,28 @@ docker exec -it mysan-web bash
 docker stats
 ```
 
-### Limpiar todo (cuidado: elimina la base de datos)
+### 🔄 Resetear la base de datos con datos de prueba (migración completa)
+
+Si necesitas re-migrar la base de datos (sea en otra máquina o para empezar desde cero):
+
+```bash
+# Paso 1: Eliminar contenedores Y volumen de datos
+docker-compose down -v
+
+# Paso 2: Levantar de nuevo — MySQL ejecuta docker/init/ automáticamente
+docker-compose up -d
+
+# Paso 3: Verificar los logs mientras inicializa (esperar ~30 segundos)
+docker-compose logs -f db
+```
+
+Verás en los logs algo como:
+```
+[Note] [Entrypoint]: /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01_mysan_schema_data.sql
+[Note] [Entrypoint]: /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/02_tasas_cambio.sql
+```
+
+### Limpiar todo sin re-migrar
 ```bash
 docker-compose down -v
 ```
@@ -185,12 +212,20 @@ El archivo `config/database.php` ya está configurado para Docker:
 
 ### Persistencia de Datos
 
-Los datos de MySQL se guardan en un volumen Docker llamado `mysql_data`. 
-Para eliminar completamente y empezar desde cero:
+Los datos de MySQL se guardan en el volumen Docker `mysql_data`.
 
-```bash
-docker-compose down -v
-```
+| Acción | Comando | ¿Borra datos? | ¿Re-migra? |
+|--------|---------|:-:|:-:|
+| Detener sin borrar | `docker-compose down` | ❌ | ❌ |
+| Reset completo | `docker-compose down -v` + `up -d` | ✅ | ✅ |
+
+### Scripts de migración
+
+Los scripts en `docker/init/` solo corren cuando el volumen está vacío:
+- **`01_mysan_schema_data.sql`** — Crea todas las tablas e inserta datos de prueba
+- **`02_tasas_cambio.sql`** — Crea tabla de tasas BCV y configuración del sistema
+
+Para agregar nuevas migraciones, crea archivos `03_...sql`, `04_...sql`, etc.
 
 ### Acceso a Archivos
 

@@ -41,7 +41,7 @@ $headerBackLabel        = $headerBackLabel ?? 'Volver';
             </div>
 
             <?php if ($showCrearUsuario): ?>
-                <a href="<?php echo $headerCrearUsuarioHref; ?>" class="btn btn-violeta">
+                <a href="<?php echo $headerCrearUsuarioHref; ?>" class="btn btn-outline">
                     <svg class="icon"><use href="#icon-user"></use></svg>
                     <span>Crear Usuario</span>
                 </a>
