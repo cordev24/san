@@ -28,10 +28,6 @@ $stmtNoti = $pdo->prepare("SELECT COUNT(*) FROM notificaciones WHERE usuario_id 
 $stmtNoti->execute([$user['id']]);
 $unread_notis = $stmtNoti->fetchColumn();
 
-// Count unread messages
-$stmtMsg = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE receiver_id = ? AND leido = 0");
-$stmtMsg->execute([$user['id']]);
-$unread_msgs = $stmtMsg->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -167,14 +163,6 @@ $unread_msgs = $stmtMsg->fetchColumn();
             </div>
             
             <div class="user-nav">
-                <!-- Mensajes -->
-                <a href="modules/mensajeria/inbox.php" class="notification-icon" title="Mensajes">
-                    <svg class="icon"><use href="#icon-mail"></use></svg>
-                    <?php if ($unread_msgs > 0): ?>
-                        <span class="badge-count"><?php echo $unread_msgs; ?></span>
-                    <?php endif; ?>
-                </a>
-
                 <!-- Notificaciones -->
                 <div class="notification-icon" title="Notificaciones" onclick="alert('Notificaciones en desarrollo')">
                     <svg class="icon"><use href="#icon-bell"></use></svg>

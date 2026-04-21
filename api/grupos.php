@@ -151,6 +151,7 @@ function updateGrupo()
     $id = $_POST['id'] ?? null;
     $nombre = trim($_POST['nombre'] ?? '');
     $estado = $_POST['estado'] ?? null;
+    $fecha_inicio = $_POST['fecha_inicio'] ?? null;
 
     if (!$id) {
         jsonResponse(false, 'ID requerido');
@@ -168,6 +169,11 @@ function updateGrupo()
     if ($estado) {
         $updates[] = "estado = ?";
         $params[] = $estado;
+    }
+
+    if ($fecha_inicio) {
+        $updates[] = "fecha_inicio = ?";
+        $params[] = $fecha_inicio;
     }
 
     if (empty($updates)) {

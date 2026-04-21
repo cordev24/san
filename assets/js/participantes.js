@@ -77,12 +77,37 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Format cedula input
+    // Format cedula input and auto-fill data if user exists
     const cedulaInput = document.getElementById('cedula');
+    let lastCheckedCedula = '';
     if (cedulaInput) {
-        cedulaInput.addEventListener('input', function (e) {
+        cedulaInput.addEventListener('input', async function (e) {
             // Remove non-numeric characters
             this.value = this.value.replace(/[^0-9]/g, '');
+            
+            const cedula = this.value;
+            if (cedula.length >= 7 && cedula !== lastCheckedCedula) {
+                lastCheckedCedula = cedula;
+                try {
+                    const response = await fetch(`../../api/participantes.php?action=get_by_cedula&cedula=${cedula}`);
+                    const data = await response.json();
+                    if (data.success && data.data && data.data.participante) {
+                        const p = data.data.participante;
+                        document.querySelector('#nuevoParticipanteForm input[name="nombre"]').value = p.nombre || '';
+                        document.querySelector('#nuevoParticipanteForm input[name="apellido"]').value = p.apellido || '';
+                        
+                        const tl = document.querySelector('#nuevoParticipanteForm input[name="telefono"]');
+                        if(tl) tl.value = p.telefono || '';
+                        
+                        const dr = document.querySelector('#nuevoParticipanteForm textarea[name="direccion"]');
+                        if(dr) dr.value = p.direccion || '';
+                        
+                        showNotification('Datos autocompletados desde el registro previo', 'info');
+                    }
+                } catch (e) {
+                    // Fail silently, just means they are totally new
+                }
+            }
         });
     }
 

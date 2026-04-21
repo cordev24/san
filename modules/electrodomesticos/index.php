@@ -547,6 +547,11 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Cédula *</label>
+                    <input type="text" id="cedula" name="cedula" class="form-input" required placeholder="12345678" maxlength="10">
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Nombre *</label>
                     <input type="text" name="nombre" class="form-input" required placeholder="Nombre">
                 </div>
@@ -554,12 +559,6 @@ $grupos = $stmt->fetchAll();
                 <div class="form-group">
                     <label class="form-label">Apellido *</label>
                     <input type="text" name="apellido" class="form-input" required placeholder="Apellido">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Cédula *</label>
-                    <input type="text" id="cedula" name="cedula" class="form-input" required placeholder="12345678"
-                        maxlength="10">
                 </div>
 
                 <div class="form-group">

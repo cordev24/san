@@ -520,7 +520,7 @@ $grupos = $stmt->fetchAll();
                                                         <div class="group-product-name"><?php echo htmlspecialchars($grupo['producto_nombre']); ?></div>
                                                     </div>
                                                 </div>
-                                                <span class="group-status-badge"><?php echo ucfirst($grupo['estado'] ?? 'activo'); ?></span>
+                                                <span class="group-status-badge"><?php echo ucwords(str_replace('_', ' ', $grupo['estado'] ?? 'abierto')); ?></span>
                                             </div>
 
                                             <!-- Stats row -->
@@ -737,6 +737,11 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Cédula *</label>
+                    <input type="text" id="cedula" name="cedula" class="form-input" required placeholder="12345678" maxlength="10">
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Nombre *</label>
                     <input type="text" name="nombre" class="form-input" required placeholder="Nombre">
                 </div>
@@ -744,12 +749,6 @@ $grupos = $stmt->fetchAll();
                 <div class="form-group">
                     <label class="form-label">Apellido *</label>
                     <input type="text" name="apellido" class="form-input" required placeholder="Apellido">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Cédula *</label>
-                    <input type="text" id="cedula" name="cedula" class="form-input" required placeholder="12345678"
-                        maxlength="10">
                 </div>
 
                 <div class="form-group">
@@ -917,8 +916,14 @@ $grupos = $stmt->fetchAll();
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Fecha de Inicio *</label>
+                    <input type="date" id="edit_grupo_fecha_inicio" name="fecha_inicio" class="form-input" required>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Estado</label>
                     <select id="edit_grupo_estado" name="estado" class="form-select">
+                        <option value="en_espera">En Espera</option>
                         <option value="abierto">Abierto</option>
                         <option value="cerrado">Cerrado</option>
                         <option value="finalizado">Finalizado</option>

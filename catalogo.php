@@ -859,7 +859,7 @@ function get_icon(string $cat): string {
         const modal     = document.getElementById('contactModal');
         const nameEl    = document.getElementById('modalProductName');
         const waBtn     = document.getElementById('whatsappBtn');
-        const phone     = '584140000000'; // Reemplaza con tu número
+        const phone     = '584243074602'; // Reemplaza con tu número
 
         function openModal(name) {
             nameEl.textContent = name;

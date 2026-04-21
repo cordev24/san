@@ -406,11 +406,11 @@ $color = htmlspecialchars($grupo['categoria_color']);
         $headerLogoHref   = '../../dashboard.php';
         $headerLogoutHref = '../../logout.php';
         $headerBackUrl    = 'index.php?id=' . $categoria_id;
-        $headerBackLabel  = 'Volver a ' . htmlspecialchars($grupo['categoria_nombre']);
+        $headerBackLabel  = 'Volver';
         include '../../includes/header.php';
         ?>
 
-        <div class="bento-container">
+        <div style="padding: var(--space-8); max-width: 1200px; margin: 0 auto;">
 
             <!-- ══ HERO ══════════════════════════════════════════════════ -->
             <div class="grupo-hero">
@@ -444,7 +444,7 @@ $color = htmlspecialchars($grupo['categoria_color']);
                                 </span>
                                 <span class="badge-info badge-warn">
                                     <svg style="width:11px;height:11px;stroke-width:2.5;"><use href="#icon-activity"></use></svg>
-                                    <?php echo ucfirst($grupo['estado'] ?? 'activo'); ?>
+                                    <?php echo ucwords(str_replace('_', ' ', $grupo['estado'] ?? 'abierto')); ?>
                                 </span>
                                 <?php if ($grupo['fecha_inicio']): ?>
                                 <span class="badge-info">
@@ -457,14 +457,20 @@ $color = htmlspecialchars($grupo['categoria_color']);
                     </div>
                     <!-- Quick action buttons -->
                     <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;align-self:center;">
+                        <?php if ($grupo['estado'] !== 'finalizado' && $grupo['cupos_ocupados'] < $grupo['cupos_totales']): ?>
+                        <button class="btn btn-menta" onclick="openModal('nuevoParticipanteModal')">
+                            <svg class="icon"><use href="#icon-user-plus"></use></svg>
+                            Inscribir
+                        </button>
+                        <?php endif; ?>
+                        <button class="btn btn-outline" onclick="editGrupo(<?php echo $grupo_id; ?>)">
+                            <svg class="icon"><use href="#icon-edit"></use></svg>
+                            Editar Grupo
+                        </button>
                         <a href="pagos.php?id=<?php echo $categoria_id; ?>&grupo_id=<?php echo $grupo_id; ?>"
                            class="btn btn-violeta">
                             <svg class="icon"><use href="#icon-dollar"></use></svg>
                             Gestión de Pagos
-                        </a>
-                        <a href="index.php?id=<?php echo $categoria_id; ?>" class="btn btn-outline">
-                            <svg class="icon"><use href="#icon-arrow-left"></use></svg>
-                            Volver
                         </a>
                     </div>
                 </div>
@@ -685,6 +691,111 @@ $color = htmlspecialchars($grupo['categoria_color']);
         </div><!-- /.bento-container -->
     </div>
 
+    <!-- Modal: Editar Grupo -->
+    <div id="editarGrupoModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Grupo San</h2>
+                <button class="modal-close" onclick="closeModal('editarGrupoModal')">
+                    <svg class="icon">
+                        <use href="#icon-x"></use>
+                    </svg>
+                </button>
+            </div>
+            <form id="editarGrupoForm">
+                <input type="hidden" id="edit_grupo_id" name="id">
+
+                <div class="form-group">
+                    <label class="form-label">Nombre del Grupo *</label>
+                    <input type="text" id="edit_grupo_nombre" name="nombre" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Fecha de Inicio *</label>
+                    <input type="date" id="edit_grupo_fecha_inicio" name="fecha_inicio" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <select id="edit_grupo_estado" name="estado" class="form-select">
+                        <option value="en_espera">En Espera</option>
+                        <option value="abierto">Abierto</option>
+                        <option value="cerrado">Cerrado</option>
+                        <option value="finalizado">Finalizado</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
+                        <svg class="icon">
+                            <use href="#icon-check-circle"></use>
+                        </svg>
+                        Guardar Cambios
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editarGrupoModal')" style="flex: 1;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Inscribir Participante -->
+    <div id="nuevoParticipanteModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Inscribir Participante</h2>
+                <button class="modal-close" onclick="closeModal('nuevoParticipanteModal')">
+                    <svg class="icon">
+                        <use href="#icon-x"></use>
+                    </svg>
+                </button>
+            </div>
+            <form id="nuevoParticipanteForm">
+                <input type="hidden" name="grupo_san_id" value="<?php echo $grupo_id; ?>">
+
+                <div class="form-group">
+                    <label class="form-label">Cédula *</label>
+                    <input type="text" id="cedula" name="cedula" class="form-input" required placeholder="12345678" maxlength="10">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" name="nombre" class="form-input" required placeholder="Nombre">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Apellido *</label>
+                    <input type="text" name="apellido" class="form-input" required placeholder="Apellido">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" class="form-input" placeholder="04121234567" maxlength="11">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Dirección</label>
+                    <textarea name="direccion" class="form-input" rows="3" placeholder="Dirección completa"></textarea>
+                </div>
+
+                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="submit" class="btn btn-menta" style="flex: 1;">
+                        <svg class="icon">
+                            <use href="#icon-user-plus"></use>
+                        </svg>
+                        Inscribir
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoParticipanteModal')" style="flex: 1;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="../../assets/js/shared.js"></script>
+    <script src="../../assets/js/grupos.js"></script>
+    <script src="../../assets/js/participantes.js"></script>
 </body>
 </html>

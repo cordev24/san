@@ -18,8 +18,17 @@ try {
         case 'get':
             getParticipante();
             break;
+        case 'get_by_cedula':
+            getParticipanteByCedula();
+            break;
         case 'update':
             updateParticipante();
+            break;
+        case 'update_global':
+            updateParticipanteGlobal();
+            break;
+        case 'disable_global':
+            disableParticipanteGlobal();
             break;
         case 'delete':
             deleteParticipante();
@@ -49,11 +58,11 @@ function createParticipante()
         return;
     }
 
-    // Check if cedula already exists
-    $stmt = $pdo->prepare("SELECT id FROM participantes WHERE cedula = ?");
-    $stmt->execute([$cedula]);
+    // Check if cedula already exists IN THE SAME GROUP
+    $stmt = $pdo->prepare("SELECT id FROM participantes WHERE grupo_san_id = ? AND cedula = ?");
+    $stmt->execute([$grupo_san_id, $cedula]);
     if ($stmt->fetch()) {
-        jsonResponse(false, 'La cédula ya está registrada');
+        jsonResponse(false, 'La cédula ya está registrada en este grupo');
         return;
     }
 
@@ -75,14 +84,25 @@ function createParticipante()
     try {
         $pdo->beginTransaction();
 
-        // 1. Create User account for Participant (Username: cedula, Password: hash(cedula))
-        $password_hash = password_hash($cedula, PASSWORD_DEFAULT);
-        $nombre_completo = $nombre . ' ' . $apellido;
+        // Check if user account already exists by username (cedula)
+        $stmtUser = $pdo->prepare("SELECT id FROM usuarios WHERE username = ?");
+        $stmtUser->execute([$cedula]);
+        $existingUser = $stmtUser->fetch();
         
-        $stmtUser = $pdo->prepare("INSERT INTO usuarios (username, password, nombre, rol) VALUES (?, ?, ?, 'participante')");
-        $stmtUser->execute([$cedula, $password_hash, $nombre_completo]);
-        
-        $usuario_id = $pdo->lastInsertId();
+        $usuario_id = null;
+
+        if ($existingUser) {
+            $usuario_id = $existingUser['id'];
+        } else {
+            // 1. Create User account for Participant (Username: cedula, Password: hash(cedula))
+            $password_hash = password_hash($cedula, PASSWORD_DEFAULT);
+            $nombre_completo = $nombre . ' ' . $apellido;
+            
+            $stmtUser = $pdo->prepare("INSERT INTO usuarios (username, password, nombre, rol) VALUES (?, ?, ?, 'participante')");
+            $stmtUser->execute([$cedula, $password_hash, $nombre_completo]);
+            
+            $usuario_id = $pdo->lastInsertId();
+        }
 
         // 2. Insert participant linked to user account
         $stmt = $pdo->prepare("
@@ -211,6 +231,37 @@ function getParticipante()
     jsonResponse(true, 'Participante obtenido', ['participante' => $participante]);
 }
 
+function getParticipanteByCedula()
+{
+    global $pdo;
+
+    $cedula = $_GET['cedula'] ?? null;
+
+    if (!$cedula) {
+        jsonResponse(false, 'Cédula requerida');
+        return;
+    }
+
+    // Obtener la información del participante correspondiente a esta cédula más reciente (en caso de que estuviera en múltiples grupos con detalles distintos)
+    $stmt = $pdo->prepare("
+        SELECT nombre, apellido, telefono, direccion
+        FROM participantes 
+        WHERE cedula = ? 
+        ORDER BY created_at DESC 
+        LIMIT 1
+    ");
+
+    $stmt->execute([$cedula]);
+    $participante = $stmt->fetch();
+
+    if (!$participante) {
+        jsonResponse(false, 'Participante no encontrado');
+        return;
+    }
+
+    jsonResponse(true, 'Participante encontrado', ['participante' => $participante]);
+}
+
 function updateParticipante()
 {
     global $pdo;
@@ -249,6 +300,46 @@ function updateParticipante()
     $stmt->execute($params);
 
     jsonResponse(true, 'Participante actualizado exitosamente');
+}
+
+function updateParticipanteGlobal()
+{
+    global $pdo;
+
+    $cedula = $_POST['cedula'] ?? null;
+    $telefono = trim($_POST['telefono'] ?? '');
+    $direccion = trim($_POST['direccion'] ?? '');
+
+    if (!$cedula) {
+        jsonResponse(false, 'Cédula requerida para actualización global');
+        return;
+    }
+
+    $updates = [];
+    $params = [];
+
+    if ($telefono !== '') {
+        $updates[] = "telefono = ?";
+        $params[] = $telefono;
+    }
+
+    if ($direccion !== '') {
+        $updates[] = "direccion = ?";
+        $params[] = $direccion;
+    }
+
+    if (empty($updates)) {
+        jsonResponse(false, 'No hay datos para actualizar');
+        return;
+    }
+
+    $params[] = $cedula;
+
+    $sql = "UPDATE participantes SET " . implode(', ', $updates) . " WHERE cedula = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    jsonResponse(true, 'Perfil global actualizado exitosamente en todos sus grupos');
 }
 
 function deleteParticipante()
@@ -291,4 +382,32 @@ function deleteParticipante()
     $stmt->execute([$participante['grupo_san_id']]);
 
     jsonResponse(true, 'Participante eliminado exitosamente');
+}
+
+function disableParticipanteGlobal()
+{
+    global $pdo;
+    $cedula = $_POST['cedula'] ?? null;
+
+    if (!$cedula) {
+        jsonResponse(false, 'Cédula requerida');
+        return;
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        $stmt = $pdo->prepare("UPDATE participantes SET activo = 0 WHERE cedula = ?");
+        $stmt->execute([$cedula]);
+
+        // Option 1: Also disable user account if you have an 'activo' column in usuarios.
+        // $stmtUser = $pdo->prepare("UPDATE usuarios SET activo = 0 WHERE username = ?");
+        // $stmtUser->execute([$cedula]);
+
+        $pdo->commit();
+        jsonResponse(true, 'Participante inhabilitado globalmente de todos sus grupos');
+    } catch(Exception $e) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Error: ' . $e->getMessage());
+    }
 }

@@ -166,7 +166,7 @@ $tasa_bcv = getBcvRate();
                         <!-- <?php echo htmlspecialchars($grupo['nombre']); ?> Group -->
                         <div class="bento-box <?php echo $bento_class; ?> module-card animate-slide-up"
                             style="animation-delay: <?php echo $delay; ?>ms; cursor: pointer;"
-                            onclick="location.href='modules/categoria/pagos.php?id=<?php echo $cat_id; ?>&grupo_id=<?php echo $grupo_id; ?>'">
+                            onclick="location.href='modules/categoria/grupo.php?id=<?php echo $cat_id; ?>&grupo_id=<?php echo $grupo_id; ?>'">
 
                             <div class="bento-header">
                                 <div class="bento-title">
@@ -279,43 +279,33 @@ $tasa_bcv = getBcvRate();
                         </div>
                     </div>
 
-                    <!-- Mensajería Module -->
-                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay; ?>ms;"
-                        onclick="location.href='modules/mensajeria/inbox.php'">
+                    <!-- Directorio de Participantes Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 100; ?>ms;"
+                        onclick="location.href='modules/participantes/index.php'">
                         <div class="bento-header">
                             <div class="bento-title">
-                                <svg class="module-icon bento-icon" style="stroke: var(--color-violeta);">
-                                    <use href="#icon-mail"></use>
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-primary);">
+                                    <use href="#icon-users"></use>
                                 </svg>
-                                Bandeja de Mensajes
+                                Directorio de Participantes
                             </div>
-                            <?php
-                            $stmtUnreadMsg = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE receiver_id = ? AND leido = 0");
-                            $stmtUnreadMsg->execute([$user['id']]);
-                            $unreadMsgAdmin = $stmtUnreadMsg->fetchColumn();
-                            if ($unreadMsgAdmin > 0):
-                            ?>
-                                <span class="badge badge-warning">
-                                    <span class="badge-dot"></span>
-                                    <?php echo $unreadMsgAdmin; ?> nuevos
-                                </span>
-                            <?php endif; ?>
                         </div>
                         <div class="bento-content">
-                            Comunícate con todos los participantes del sistema.
+                            Administra la base de datos global de participantes.
                         </div>
                         <div class="module-stats">
                             <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                                <span class="stat-label">Mensajes Recibidos</span>
+                                <span class="stat-label">Total Participantes Únicos</span>
                                 <?php
-                                $stmtMsgCount = $pdo->prepare("SELECT COUNT(*) FROM mensajes WHERE receiver_id = ?");
-                                $stmtMsgCount->execute([$user['id']]);
-                                $countMsg = $stmtMsgCount->fetchColumn();
+                                // Count unique cedulas across all groups
+                                $stmtClientCount = $pdo->query("SELECT COUNT(DISTINCT cedula) FROM participantes");
+                                $countClients = $stmtClientCount->fetchColumn();
                                 ?>
-                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countMsg; ?></span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countClients; ?></span>
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Gestión de Categorias Module -->
                     <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay; ?>ms;"
@@ -389,8 +379,40 @@ $tasa_bcv = getBcvRate();
                                 <span class="stat-value" style="font-size: var(--font-size-xl);">156</span>
                             </div>
                             <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                                <span class="stat-label">Mes Acual</span>
+                                <span class="stat-label">Mes Actual</span>
                                 <span class="stat-value" style="font-size: var(--font-size-xl);">23</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gestión de Pagos Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 300; ?>ms;"
+                        onclick="location.href='modules/pagos/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-menta);">
+                                    <use href="#icon-credit-card"></use>
+                                </svg>
+                                Gestión de Pagos
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Registra y controla los pagos de cuotas por grupo.
+                        </div>
+                        <div class="module-stats">
+                            <?php
+                            $stmtPagPend = $pdo->query("SELECT COUNT(*) FROM pagos WHERE estado = 'pendiente'");
+                            $countPagPend = $stmtPagPend->fetchColumn();
+                            $stmtPagAtras = $pdo->query("SELECT COUNT(*) FROM pagos WHERE estado = 'atrasado'");
+                            $countPagAtras = $stmtPagAtras->fetchColumn();
+                            ?>
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Pendientes</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countPagPend; ?></span>
+                            </div>
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label" style="color: var(--color-salmon);">Atrasados</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl); color: var(--color-salmon);"><?php echo $countPagAtras; ?></span>
                             </div>
                         </div>
                     </div>

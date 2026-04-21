@@ -75,6 +75,9 @@ async function editGrupo(id) {
             document.getElementById('edit_grupo_id').value = grupo.id;
             document.getElementById('edit_grupo_nombre').value = grupo.nombre;
             document.getElementById('edit_grupo_estado').value = grupo.estado;
+            
+            const dp = document.getElementById('edit_grupo_fecha_inicio');
+            if(dp) dp.value = grupo.fecha_inicio;
 
             openModal('editarGrupoModal');
         } else {

@@ -244,51 +244,125 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                 </button>
             </div>
             <form id="nuevoParticipanteForm">
-                <div class="form-group">
-                    <label class="form-label">Grupo San *</label>
-                    <select name="grupo_san_id" class="form-select" required>
-                        <option value="">Selecciona el grupo...</option>
-                        <?php foreach ($grupos as $grupo): ?>
-                            <?php if ($grupo['cupos_ocupados'] < $grupo['cupos_totales']): ?>
-                                <option value="<?php echo $grupo['id']; ?>">
-                                    <?php echo htmlspecialchars($grupo['nombre']); ?> (<?php echo $grupo['cupos_ocupados']; ?>/<?php echo $grupo['cupos_totales']; ?>)
-                                </option>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </select>
+
+                <!-- STEP 1: Cedula lookup -->
+                <div id="step-cedula">
+                    <p style="color: var(--color-text-tertiary); font-size: var(--font-size-sm); margin-bottom: var(--space-4);">
+                        Ingresa la cédula para verificar si el participante ya existe en el sistema.
+                    </p>
+                    <div class="form-group" style="margin-bottom: var(--space-3);">
+                        <label class="form-label">Cédula de Identidad *</label>
+                        <div style="display: flex; gap: var(--space-3);">
+                            <input type="text" id="lookup_cedula" class="form-input" placeholder="V-12345678" maxlength="15" style="flex: 1;"
+                                   onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCedula();}">
+                            <button type="button" class="btn btn-outline" onclick="buscarCedula()" id="btn-buscar" style="white-space:nowrap;">
+                                <svg class="icon"><use href="#icon-search"></use></svg>
+                                Buscar
+                            </button>
+                        </div>
+                        <div id="cedula-feedback" style="margin-top: var(--space-2); font-size: var(--font-size-sm);"></div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" name="nombre" class="form-input" required placeholder="Nombre">
+                <!-- STEP 2: Participant found — prefilled card -->
+                <div id="step-found" style="display:none;">
+                    <div id="found-card" style="
+                        background: rgba(0,203,169,0.07);
+                        border: 1px solid var(--color-menta);
+                        border-radius: var(--radius-lg);
+                        padding: var(--space-4);
+                        margin-bottom: var(--space-4);
+                        display: flex;
+                        align-items: center;
+                        gap: var(--space-4);
+                    ">
+                        <div id="found-avatar" style="
+                            width: 48px; height: 48px; border-radius: 50%;
+                            background: linear-gradient(135deg, var(--color-menta), var(--color-violeta));
+                            display: flex; align-items: center; justify-content: center;
+                            color: white; font-weight: 700; font-size: 18px; flex-shrink: 0;
+                        "></div>
+                        <div>
+                            <div id="found-name" style="font-weight: var(--font-weight-semibold); color: var(--color-text-primary); font-size: var(--font-size-lg);"></div>
+                            <div style="font-size: var(--font-size-sm); color: var(--color-text-tertiary); margin-top: 2px;">
+                                <span id="found-cedula-display"></span>
+                                &bull; <span id="found-tel"></span>
+                            </div>
+                        </div>
+                        <span class="badge badge-success" style="margin-left: auto; flex-shrink:0;">
+                            <span class="badge-dot"></span> Existente
+                        </span>
+                    </div>
+                    <!-- Hidden fields populated from lookup -->
+                    <input type="hidden" name="nombre"    id="p_nombre">
+                    <input type="hidden" name="apellido"  id="p_apellido">
+                    <input type="hidden" name="cedula"    id="p_cedula">
+                    <input type="hidden" name="telefono"  id="p_telefono">
+                    <input type="hidden" name="direccion" id="p_direccion">
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Apellido *</label>
-                    <input type="text" name="apellido" class="form-input" required placeholder="Apellido">
+                <!-- STEP 3: New participant — full form (shown when not found) -->
+                <div id="step-new" style="display:none;">
+                    <div style="
+                        background: rgba(255,180,100,0.07);
+                        border: 1px solid var(--color-salmon);
+                        border-radius: var(--radius-md);
+                        padding: var(--space-3) var(--space-4);
+                        margin-bottom: var(--space-4);
+                        font-size: var(--font-size-sm);
+                        color: var(--color-salmon);
+                        display: flex; align-items: center; gap: var(--space-2);
+                    ">
+                        <svg style="width:16px;height:16px;flex-shrink:0;"><use href="#icon-alert-triangle"></use></svg>
+                        Participante nuevo — completa sus datos para registrarlo.
+                    </div>
+                    <input type="hidden" name="cedula" id="new_cedula">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" id="new_nombre" name="nombre" class="form-input" required placeholder="Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellido *</label>
+                            <input type="text" id="new_apellido" name="apellido" class="form-input" required placeholder="Apellido">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="new_telefono" name="telefono" class="form-input" placeholder="04121234567" maxlength="15">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dirección</label>
+                        <textarea id="new_direccion" name="direccion" class="form-input" rows="2" placeholder="Sector, Calle..."></textarea>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Cédula *</label>
-                    <input type="text" id="cedula" name="cedula" class="form-input" required placeholder="V-12345678" maxlength="15">
+                <!-- Group selector — shown after lookup resolves -->
+                <div id="step-group" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Grupo San a Inscribir *</label>
+                        <select name="grupo_san_id" id="select_grupo" class="form-select" required>
+                            <option value="">Selecciona el grupo...</option>
+                            <?php foreach ($grupos as $grupo): ?>
+                                <?php if ($grupo['cupos_ocupados'] < $grupo['cupos_totales']): ?>
+                                    <option value="<?php echo $grupo['id']; ?>">
+                                        <?php echo htmlspecialchars($grupo['nombre']); ?> (<?php echo $grupo['cupos_ocupados']; ?>/<?php echo $grupo['cupos_totales']; ?> cupos)
+                                    </option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: var(--space-4); margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-outline" style="flex:1;" onclick="resetInscripcionForm()">
+                            <svg class="icon"><use href="#icon-arrow-left"></use></svg> Nueva Búsqueda
+                        </button>
+                        <button type="submit" class="btn btn-menta" style="flex:1;">
+                            <svg class="icon"><use href="#icon-user-plus"></use></svg> Inscribir
+                        </button>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" class="form-input" placeholder="04121234567" maxlength="15">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Dirección</label>
-                    <textarea name="direccion" class="form-input" rows="3" placeholder="Sector, Calle.."></textarea>
-                </div>
-
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        <svg class="icon"><use href="#icon-user-plus"></use></svg> Inscribir
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoParticipanteModal')" style="flex: 1;">Cancelar</button>
-                </div>
             </form>
         </div>
     </div>
@@ -334,6 +408,146 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
     <script src="../../assets/js/grupos.js"></script>
     <script src="../../assets/js/participantes.js"></script>
     <script src="../../assets/js/eliminar_grupo.js"></script>
+
+    <script>
+    /* =========================================================
+       INSCRIBIR PARTICIPANTE — Flujo de búsqueda por cédula
+       ========================================================= */
+
+    // Reset full modal to step-1 every time it opens
+    const _origOpen = window.openModal;
+    window.openModal = function(id) {
+        if (id === 'nuevoParticipanteModal') resetInscripcionForm();
+        _origOpen(id);
+    };
+
+    function resetInscripcionForm() {
+        document.getElementById('lookup_cedula').value    = '';
+        document.getElementById('cedula-feedback').innerHTML = '';
+        document.getElementById('step-cedula').style.display = '';
+        document.getElementById('step-found').style.display  = 'none';
+        document.getElementById('step-new').style.display    = 'none';
+        document.getElementById('step-group').style.display  = 'none';
+        // Clear new-participant fields
+        ['new_nombre','new_apellido','new_telefono','new_direccion'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('select_grupo').value = '';
+        setTimeout(() => document.getElementById('lookup_cedula').focus(), 150);
+    }
+
+    async function buscarCedula() {
+        const cedula = document.getElementById('lookup_cedula').value.trim();
+        if (!cedula) {
+            setFeedback('Ingresa una cédula antes de buscar.', 'warn');
+            return;
+        }
+
+        const btn = document.getElementById('btn-buscar');
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="icon" style="animation:spin 0.8s linear infinite"><use href="#icon-refresh-cw"></use></svg> Buscando...';
+
+        try {
+            const res  = await fetch(`../../api/participantes.php?action=get_by_cedula&cedula=${encodeURIComponent(cedula)}`);
+            const data = await res.json();
+
+            if (data.success) {
+                showFoundState(cedula, data.data.participante);
+            } else {
+                showNewState(cedula);
+            }
+        } catch(e) {
+            setFeedback('Error de conexión. Intenta de nuevo.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="icon"><use href="#icon-search"></use></svg> Buscar';
+        }
+    }
+
+    function showFoundState(cedula, p) {
+        // Populate hidden fields
+        document.getElementById('p_nombre').value    = p.nombre;
+        document.getElementById('p_apellido').value  = p.apellido;
+        document.getElementById('p_cedula').value    = cedula;
+        document.getElementById('p_telefono').value  = p.telefono  || '';
+        document.getElementById('p_direccion').value = p.direccion || '';
+
+        // Populate display card
+        const initials = (p.nombre[0] || '') + (p.apellido[0] || '');
+        document.getElementById('found-avatar').textContent     = initials.toUpperCase();
+        document.getElementById('found-name').textContent       = `${p.nombre} ${p.apellido}`;
+        document.getElementById('found-cedula-display').textContent = cedula;
+        document.getElementById('found-tel').textContent        = p.telefono || 'Sin teléfono';
+
+        document.getElementById('step-cedula').style.display = 'none';
+        document.getElementById('step-found').style.display  = '';
+        document.getElementById('step-new').style.display    = 'none';
+        document.getElementById('step-group').style.display  = '';
+    }
+
+    function showNewState(cedula) {
+        document.getElementById('new_cedula').value = cedula;
+
+        document.getElementById('step-cedula').style.display = 'none';
+        document.getElementById('step-found').style.display  = 'none';
+        document.getElementById('step-new').style.display    = '';
+        document.getElementById('step-group').style.display  = '';
+
+        setFeedback('', '');
+        setTimeout(() => document.getElementById('new_nombre').focus(), 100);
+    }
+
+    function setFeedback(msg, type) {
+        const el = document.getElementById('cedula-feedback');
+        const colors = { warn: 'var(--color-salmon)', error: '#ff6464', ok: 'var(--color-menta)' };
+        el.style.color = colors[type] || 'var(--color-text-tertiary)';
+        el.textContent = msg;
+    }
+
+    // Spin keyframe for loading state
+    const styleTag = document.createElement('style');
+    styleTag.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(styleTag);
+
+    // Form submit — delegates to existing participantes.js handler if present,
+    // otherwise handles it directly
+    document.getElementById('nuevoParticipanteForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const grupo_san_id = document.getElementById('select_grupo').value;
+        if (!grupo_san_id) {
+            showNotification('Selecciona un grupo San', 'error');
+            return;
+        }
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+
+        const formData = new FormData(this);
+        formData.set('action', 'create');
+        formData.set('grupo_san_id', grupo_san_id);
+
+        try {
+            const res  = await fetch('../../api/participantes.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                showNotification('Participante inscrito exitosamente', 'success');
+                closeModal('nuevoParticipanteModal');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showNotification(data.message || 'Error al inscribir', 'error');
+            }
+        } catch(err) {
+            showNotification('Error de conexión', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+        }
+    });
+    </script>
 </body>
 
 </html>
