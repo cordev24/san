@@ -11,6 +11,9 @@ try {
         case 'create':
             createParticipante();
             break;
+        case 'join_group':
+            joinGroup();
+            break;
         case 'list':
         case 'list_all':
             listParticipantes();
@@ -127,6 +130,14 @@ function createParticipante()
     $stmt = $pdo->prepare("UPDATE grupos_san SET cupos_ocupados = cupos_ocupados + 1 WHERE id = ?");
     $stmt->execute([$grupo_san_id]);
 
+    // Auto-asignar turno por orden de inscripción
+    $stmtTurno = $pdo->prepare("SELECT COALESCE(MAX(numero_turno), 0) + 1 FROM turnos WHERE grupo_san_id = ? FOR UPDATE");
+    $stmtTurno->execute([$grupo_san_id]);
+    $nextTurno = (int)$stmtTurno->fetchColumn();
+
+    $stmt = $pdo->prepare("INSERT INTO turnos (grupo_san_id, participante_id, numero_turno, metodo_asignacion, estado, fecha_asignacion) VALUES (?, ?, ?, 'orden_inscripcion', 'asignado', NOW())");
+    $stmt->execute([$grupo_san_id, $participante_id, $nextTurno]);
+
     // Create payment records for all cuotas
     $stmt = $pdo->prepare("SELECT numero_cuotas, monto_cuota, fecha_inicio, frecuencia FROM grupos_san WHERE id = ?");
     $stmt->execute([$grupo_san_id]);
@@ -161,6 +172,122 @@ function createParticipante()
     } catch (Exception $e) {
         $pdo->rollBack();
         jsonResponse(false, 'Error al inscribir participante: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Permite a un participante autenticado unirse a un grupo disponible.
+ * POST: grupo_id
+ * Usa la sesión actual para identificar al usuario.
+ */
+function joinGroup()
+{
+    global $pdo;
+
+    $grupo_id = (int)($_POST['grupo_id'] ?? 0);
+    $user_id  = (int)($_SESSION['user_id'] ?? 0);
+
+    if ($grupo_id <= 0 || $user_id <= 0) {
+        jsonResponse(false, 'Solicitud inválida.');
+        return;
+    }
+
+    // Obtener datos del usuario
+    $stmt = $pdo->prepare("SELECT username, nombre, email FROM usuarios WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        jsonResponse(false, 'Usuario no encontrado.');
+        return;
+    }
+
+    // Obtener cédula y datos del participante desde sus registros existentes
+    $stmt = $pdo->prepare("SELECT cedula, telefono, direccion FROM participantes WHERE usuario_id = ? AND activo = 1 ORDER BY created_at DESC LIMIT 1");
+    $stmt->execute([$user_id]);
+    $existing = $stmt->fetch();
+
+    // Separar nombre completo en nombre y apellido
+    $nombre_parts = explode(' ', $user['nombre'], 2);
+    $nombre   = $nombre_parts[0] ?? '';
+    $apellido = $nombre_parts[1] ?? '';
+    $cedula   = $existing ? $existing['cedula'] : $user['username'];
+    $telefono = $existing ? ($existing['telefono'] ?? '') : '';
+    $direccion = $existing ? ($existing['direccion'] ?? '') : '';
+
+    if (empty($nombre) || empty($apellido) || empty($cedula)) {
+        jsonResponse(false, 'Completa tu perfil antes de unirte a un grupo. Contacta al administrador.');
+        return;
+    }
+
+    $pdo->beginTransaction();
+
+    // Validar grupo
+    $stmt = $pdo->prepare("SELECT id, nombre, cupos_totales, cupos_ocupados, estado FROM grupos_san WHERE id = ? FOR UPDATE");
+    $stmt->execute([$grupo_id]);
+    $grupo = $stmt->fetch();
+
+    if (!$grupo || $grupo['estado'] !== 'abierto') {
+        $pdo->rollBack();
+        jsonResponse(false, 'El grupo no está disponible.');
+        return;
+    }
+
+    if ($grupo['cupos_ocupados'] >= $grupo['cupos_totales']) {
+        $pdo->rollBack();
+        jsonResponse(false, 'El grupo ya no tiene cupos disponibles.');
+        return;
+    }
+
+    // Verificar que no esté ya inscrito en este grupo
+    $stmt = $pdo->prepare("SELECT id FROM participantes WHERE grupo_san_id = ? AND usuario_id = ? AND activo = 1");
+    $stmt->execute([$grupo_id, $user_id]);
+    if ($stmt->fetch()) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Ya estás inscrito en este grupo.');
+        return;
+    }
+
+    try {
+        // Crear participante
+        $stmt = $pdo->prepare("
+            INSERT INTO participantes (grupo_san_id, nombre, apellido, cedula, telefono, direccion, fecha_inscripcion, usuario_id, tipo_registro)
+            VALUES (?, ?, ?, ?, ?, ?, CURDATE(), ?, 'autonomo')
+        ");
+        $stmt->execute([$grupo_id, $nombre, $apellido, $cedula, $telefono ?: null, $direccion ?: null, $user_id]);
+        $participante_id = $pdo->lastInsertId();
+
+        // Actualizar cupos
+        $pdo->prepare("UPDATE grupos_san SET cupos_ocupados = cupos_ocupados + 1 WHERE id = ?")->execute([$grupo_id]);
+
+        // Auto-asignar turno por orden de inscripción
+        $stmtTurno = $pdo->prepare("SELECT COALESCE(MAX(numero_turno), 0) + 1 FROM turnos WHERE grupo_san_id = ? FOR UPDATE");
+        $stmtTurno->execute([$grupo_id]);
+        $nextTurno = (int)$stmtTurno->fetchColumn();
+
+        $pdo->prepare("INSERT INTO turnos (grupo_san_id, participante_id, numero_turno, metodo_asignacion, estado, fecha_asignacion) VALUES (?, ?, ?, 'orden_inscripcion', 'asignado', NOW())")
+            ->execute([$grupo_id, $participante_id, $nextTurno]);
+
+        // Crear pagos
+        $stmt = $pdo->prepare("SELECT numero_cuotas, monto_cuota, fecha_inicio, frecuencia FROM grupos_san WHERE id = ?");
+        $stmt->execute([$grupo_id]);
+        $g = $stmt->fetch();
+
+        $fecha_base = new DateTime($g['fecha_inicio']);
+        $dias = ($g['frecuencia'] === 'quincenal') ? 15 : 30;
+
+        for ($i = 1; $i <= $g['numero_cuotas']; $i++) {
+            $fv = clone $fecha_base;
+            $pdo->prepare("INSERT INTO pagos (participante_id, numero_cuota, monto, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, 'pendiente')")
+                ->execute([$participante_id, $i, $g['monto_cuota'], $fv->format('Y-m-d')]);
+            $fecha_base->modify("+{$dias} days");
+        }
+
+        $pdo->commit();
+        jsonResponse(true, '¡Te has inscrito exitosamente en el grupo!');
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Error al inscribirte: ' . $e->getMessage());
     }
 }
 
@@ -235,14 +362,15 @@ function getParticipanteByCedula()
 {
     global $pdo;
 
-    $cedula = $_GET['cedula'] ?? null;
+    $cedula   = $_GET['cedula'] ?? null;
+    $grupo_id = (int)($_GET['grupo_id'] ?? 0);
 
     if (!$cedula) {
         jsonResponse(false, 'Cédula requerida');
         return;
     }
 
-    // Obtener la información del participante correspondiente a esta cédula más reciente (en caso de que estuviera en múltiples grupos con detalles distintos)
+    // Obtener la información del participante correspondiente a esta cédula más reciente
     $stmt = $pdo->prepare("
         SELECT nombre, apellido, telefono, direccion
         FROM participantes 
@@ -259,7 +387,18 @@ function getParticipanteByCedula()
         return;
     }
 
-    jsonResponse(true, 'Participante encontrado', ['participante' => $participante]);
+    // Si se especificó un grupo, verificar si ya está inscrito en él
+    $already_inscrito = false;
+    if ($grupo_id > 0) {
+        $stmtCheck = $pdo->prepare("SELECT id FROM participantes WHERE grupo_san_id = ? AND cedula = ? AND activo = 1");
+        $stmtCheck->execute([$grupo_id, $cedula]);
+        $already_inscrito = (bool) $stmtCheck->fetch();
+    }
+
+    jsonResponse(true, 'Participante encontrado', [
+        'participante'      => $participante,
+        'already_inscrito'  => $already_inscrito
+    ]);
 }
 
 function updateParticipante()
@@ -345,43 +484,62 @@ function updateParticipanteGlobal()
 function deleteParticipante()
 {
     global $pdo;
+    $participante_id = $_POST['id'] ?? null;
 
-    $id = $_POST['id'] ?? null;
-
-    if (!$id) {
-        jsonResponse(false, 'ID requerido');
+    if (!$participante_id) {
+        jsonResponse(false, 'ID de participante requerido');
         return;
     }
 
-    // Get participant info
-    $stmt = $pdo->prepare("SELECT grupo_san_id FROM participantes WHERE id = ?");
-    $stmt->execute([$id]);
-    $participante = $stmt->fetch();
+    try {
+        $pdo->beginTransaction();
 
-    if (!$participante) {
-        jsonResponse(false, 'Participante no encontrado');
-        return;
+        // Get grupo_san_id before deleting
+        $stmt = $pdo->prepare("SELECT grupo_san_id FROM participantes WHERE id = ?");
+        $stmt->execute([$participante_id]);
+        $part = $stmt->fetch();
+
+        if (!$part) {
+            jsonResponse(false, 'Participante no encontrado');
+            $pdo->rollBack();
+            return;
+        }
+
+        $grupo_san_id = $part['grupo_san_id'];
+
+        // Check if has payments
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM pagos WHERE participante_id = ? AND estado = 'pagado'");
+        $stmt->execute([$participante_id]);
+        $result = $stmt->fetch();
+
+        if ($result['count'] > 0) {
+            $pdo->rollBack();
+            jsonResponse(false, 'No se puede eliminar un participante con pagos registrados');
+            return;
+        }
+
+        // Delete turno
+        $stmt = $pdo->prepare("DELETE FROM turnos WHERE participante_id = ?");
+        $stmt->execute([$participante_id]);
+
+        // Decrement cupos
+        $stmt = $pdo->prepare("UPDATE grupos_san SET cupos_ocupados = cupos_ocupados - 1 WHERE id = ?");
+        $stmt->execute([$grupo_san_id]);
+
+        // Delete payments (pending)
+        $stmt = $pdo->prepare("DELETE FROM pagos WHERE participante_id = ?");
+        $stmt->execute([$participante_id]);
+
+        // Delete participant
+        $stmt = $pdo->prepare("DELETE FROM participantes WHERE id = ?");
+        $stmt->execute([$participante_id]);
+
+        $pdo->commit();
+        jsonResponse(true, 'Participante eliminado correctamente');
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Error al eliminar participante: ' . $e->getMessage());
     }
-
-    // Check if has payments
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM pagos WHERE participante_id = ? AND estado = 'pagado'");
-    $stmt->execute([$id]);
-    $result = $stmt->fetch();
-
-    if ($result['count'] > 0) {
-        jsonResponse(false, 'No se puede eliminar un participante con pagos registrados');
-        return;
-    }
-
-    // Delete participant (cascade will delete pending payments)
-    $stmt = $pdo->prepare("DELETE FROM participantes WHERE id = ?");
-    $stmt->execute([$id]);
-
-    // Update group cupos_ocupados
-    $stmt = $pdo->prepare("UPDATE grupos_san SET cupos_ocupados = cupos_ocupados - 1 WHERE id = ?");
-    $stmt->execute([$participante['grupo_san_id']]);
-
-    jsonResponse(true, 'Participante eliminado exitosamente');
 }
 
 function disableParticipanteGlobal()
