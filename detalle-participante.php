@@ -97,11 +97,6 @@ $turno = $stmt->fetch();
 // ── BCV rate ──────────────────────────────────────────────────────────────
 $tasa_bcv_hoy = getBcvRate();
 
-// ── Unread notifications count ────────────────────────────────────────────
-$stmtNoti = $pdo->prepare("SELECT COUNT(*) FROM notificaciones WHERE usuario_id = ? AND leido = 0");
-$stmtNoti->execute([$user['id']]);
-$unread_notis = $stmtNoti->fetchColumn();
-
 // ── Determine if "Reportar Pago" button should show ────────────────────
 $can_report = ($pendientes + $atrasadas) > 0;
 
@@ -187,30 +182,6 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
             display: flex;
             align-items: center;
             gap: var(--space-3);
-        }
-
-        .notification-icon {
-            position: relative;
-            cursor: pointer;
-            color: var(--color-text-secondary);
-            transition: color 0.2s;
-        }
-
-        .notification-icon:hover {
-            color: var(--color-primary);
-        }
-
-        .badge-count {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background: var(--color-error);
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 10px;
-            border: 2px solid var(--color-surface);
         }
 
         /* ── Page container ─────────────────────────────────────── */
@@ -336,7 +307,6 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
         /* ── Summary stats grid ──────────────────────────────────── */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
             gap: var(--space-4);
             margin-bottom: var(--space-6);
         }
@@ -502,23 +472,15 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
         }
 
         /* ── Responsive ──────────────────────────────────────────── */
-        @media (max-width: 900px) {
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
         @media (max-width: 768px) {
             .grupo-hero-body { flex-direction: column; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .page-container { padding: var(--space-4); }
 
-            .part-table th:nth-child(n+6),
-            .part-table td:nth-child(n+6) { display: none; }
+            .part-table th:nth-child(n+7),
+            .part-table td:nth-child(n+7) { display: none; }
         }
 
         @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .turno-content { flex-direction: column; align-items: flex-start; }
         }
     </style>
@@ -539,12 +501,7 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
                 </a>
 
                 <!-- Notificaciones -->
-                <div class="notification-icon" title="Notificaciones" onclick="alert('Notificaciones en desarrollo')">
-                    <svg class="icon"><use href="#icon-bell"></use></svg>
-                    <?php if ($unread_notis > 0): ?>
-                        <span class="badge-count"><?php echo $unread_notis; ?></span>
-                    <?php endif; ?>
-                </div>
+                <?php include 'includes/notificaciones_participante.php'; ?>
 
                 <div style="border-left:1px solid var(--glass-border);padding-left:var(--space-4);margin-left:var(--space-2);">
                     <div style="font-weight:bold;font-size:var(--font-size-sm);"><?php echo htmlspecialchars($user['nombre']); ?></div>
@@ -595,21 +552,24 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
                             </span>
                             <?php endif; ?>
                         </div>
+                        <?php if ($tasa_bcv_hoy > 0): ?>
+                        <div style="margin-top:var(--space-2);font-size:var(--font-size-xs);color:var(--color-text-tertiary);opacity:0.65;">
+                            Tasa BCV: Bs <?php echo number_format($tasa_bcv_hoy, 2); ?> / $
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;align-self:center;">
-                    <?php if ($can_report && $primer_pago_pendiente): ?>
-                    <button class="btn btn-violeta" onclick="openReportModal(<?php echo $primer_pago_pendiente['id']; ?>, <?php echo $primer_pago_pendiente['numero_cuota']; ?>, <?php echo $primer_pago_pendiente['monto']; ?>)">
+                    <button class="btn btn-violeta" onclick="openReportModal(<?php echo $primer_pago_pendiente ? $primer_pago_pendiente['id'] : 0; ?>, <?php echo $primer_pago_pendiente ? $primer_pago_pendiente['numero_cuota'] : ($total_cuotas + 1); ?>, <?php echo $primer_pago_pendiente ? $primer_pago_pendiente['monto'] : $grupo['monto_cuota']; ?>)">
                         <svg class="icon"><use href="#icon-download"></use></svg>
                         Reportar Pago
                     </button>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
         <!-- ══ STATS GRID ══════════════════════════════════════════════ -->
-        <div class="stats-grid">
+        <div class="stats-grid grid-responsive-4">
             <div class="summary-card gray">
                 <div class="summary-label">Total Cuotas</div>
                 <div class="summary-value"><?php echo $total_cuotas; ?></div>
@@ -707,7 +667,7 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
                 <p>No hay pagos registrados para este grupo.</p>
             </div>
             <?php else: ?>
-            <div style="overflow-x:auto;">
+            <div class="table-responsive">
                 <table class="part-table">
                     <thead>
                         <tr>
@@ -718,6 +678,7 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
                             <th>Estado</th>
                             <th>Referencia</th>
                             <th>Método</th>
+                            <th>Recibo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -749,6 +710,18 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
                             </td>
                             <td style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">
                                 <?php echo htmlspecialchars($p['metodo_pago'] ?? '—'); ?>
+                            </td>
+                            <td>
+                                <?php if ($p['estado'] === 'pagado'): ?>
+                                    <a href="api/comprobantes.php?action=recibo&id=<?php echo $p['id']; ?>"
+                                       target="_blank"
+                                       style="color:var(--color-primary);text-decoration:none;font-weight:600;font-size:var(--font-size-xs);display:inline-flex;align-items:center;gap:4px;">
+                                        <svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;"><use href="#icon-eye"></use></svg>
+                                        Ver
+                                    </a>
+                                <?php else: ?>
+                                    <span style="color:var(--color-text-tertiary);font-size:var(--font-size-xs);">—</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -782,6 +755,22 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
 
             <form id="reportForm" enctype="multipart/form-data">
                 <input type="hidden" id="reportPagoId" name="pago_id">
+                <input type="hidden" id="reportMontoCuota" name="monto">
+                <input type="hidden" name="grupo_id" value="<?php echo $grupo_id; ?>">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-bottom:var(--space-4);">
+                    <div class="form-group">
+                        <label class="form-label" for="reportNumeroCuota">Cuota # *</label>
+                        <input type="number" id="reportNumeroCuota" name="numero_cuota" class="form-input"
+                               min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reportMontoDisplay">Monto ($) *</label>
+                        <input type="number" id="reportMontoDisplay" class="form-input"
+                               step="0.01" min="0.01" readonly
+                               style="background:var(--color-surface-section);cursor:not-allowed;">
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label class="form-label" for="referenciaPago">
@@ -835,11 +824,30 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
     <script>
         function openReportModal(pagoId, numeroCuota, monto) {
             document.getElementById('reportPagoId').value = pagoId;
-            document.getElementById('modalDesc').textContent =
-                'Cuota #' + numeroCuota + ' — $' + parseFloat(monto).toFixed(2) + '. Ingresa el número de referencia y adjunta tu comprobante.';
+            document.getElementById('reportNumeroCuota').value = numeroCuota;
+            document.getElementById('reportMontoDisplay').value = parseFloat(monto).toFixed(2);
+            document.getElementById('reportMontoCuota').value = parseFloat(monto).toFixed(2);
+
+            if (pagoId > 0) {
+                document.getElementById('reportNumeroCuota').readOnly = true;
+                document.getElementById('reportNumeroCuota').style.background = 'var(--color-surface-section)';
+                document.getElementById('reportNumeroCuota').style.cursor = 'not-allowed';
+                document.getElementById('modalDesc').textContent =
+                    'Cuota #' + numeroCuota + ' — $' + parseFloat(monto).toFixed(2) + '. Ingresa el número de referencia y adjunta tu comprobante.';
+            } else {
+                document.getElementById('reportNumeroCuota').readOnly = false;
+                document.getElementById('reportNumeroCuota').style.background = '';
+                document.getElementById('reportNumeroCuota').style.cursor = '';
+                document.getElementById('modalDesc').textContent =
+                    'Registra el pago de tu cuota. Indica el número de cuota que estás pagando (puede ser una cuota adelantada).';
+            }
+
             document.getElementById('reportAlert').style.display = 'none';
             document.getElementById('reportForm').reset();
             document.getElementById('reportPagoId').value = pagoId;
+            document.getElementById('reportNumeroCuota').value = numeroCuota;
+            document.getElementById('reportMontoDisplay').value = parseFloat(monto).toFixed(2);
+            document.getElementById('reportMontoCuota').value = parseFloat(monto).toFixed(2);
             const modal = document.getElementById('reportModal');
             modal.style.display = 'flex';
         }
@@ -869,8 +877,10 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
 
                 if (data.success) {
                     closeReportModal();
-                    // Redirect to same page to reflect updated state
-                    window.location.href = 'detalle-participante.php?grupo_id=<?php echo $grupo_id; ?>';
+                    showNotification('Pago reportado correctamente. El administrador lo revisará pronto.', 'success');
+                    setTimeout(function () {
+                        window.location.href = 'detalle-participante.php?grupo_id=<?php echo $grupo_id; ?>';
+                    }, 1500);
                 } else {
                     alertBox.textContent = data.message;
                     alertBox.style.display = 'block';
@@ -885,5 +895,6 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
             }
         });
     </script>
+    <script src="assets/js/shared.js"></script>
 </body>
 </html>
