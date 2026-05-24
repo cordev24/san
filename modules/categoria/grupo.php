@@ -46,7 +46,7 @@ $stmt = $pdo->prepare("
     LEFT JOIN turnos t ON t.participante_id = part.id AND t.grupo_san_id = part.grupo_san_id
     LEFT JOIN pagos pg ON pg.participante_id = part.id
     WHERE part.grupo_san_id = ? AND part.activo = TRUE
-    GROUP BY part.id
+    GROUP BY part.id, t.numero_turno
     ORDER BY t.numero_turno ASC, part.id ASC
 ");
 $stmt->execute([$grupo_id]);
@@ -571,7 +571,7 @@ $color = htmlspecialchars($grupo['categoria_color']);
                         <p>No hay participantes inscritos en este grupo.</p>
                     </div>
                 <?php else: ?>
-                    <div style="overflow-x:auto;">
+                    <div class="table-responsive">
                         <table class="part-table">
                             <thead>
                                 <tr>

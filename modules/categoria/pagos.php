@@ -287,7 +287,7 @@ if ($grupo_seleccionado) {
                             </div>
                         </div>
 
-                        <div style="overflow-x: auto;">
+                        <div class="table-responsive">
                             <table class="payment-table">
                                 <thead>
                                     <tr>

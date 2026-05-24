@@ -2,19 +2,21 @@
 require_once '../../config/database.php';
 requireLogin();
 
-// Fetch clients globally
+// Fetch clients globally with their group names
 $stmt = $pdo->query("
     SELECT 
-        cedula, 
-        MAX(nombre) as nombre, 
-        MAX(apellido) as apellido, 
-        MAX(telefono) as telefono, 
-        MAX(direccion) as direccion,
-        COUNT(DISTINCT grupo_san_id) as total_grupos,
-        MAX(activo) as estado_activo
-    FROM participantes 
-    GROUP BY cedula
-    ORDER BY MAX(created_at) DESC
+        p.cedula, 
+        MAX(p.nombre) as nombre, 
+        MAX(p.apellido) as apellido, 
+        MAX(p.telefono) as telefono, 
+        MAX(p.direccion) as direccion,
+        COUNT(DISTINCT p.grupo_san_id) as total_grupos,
+        MAX(p.activo) as estado_activo,
+        GROUP_CONCAT(DISTINCT gs.nombre ORDER BY gs.nombre ASC SEPARATOR ', ') as grupos_lista
+    FROM participantes p
+    JOIN grupos_san gs ON p.grupo_san_id = gs.id
+    GROUP BY p.cedula
+    ORDER BY MAX(p.created_at) DESC
 ");
 $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -143,7 +145,7 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <p>No hay participantes registrados en el sistema global.</p>
                         </div>
                     <?php else: ?>
-                        <div style="overflow-x: auto;">
+                        <div class="table-responsive">
                             <table class="participantes-table">
                                 <thead>
                                     <tr>
@@ -178,10 +180,25 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <?php echo htmlspecialchars($cli['direccion'] ?: '-'); ?>
                                         </td>
                                         <td>
-                                            <span class="badge badge-info" style="color: var(--color-primary); background: rgba(0, 203, 169, 0.1);">
-                                                <svg style="width:11px; height:11px; stroke-width: 3;"><use href="#icon-grid"></use></svg>
-                                                En <?php echo $cli['total_grupos']; ?> Grupo(s)
-                                            </span>
+                                            <?php if ($cli['total_grupos'] > 0): ?>
+                                                <div style="display:flex;flex-direction:column;gap:var(--space-1);">
+                                                    <span style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">
+                                                        <?php echo (int)$cli['total_grupos']; ?> grupo<?php echo $cli['total_grupos'] != 1 ? 's' : ''; ?>:
+                                                    </span>
+                                                    <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                                        <?php 
+                                                        $grupos = explode(', ', $cli['grupos_lista']);
+                                                        foreach ($grupos as $g):
+                                                        ?>
+                                                            <span style="font-size:var(--font-size-xs);background:var(--color-primary-tint);color:var(--color-primary);padding:2px 8px;border-radius:var(--radius-full);white-space:nowrap;">
+                                                                <?php echo htmlspecialchars($g); ?>
+                                                            </span>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
+                                                <span style="color:var(--color-text-tertiary);font-size:var(--font-size-sm);">Sin grupos</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td style="text-align: right;">
                                             <div style="display: flex; gap: var(--space-2); justify-content: flex-end;">
