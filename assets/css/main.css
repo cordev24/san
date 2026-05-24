@@ -532,40 +532,48 @@ body::before {
 /* Header Responsive */
 @media (max-width: 768px) {
     .header {
-        padding: var(--space-4);
+        padding: var(--space-3) var(--space-4);
     }
 
     .header-content {
-        flex-direction: column;
-        gap: var(--space-4);
-    }
-
-    .header-user {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .user-info {
-        text-align: center;
-        width: 100%;
+        flex-direction: row;
+        gap: var(--space-2);
     }
 
     .header-logo {
-        font-size: var(--font-size-2xl);
+        font-size: var(--font-size-xl);
+        flex-shrink: 0;
+    }
+
+    .header-user {
+        gap: var(--space-2);
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        display: none;
+    }
+
+    .header-user .btn span {
+        display: none;
+    }
+
+    .header-user .btn {
+        padding: var(--space-2);
     }
 }
 
 @media (max-width: 480px) {
     .header {
-        padding: var(--space-3);
+        padding: var(--space-2) var(--space-3);
     }
 
-    .header-user {
-        gap: var(--space-2);
+    .header-logo {
+        font-size: var(--font-size-lg);
     }
 
     .header-user .btn {
-        padding: var(--space-2) var(--space-3);
+        padding: var(--space-1) var(--space-2);
         font-size: var(--font-size-sm);
     }
 
@@ -579,6 +587,35 @@ body::before {
     padding: var(--space-6) var(--space-8);
     max-width: 1600px;
     margin: 0 auto;
+}
+
+/* Header Back Button */
+.header-back {
+    padding: var(--space-2) var(--space-6);
+}
+
+@media (max-width: 768px) {
+    .header-back {
+        padding: var(--space-2) var(--space-4);
+    }
+}
+
+/* Page Header Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        padding: var(--space-4) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1.page-title {
+        font-size: var(--font-size-2xl) !important;
+    }
+
+    .page-header h1.page-title svg.icon-xl {
+        width: 28px !important;
+        height: 28px !important;
+    }
 }
 
 .page-title {
@@ -1239,16 +1276,19 @@ table {
 
 /* ── Sidebar Backdrop ─────────────────────────────────────────────── */
 .sidebar-backdrop {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 99;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
 .sidebar.open ~ .sidebar-backdrop,
 .sidebar-backdrop.active {
-    display: block;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* ── Responsive: Mobile (< 480px) ─────────────────────────────────── */

@@ -3,7 +3,6 @@
  * Header Component - Incluir en todas las páginas admin
  * 
  * Variables opcionales que se pueden definir antes de incluir:
- *   $showCrearUsuario (bool) - Mostrar botón "Crear Usuario". Default: false
  *   $headerBackUrl   (string) - URL del botón "Volver". Si se define, muestra el botón.
  *   $headerBackLabel (string) - Texto del botón "Volver". Default: "Volver"
  *
@@ -13,20 +12,16 @@
  * Uso desde dashboard (raíz):
  *   $headerLogoHref = 'dashboard.php';
  *   $headerLogoutHref = 'logout.php';
- *   $headerCrearUsuarioHref = 'crear-usuario.php';
  *
  * Uso desde módulos (modules/xxx/):
  *   $headerLogoHref = '../../dashboard.php';
  *   $headerLogoutHref = '../../logout.php';
- *   $headerCrearUsuarioHref = '../../crear-usuario.php';
  */
 
-$headerLogoHref         = $headerLogoHref ?? 'dashboard.php';
-$headerLogoutHref       = $headerLogoutHref ?? 'logout.php';
-$headerCrearUsuarioHref = $headerCrearUsuarioHref ?? 'crear-usuario.php';
-$showCrearUsuario       = $showCrearUsuario ?? false;
-$headerBackUrl          = $headerBackUrl ?? null;
-$headerBackLabel        = $headerBackLabel ?? 'Volver';
+$headerLogoHref   = $headerLogoHref ?? 'dashboard.php';
+$headerLogoutHref = $headerLogoutHref ?? 'logout.php';
+$headerBackUrl    = $headerBackUrl ?? null;
+$headerBackLabel  = $headerBackLabel ?? 'Volver';
 ?>
 <header class="header">
     <div class="header-content">
@@ -40,12 +35,7 @@ $headerBackLabel        = $headerBackLabel ?? 'Volver';
                 <div class="user-role">Administrador</div>
             </div>
 
-            <?php if ($showCrearUsuario): ?>
-                <a href="<?php echo $headerCrearUsuarioHref; ?>" class="btn btn-outline">
-                    <svg class="icon"><use href="#icon-user"></use></svg>
-                    <span>Crear Usuario</span>
-                </a>
-            <?php endif; ?>
+            <?php include __DIR__ . '/notificaciones.php'; ?>
 
             <a href="<?php echo $headerLogoutHref; ?>" class="btn btn-outline">
                 <svg class="icon"><use href="#icon-log-out"></use></svg>
@@ -56,8 +46,8 @@ $headerBackLabel        = $headerBackLabel ?? 'Volver';
 </header>
 
 <?php if ($headerBackUrl): ?>
-<div style="padding: var(--space-4) var(--space-6);">
-    <a href="<?php echo $headerBackUrl; ?>" class="btn btn-outline">
+<div class="header-back">
+    <a href="<?php echo $headerBackUrl; ?>" class="btn btn-outline btn-sm">
         <svg class="icon"><use href="#icon-arrow-left"></use></svg>
         <?php echo htmlspecialchars($headerBackLabel); ?>
     </a>
