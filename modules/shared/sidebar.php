@@ -11,7 +11,6 @@ $moduleTitles = [
     'electrodomesticos' => 'Electrodomesticos',
     'telefonia' => 'Telefonia',
     'motocicletas' => 'Motocicletas',
-    'turnos' => 'Turnos',
     'comprobantes' => 'Comprobantes'
 ];
 ?>
@@ -46,11 +45,6 @@ $moduleTitles = [
                     Motocicletas
                 </a>
                 
-                <a href="../turnos/index.php" class="sidebar-link <?php echo ($currentModule === 'turnos') ? 'active' : ''; ?>">
-                    <svg class="icon"><use href="#icon-calendar"></use></svg>
-                    Turnos
-                </a>
-                
                 <a href="../comprobantes/index.php" class="sidebar-link <?php echo ($currentModule === 'comprobantes') ? 'active' : ''; ?>">
                     <svg class="icon"><use href="#icon-file-text"></use></svg>
                     Comprobantes
@@ -66,12 +60,15 @@ $moduleTitles = [
         </div>
     </aside>
 
+    <!-- Sidebar Backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
     <!-- Main Content -->
     <div class="main-content-with-sidebar">
         <!-- Top Header -->
         <header class="top-header">
             <div class="header-left">
-                <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Toggle menu">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
                     <svg class="icon"><use href="#icon-menu"></use></svg>
                 </button>
                 <div class="header-title">
