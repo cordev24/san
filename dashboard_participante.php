@@ -26,10 +26,6 @@ $mis_sanes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Tasa BCV del día para mostrar equivalencias en Bs (informe §6.2.5)
 $tasa_bcv_hoy = getBcvRate();
 
-// Count unread notifications
-$stmtNoti = $pdo->prepare("SELECT COUNT(*) FROM notificaciones WHERE usuario_id = ? AND leido = 0");
-$stmtNoti->execute([$user['id']]);
-$unread_notis = $stmtNoti->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -73,34 +69,22 @@ $unread_notis = $stmtNoti->fetchColumn();
             text-decoration: none;
         }
 
+        @media (max-width: 768px) {
+            .header {
+                padding: var(--space-2) var(--space-3);
+            }
+            .header-content {
+                gap: var(--space-2);
+            }
+            .header-logo {
+                font-size: var(--font-size-lg);
+            }
+        }
+
         .user-nav {
             display: flex;
             align-items: center;
             gap: var(--space-3);
-        }
-
-        .notification-icon {
-            position: relative;
-            cursor: pointer;
-            color: var(--color-text-secondary);
-            transition: color 0.2s;
-        }
-
-        .notification-icon:hover {
-            color: var(--color-primary);
-        }
-
-        .badge-count {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background: var(--color-error);
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 10px;
-            border: 2px solid var(--color-surface);
         }
 
         .page-container {
@@ -180,12 +164,7 @@ $unread_notis = $stmtNoti->fetchColumn();
                 </a>
 
                 <!-- Notificaciones -->
-                <div class="notification-icon" title="Notificaciones" onclick="alert('Notificaciones en desarrollo')">
-                    <svg class="icon"><use href="#icon-bell"></use></svg>
-                    <?php if ($unread_notis > 0): ?>
-                        <span class="badge-count"><?php echo $unread_notis; ?></span>
-                    <?php endif; ?>
-                </div>
+                <?php include 'includes/notificaciones_participante.php'; ?>
                 
                 <div style="border-left: 1px solid var(--glass-border); padding-left: var(--space-4); margin-left: var(--space-2);">
                     <div style="font-weight: bold; font-size: var(--font-size-sm);"><?php echo htmlspecialchars($user['nombre']); ?></div>
@@ -330,7 +309,7 @@ $unread_notis = $stmtNoti->fetchColumn();
                                 <button
                                     class="btn btn-violeta"
                                     style="width:100%;font-size:var(--font-size-sm);padding:var(--space-3);"
-                                    onclick="openReportModal(<?php echo $prox_pago['id']; ?>, <?php echo $prox_pago['numero_cuota']; ?>, <?php echo $prox_pago['monto']; ?>)">
+                                    onclick="openReportModal(<?php echo $prox_pago['id']; ?>, <?php echo $prox_pago['numero_cuota']; ?>, <?php echo $prox_pago['monto']; ?>, <?php echo $san['grupo_id']; ?>)">
                                     <svg style="width:14px;height:14px;"><use href="#icon-download"></use></svg>
                                     Reportar Pago
                                 </button>
@@ -375,6 +354,9 @@ $unread_notis = $stmtNoti->fetchColumn();
 
             <form id="reportForm" enctype="multipart/form-data">
                 <input type="hidden" id="reportPagoId" name="pago_id">
+                <input type="hidden" id="reportNumeroCuota" name="numero_cuota">
+                <input type="hidden" id="reportMontoCuota" name="monto">
+                <input type="hidden" id="reportGrupoId" name="grupo_id">
 
                 <div class="form-group">
                     <label class="form-label" for="referenciaPago">
@@ -428,13 +410,19 @@ $unread_notis = $stmtNoti->fetchColumn();
     <!-- Join button now links to sanes-disponibles.php -->
 
     <script>
-        function openReportModal(pagoId, numeroCuota, monto) {
+        function openReportModal(pagoId, numeroCuota, monto, grupoId) {
             document.getElementById('reportPagoId').value = pagoId;
+            document.getElementById('reportNumeroCuota').value = numeroCuota;
+            document.getElementById('reportMontoCuota').value = parseFloat(monto).toFixed(2);
+            document.getElementById('reportGrupoId').value = grupoId;
             document.getElementById('modalDesc').textContent =
                 'Cuota #' + numeroCuota + ' — $' + parseFloat(monto).toFixed(2) + '. Ingresa el número de referencia y adjunta tu comprobante.';
             document.getElementById('reportAlert').style.display = 'none';
             document.getElementById('reportForm').reset();
             document.getElementById('reportPagoId').value = pagoId;
+            document.getElementById('reportNumeroCuota').value = numeroCuota;
+            document.getElementById('reportMontoCuota').value = parseFloat(monto).toFixed(2);
+            document.getElementById('reportGrupoId').value = grupoId;
             const modal = document.getElementById('reportModal');
             modal.style.display = 'flex';
         }
@@ -464,8 +452,8 @@ $unread_notis = $stmtNoti->fetchColumn();
 
                 if (data.success) {
                     closeReportModal();
-                    // Recargar para reflejar estado actualizado
-                    location.reload();
+                    showNotification('Pago reportado correctamente. El administrador lo revisará pronto.', 'success');
+                    setTimeout(function () { location.reload(); }, 1500);
                 } else {
                     alertBox.textContent = data.message;
                     alertBox.style.display = 'block';
@@ -480,5 +468,6 @@ $unread_notis = $stmtNoti->fetchColumn();
             }
         });
     </script>
+    <script src="assets/js/shared.js"></script>
 </body>
 </html>

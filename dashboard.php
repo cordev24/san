@@ -20,53 +20,6 @@ $tasa_bcv = getBcvRate();
     <link rel="stylesheet" href="assets/css/main.css">
 
     <style>
-        .header {
-            padding: var(--space-6) var(--space-8);
-            background: var(--glass-background);
-            backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: var(--z-dropdown);
-        }
-
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-logo {
-            font-size: var(--font-size-2xl);
-            font-weight: var(--font-weight-bold);
-            background: linear-gradient(135deg, var(--color-violeta), var(--color-menta));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: var(--space-4);
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .user-name {
-            font-weight: var(--font-weight-semibold);
-            color: var(--color-text-primary);
-        }
-
-        .user-role {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-tertiary);
-        }
-
         .module-card {
             cursor: pointer;
             min-height: 200px;
@@ -111,10 +64,8 @@ $tasa_bcv = getBcvRate();
     <div class="main-content">
         <!-- Header -->
         <?php
-        $headerLogoHref         = 'dashboard.php';
-        $headerLogoutHref       = 'logout.php';
-        $headerCrearUsuarioHref = 'crear-usuario.php';
-        $showCrearUsuario       = true;
+        $headerLogoHref   = 'dashboard.php';
+        $headerLogoutHref = 'logout.php';
         include 'includes/header.php';
         ?>
 
@@ -307,6 +258,33 @@ $tasa_bcv = getBcvRate();
                     </div>
 
 
+                    <!-- Gestión de Usuarios Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 100; ?>ms;"
+                        onclick="location.href='modules/usuarios/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-primary);">
+                                    <use href="#icon-user"></use>
+                                </svg>
+                                Gestión de Usuarios
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Administra los usuarios del sistema.
+                        </div>
+                        <div class="module-stats">
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Total Usuarios</span>
+                                <?php
+                                $stmtUserCount = $pdo->query("SELECT COUNT(*) FROM usuarios");
+                                $countUsers = $stmtUserCount->fetchColumn();
+                                ?>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);"><?php echo $countUsers; ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- Gestión de Categorias Module -->
                     <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay; ?>ms;"
                         onclick="location.href='modules/categorias_admin/index.php'">
@@ -333,32 +311,6 @@ $tasa_bcv = getBcvRate();
                         </div>
                     </div>
 
-                    <!-- Gestión de Turnos Module -->
-                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 100; ?>ms;"
-                        onclick="location.href='modules/turnos/index.php'">
-                        <div class="bento-header">
-                            <div class="bento-title">
-                                <svg class="module-icon bento-icon" style="stroke: var(--color-violeta);">
-                                    <use href="#icon-dice"></use>
-                                </svg>
-                                Sorteos de Turnos
-                            </div>
-                        </div>
-                        <div class="bento-content">
-                            Sistema de sorteo y asignación de turnos.
-                        </div>
-                        <div class="module-stats">
-                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                                <span class="stat-label">Pendientes</span>
-                                <span class="stat-value" style="font-size: var(--font-size-xl);">7</span>
-                            </div>
-                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
-                                <span class="stat-label">Próximo</span>
-                                <span class="stat-value" style="font-size: var(--font-size-xl);">15 Feb</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Comprobantes Module -->
                     <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 200; ?>ms;"
                         onclick="location.href='modules/comprobantes/index.php'">
@@ -371,7 +323,7 @@ $tasa_bcv = getBcvRate();
                             </div>
                         </div>
                         <div class="bento-content">
-                            Generación de recibos y certificados.
+                            Generación de recibos.
                         </div>
                         <div class="module-stats">
                             <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
@@ -413,6 +365,52 @@ $tasa_bcv = getBcvRate();
                             <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
                                 <span class="stat-label" style="color: var(--color-salmon);">Atrasados</span>
                                 <span class="stat-value" style="font-size: var(--font-size-xl); color: var(--color-salmon);"><?php echo $countPagAtras; ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Morosidad Module -->
+                    <div class="bento-box bento-4 module-card animate-slide-up" style="animation-delay: <?php echo $delay + 400; ?>ms;"
+                        onclick="location.href='modules/morosidad/index.php'">
+                        <div class="bento-header">
+                            <div class="bento-title">
+                                <svg class="module-icon bento-icon" style="stroke: var(--color-salmon);">
+                                    <use href="#icon-alert-triangle"></use>
+                                </svg>
+                                Morosidad
+                            </div>
+                        </div>
+                        <div class="bento-content">
+                            Control de deudores y cuotas vencidas.
+                        </div>
+                        <div class="module-stats">
+                            <?php
+                            $stmtMorDeud = $pdo->query("
+                                SELECT COUNT(DISTINCT p.id)
+                                FROM participantes p
+                                JOIN pagos pg ON pg.participante_id = p.id
+                                WHERE pg.estado IN ('pendiente','atrasado')
+                                  AND pg.fecha_vencimiento < CURDATE()
+                                  AND p.activo = 1
+                            ");
+                            $countMorDeud = (int)$stmtMorDeud->fetchColumn();
+                            $stmtMorTotal = $pdo->query("
+                                SELECT COALESCE(SUM(pg.monto), 0)
+                                FROM participantes p
+                                JOIN pagos pg ON pg.participante_id = p.id
+                                WHERE pg.estado IN ('pendiente','atrasado')
+                                  AND pg.fecha_vencimiento < CURDATE()
+                                  AND p.activo = 1
+                            ");
+                            $countMorTotal = (float)$stmtMorTotal->fetchColumn();
+                            ?>
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label" style="color: var(--color-salmon);">Deudores</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl); color: var(--color-salmon);"><?php echo $countMorDeud; ?></span>
+                            </div>
+                            <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+                                <span class="stat-label">Total Adeudado</span>
+                                <span class="stat-value" style="font-size: var(--font-size-xl);">$<?php echo number_format($countMorTotal, 2); ?></span>
                             </div>
                         </div>
                     </div>

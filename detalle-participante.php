@@ -178,6 +178,18 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
             text-decoration: none;
         }
 
+        @media (max-width: 768px) {
+            .header {
+                padding: var(--space-2) var(--space-3);
+            }
+            .header-content {
+                gap: var(--space-2);
+            }
+            .header-logo {
+                font-size: var(--font-size-lg);
+            }
+        }
+
         .user-nav {
             display: flex;
             align-items: center;
