@@ -1,0 +1,118 @@
+erDiagram
+    %% Tablas Base
+    USUARIOS {
+        int id PK
+        varchar username
+        varchar password
+        varchar nombre
+        enum rol
+    }
+    
+    CATEGORIAS {
+        int id PK
+        varchar nombre
+        varchar color
+    }
+    
+    PRODUCTOS {
+        int id PK
+        int categoria_id FK
+        varchar nombre
+        decimal valor_total
+        tinyint activo
+    }
+    
+    PRODUCTOS_IMAGENES {
+        int id PK
+        int producto_id FK
+        varchar ruta
+        int orden
+    }
+    
+    %% Core del Negocio
+    GRUPOS_SAN {
+        int id PK
+        int producto_id FK
+        varchar nombre
+        enum frecuencia
+        int numero_cuotas
+        int cupos_totales
+        int cupos_ocupados
+        decimal monto_cuota
+        enum estado
+    }
+    
+    PARTICIPANTES {
+        int id PK
+        int grupo_san_id FK
+        int usuario_id FK
+        varchar cedula
+        date fecha_inscripcion
+        tinyint ha_recibido
+        enum tipo_registro
+        tinyint activo
+    }
+    
+    PAGOS {
+        int id PK
+        int participante_id FK
+        int numero_cuota
+        decimal monto
+        decimal monto_bs_pagado
+        decimal tasa_aplicada
+        enum estado
+        date fecha_vencimiento
+    }
+    
+    %% Tablas Auxiliares y Nuevas
+    COMPROBANTES {
+        int id PK
+        enum tipo
+        int pago_id FK
+        int turno_id FK
+        text codigo_qr
+    }
+    
+    NOTIFICACIONES {
+        int id PK
+        int usuario_id FK
+        varchar tipo
+        text mensaje
+        tinyint leido
+    }
+    
+    TASAS_CAMBIO {
+        int id PK
+        decimal tasa
+        date fecha
+        enum origen
+    }
+    
+    CONFIGURACION {
+        int id PK
+        varchar clave
+        varchar valor
+    }
+
+    TURNOS {
+        int id PK "DEPRECATED"
+        int grupo_san_id FK
+        int participante_id FK
+        int numero_turno
+        enum estado
+    }
+
+    %% Relaciones
+    CATEGORIAS ||--|{ PRODUCTOS : "clasifica"
+    PRODUCTOS ||--o{ PRODUCTOS_IMAGENES : "posee"
+    PRODUCTOS ||--|{ GRUPOS_SAN : "asociado a"
+    GRUPOS_SAN ||--|{ PARTICIPANTES : "inscribe"
+    USUARIOS ||--o{ PARTICIPANTES : "vinculado a"
+    USUARIOS ||--o{ NOTIFICACIONES : "recibe"
+    PARTICIPANTES ||--|{ PAGOS : "realiza"
+    PAGOS ||--o| COMPROBANTES : "genera"
+    
+    %% Relaciones deprecadas / legacy
+    GRUPOS_SAN ||--o{ TURNOS : "tiene_legacy"
+    PARTICIPANTES ||--o| TURNOS : "posee_legacy"
+    TURNOS ||--o| COMPROBANTES : "genera_entrega"

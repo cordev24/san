@@ -5,7 +5,7 @@ $user = getCurrentUser();
 
 // Fetch all active groups
 $stmt = $pdo->query("
-    SELECT gs.*, p.nombre as producto_nombre, p.marca as producto_marca, p.modelo as producto_modelo, c.color as categoria_color
+    SELECT gs.*, p.nombre as producto_nombre, p.imagen as producto_imagen, p.marca as producto_marca, p.modelo as producto_modelo, c.color as categoria_color
     FROM grupos_san gs
     JOIN productos p ON gs.producto_id = p.id
     JOIN categorias c ON p.categoria_id = c.id
@@ -28,8 +28,14 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Gestión de Grupos San</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -41,7 +47,7 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
         .page-header { padding: var(--space-8); max-width: 1600px; margin: 0 auto; }
         .page-title { font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-2); display: flex; align-items: center; gap: var(--space-4); }
 
-        .group-card { background: var(--color-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-5); transition: all var(--transition-base); display: flex; flex-direction: column; gap: var(--space-4); position: relative; }
+        .group-card { background: var(--color-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-5); transition: all var(--transition-base); display: flex; flex-direction: column; gap: var(--space-4); position: relative; overflow: hidden; }
         .group-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-glow-secondary); }
 
         .group-header { display: flex; align-items: center; gap: var(--space-4); }
@@ -90,9 +96,6 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                     </p>
                 </div>
                 <div style="display: flex; gap: var(--space-4);">
-                    <button class="btn btn-menta" onclick="openModal('nuevoParticipanteModal')">
-                        <svg class="icon"><use href="#icon-user-plus"></use></svg> Participante
-                    </button>
                     <button class="btn btn-secondary" onclick="openModal('nuevoGrupoModal')">
                         <svg class="icon"><use href="#icon-plus"></use></svg> Grupo San
                     </button>
@@ -118,7 +121,7 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                             $cat_id = $stmtC->fetchColumn(); 
                             ?>
                             <div class="group-card" onmouseover="this.style.borderColor='var(--color-<?php echo $grupo['categoria_color']; ?>)'" onmouseout="this.style.borderColor='var(--glass-border)'"
-                                onclick="location.href='../categoria/pagos.php?id=<?php echo $cat_id; ?>&grupo_id=<?php echo $grupo['id']; ?>'">
+                                onclick="location.href='../categoria/grupo.php?id=<?php echo $cat_id; ?>&grupo_id=<?php echo $grupo['id']; ?>'">
                                 
                                 <div class="card-actions">
                                     <button class="btn-action" onclick="event.stopPropagation(); editGrupo(<?php echo $grupo['id']; ?>)" title="Editar Grupo">
@@ -128,6 +131,15 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                                         <svg class="icon-sm"><use href="#icon-trash-2"></use></svg>
                                     </button>
                                 </div>
+                                <?php if (!empty($grupo['producto_imagen'])): ?>
+                                <div style="margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) 0; height: 160px; background: var(--color-background); border-bottom: 1px solid var(--glass-border); position:relative; cursor:zoom-in; overflow:hidden; padding: 12px; display: flex; align-items: center; justify-content: center;"
+                                     onclick="event.stopPropagation(); viewGallery(<?php echo (int)$grupo['producto_id']; ?>, '<?php echo htmlspecialchars(addslashes($grupo['producto_nombre'])); ?>')">
+                                    <img src="../../<?php echo htmlspecialchars(ltrim($grupo['producto_imagen'] ?? '', '/')); ?>" alt="<?php echo htmlspecialchars($grupo['producto_nombre']); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;">
+                                        <svg style="width:11px;height:11px;stroke:#fff;stroke-width:2.5;"><use href="#icon-image"></use></svg>Ver galería
+                                    </span>
+                                </div>
+                                <?php endif; ?>
                                 <div class="group-header">
                                     <div class="group-icon" style="border: 1px solid var(--color-<?php echo $grupo['categoria_color']; ?>); color: var(--color-<?php echo $grupo['categoria_color']; ?>);">
                                         <svg class="icon-lg"><use href="#icon-users"></use></svg>
@@ -174,7 +186,7 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                     <svg class="icon"><use href="#icon-x"></use></svg>
                 </button>
             </div>
-            <form id="nuevoGrupoForm">
+            <form id="nuevoGrupoForm" data-siguiente-num="<?php echo count($grupos) + 1; ?>">
                 <div class="form-group">
                     <label class="form-label">Producto Asociado *</label>
                     <select id="producto_id" name="producto_id" class="form-select" required>
@@ -188,7 +200,7 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                                 echo "<optgroup label='" . htmlspecialchars($current_cat) . "'>";
                             }
                         ?>
-                            <option value="<?php echo $p['id']; ?>" data-valor="<?php echo $p['valor_total']; ?>">
+                            <option value="<?php echo $p['id']; ?>" data-valor="<?php echo $p['valor_total']; ?>" data-nombre="<?php echo htmlspecialchars($p['nombre']); ?>">
                                 <?php echo htmlspecialchars($p['nombre']); ?> - $<?php echo number_format($p['valor_total'], 2); ?>
                             </option>
                         <?php endforeach; ?>
@@ -224,145 +236,11 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                     <div style="font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-secondary); padding: var(--space-3);" id="monto_cuota_display">$0.00</div>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-secondary" style="flex: 1;">
-                        <svg class="icon"><use href="#icon-check-circle"></use></svg> Crear Grupo
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('nuevoGrupoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-secondary"><svg class="icon"><use href="#icon-check-circle"></use></svg> Crear Grupo
                     </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoGrupoModal')" style="flex: 1;">Cancelar</button>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Inscribir Participante -->
-    <div id="nuevoParticipanteModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Inscribir Participante</h2>
-                <button class="modal-close" onclick="closeModal('nuevoParticipanteModal')">
-                    <svg class="icon"><use href="#icon-x"></use></svg>
-                </button>
-            </div>
-            <form id="nuevoParticipanteForm">
-
-                <!-- STEP 1: Cedula lookup -->
-                <div id="step-cedula">
-                    <p style="color: var(--color-text-tertiary); font-size: var(--font-size-sm); margin-bottom: var(--space-4);">
-                        Ingresa la cédula para verificar si el participante ya existe en el sistema.
-                    </p>
-                    <div class="form-group" style="margin-bottom: var(--space-3);">
-                        <label class="form-label">Cédula de Identidad *</label>
-                        <div style="display: flex; gap: var(--space-3);">
-                            <input type="text" id="lookup_cedula" class="form-input" placeholder="V-12345678" maxlength="15" style="flex: 1;"
-                                   onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCedula();}">
-                            <button type="button" class="btn btn-outline" onclick="buscarCedula()" id="btn-buscar" style="white-space:nowrap;">
-                                <svg class="icon"><use href="#icon-search"></use></svg>
-                                Buscar
-                            </button>
-                        </div>
-                        <div id="cedula-feedback" style="margin-top: var(--space-2); font-size: var(--font-size-sm);"></div>
-                    </div>
-                </div>
-
-                <!-- STEP 2: Participant found — prefilled card -->
-                <div id="step-found" style="display:none;">
-                    <div id="found-card" style="
-                        background: rgba(0,203,169,0.07);
-                        border: 1px solid var(--color-menta);
-                        border-radius: var(--radius-lg);
-                        padding: var(--space-4);
-                        margin-bottom: var(--space-4);
-                        display: flex;
-                        align-items: center;
-                        gap: var(--space-4);
-                    ">
-                        <div id="found-avatar" style="
-                            width: 48px; height: 48px; border-radius: 50%;
-                            background: linear-gradient(135deg, var(--color-menta), var(--color-violeta));
-                            display: flex; align-items: center; justify-content: center;
-                            color: white; font-weight: 700; font-size: 18px; flex-shrink: 0;
-                        "></div>
-                        <div>
-                            <div id="found-name" style="font-weight: var(--font-weight-semibold); color: var(--color-text-primary); font-size: var(--font-size-lg);"></div>
-                            <div style="font-size: var(--font-size-sm); color: var(--color-text-tertiary); margin-top: 2px;">
-                                <span id="found-cedula-display"></span>
-                                &bull; <span id="found-tel"></span>
-                            </div>
-                        </div>
-                        <span class="badge badge-success" style="margin-left: auto; flex-shrink:0;">
-                            <span class="badge-dot"></span> Existente
-                        </span>
-                    </div>
-                    <!-- Hidden fields populated from lookup -->
-                    <input type="hidden" name="nombre"    id="p_nombre">
-                    <input type="hidden" name="apellido"  id="p_apellido">
-                    <input type="hidden" name="cedula"    id="p_cedula">
-                    <input type="hidden" name="telefono"  id="p_telefono">
-                    <input type="hidden" name="direccion" id="p_direccion">
-                </div>
-
-                <!-- STEP 3: New participant — full form (shown when not found) -->
-                <div id="step-new" style="display:none;">
-                    <div style="
-                        background: rgba(255,180,100,0.07);
-                        border: 1px solid var(--color-salmon);
-                        border-radius: var(--radius-md);
-                        padding: var(--space-3) var(--space-4);
-                        margin-bottom: var(--space-4);
-                        font-size: var(--font-size-sm);
-                        color: var(--color-salmon);
-                        display: flex; align-items: center; gap: var(--space-2);
-                    ">
-                        <svg style="width:16px;height:16px;flex-shrink:0;"><use href="#icon-alert-triangle"></use></svg>
-                        Participante nuevo — completa sus datos para registrarlo.
-                    </div>
-                    <input type="hidden" name="cedula" id="new_cedula">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
-                        <div class="form-group">
-                            <label class="form-label">Nombre *</label>
-                            <input type="text" id="new_nombre" name="nombre" class="form-input" required placeholder="Nombre">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Apellido *</label>
-                            <input type="text" id="new_apellido" name="apellido" class="form-input" required placeholder="Apellido">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Teléfono</label>
-                        <input type="text" id="new_telefono" name="telefono" class="form-input" placeholder="04121234567" maxlength="15">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Dirección</label>
-                        <textarea id="new_direccion" name="direccion" class="form-input" rows="2" placeholder="Sector, Calle..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Group selector — shown after lookup resolves -->
-                <div id="step-group" style="display:none;">
-                    <div class="form-group">
-                        <label class="form-label">Grupo San a Inscribir *</label>
-                        <select name="grupo_san_id" id="select_grupo" class="form-select" required>
-                            <option value="">Selecciona el grupo...</option>
-                            <?php foreach ($grupos as $grupo): ?>
-                                <?php if ($grupo['cupos_ocupados'] < $grupo['cupos_totales']): ?>
-                                    <option value="<?php echo $grupo['id']; ?>">
-                                        <?php echo htmlspecialchars($grupo['nombre']); ?> (<?php echo $grupo['cupos_ocupados']; ?>/<?php echo $grupo['cupos_totales']; ?> cupos)
-                                    </option>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div style="display: flex; gap: var(--space-4); margin-top: var(--space-4);">
-                        <button type="button" class="btn btn-outline" style="flex:1;" onclick="resetInscripcionForm()">
-                            <svg class="icon"><use href="#icon-arrow-left"></use></svg> Nueva Búsqueda
-                        </button>
-                        <button type="submit" class="btn btn-menta" style="flex:1;">
-                            <svg class="icon"><use href="#icon-user-plus"></use></svg> Inscribir
-                        </button>
-                    </div>
-                </div>
-
             </form>
         </div>
     </div>
@@ -393,15 +271,16 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
                     </select>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-secondary" style="flex: 1;">
-                        <svg class="icon"><use href="#icon-check-circle"></use></svg> Guardar Cambios
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editarGrupoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-secondary"><svg class="icon"><use href="#icon-check-circle"></use></svg> Guardar Cambios
                     </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editarGrupoModal')" style="flex: 1;">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
+
+
 
     <!-- Shared Scripts -->
     <script src="../../assets/js/shared.js"></script>
@@ -409,145 +288,9 @@ $productos = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
     <script src="../../assets/js/participantes.js"></script>
     <script src="../../assets/js/eliminar_grupo.js"></script>
 
-    <script>
-    /* =========================================================
-       INSCRIBIR PARTICIPANTE — Flujo de búsqueda por cédula
-       ========================================================= */
 
-    // Reset full modal to step-1 every time it opens
-    const _origOpen = window.openModal;
-    window.openModal = function(id) {
-        if (id === 'nuevoParticipanteModal') resetInscripcionForm();
-        _origOpen(id);
-    };
 
-    function resetInscripcionForm() {
-        document.getElementById('lookup_cedula').value    = '';
-        document.getElementById('cedula-feedback').innerHTML = '';
-        document.getElementById('step-cedula').style.display = '';
-        document.getElementById('step-found').style.display  = 'none';
-        document.getElementById('step-new').style.display    = 'none';
-        document.getElementById('step-group').style.display  = 'none';
-        // Clear new-participant fields
-        ['new_nombre','new_apellido','new_telefono','new_direccion'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        document.getElementById('select_grupo').value = '';
-        setTimeout(() => document.getElementById('lookup_cedula').focus(), 150);
-    }
 
-    async function buscarCedula() {
-        const cedula = document.getElementById('lookup_cedula').value.trim();
-        if (!cedula) {
-            setFeedback('Ingresa una cédula antes de buscar.', 'warn');
-            return;
-        }
-
-        const btn = document.getElementById('btn-buscar');
-        btn.disabled = true;
-        btn.innerHTML = '<svg class="icon" style="animation:spin 0.8s linear infinite"><use href="#icon-refresh-cw"></use></svg> Buscando...';
-
-        try {
-            const res  = await fetch(`../../api/participantes.php?action=get_by_cedula&cedula=${encodeURIComponent(cedula)}`);
-            const data = await res.json();
-
-            if (data.success) {
-                showFoundState(cedula, data.data.participante);
-            } else {
-                showNewState(cedula);
-            }
-        } catch(e) {
-            setFeedback('Error de conexión. Intenta de nuevo.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<svg class="icon"><use href="#icon-search"></use></svg> Buscar';
-        }
-    }
-
-    function showFoundState(cedula, p) {
-        // Populate hidden fields
-        document.getElementById('p_nombre').value    = p.nombre;
-        document.getElementById('p_apellido').value  = p.apellido;
-        document.getElementById('p_cedula').value    = cedula;
-        document.getElementById('p_telefono').value  = p.telefono  || '';
-        document.getElementById('p_direccion').value = p.direccion || '';
-
-        // Populate display card
-        const initials = (p.nombre[0] || '') + (p.apellido[0] || '');
-        document.getElementById('found-avatar').textContent     = initials.toUpperCase();
-        document.getElementById('found-name').textContent       = `${p.nombre} ${p.apellido}`;
-        document.getElementById('found-cedula-display').textContent = cedula;
-        document.getElementById('found-tel').textContent        = p.telefono || 'Sin teléfono';
-
-        document.getElementById('step-cedula').style.display = 'none';
-        document.getElementById('step-found').style.display  = '';
-        document.getElementById('step-new').style.display    = 'none';
-        document.getElementById('step-group').style.display  = '';
-    }
-
-    function showNewState(cedula) {
-        document.getElementById('new_cedula').value = cedula;
-
-        document.getElementById('step-cedula').style.display = 'none';
-        document.getElementById('step-found').style.display  = 'none';
-        document.getElementById('step-new').style.display    = '';
-        document.getElementById('step-group').style.display  = '';
-
-        setFeedback('', '');
-        setTimeout(() => document.getElementById('new_nombre').focus(), 100);
-    }
-
-    function setFeedback(msg, type) {
-        const el = document.getElementById('cedula-feedback');
-        const colors = { warn: 'var(--color-salmon)', error: '#ff6464', ok: 'var(--color-menta)' };
-        el.style.color = colors[type] || 'var(--color-text-tertiary)';
-        el.textContent = msg;
-    }
-
-    // Spin keyframe for loading state
-    const styleTag = document.createElement('style');
-    styleTag.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-    document.head.appendChild(styleTag);
-
-    // Form submit — delegates to existing participantes.js handler if present,
-    // otherwise handles it directly
-    document.getElementById('nuevoParticipanteForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const grupo_san_id = document.getElementById('select_grupo').value;
-        if (!grupo_san_id) {
-            showNotification('Selecciona un grupo San', 'error');
-            return;
-        }
-
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.7';
-
-        const formData = new FormData(this);
-        formData.set('action', 'create');
-        formData.set('grupo_san_id', grupo_san_id);
-
-        try {
-            const res  = await fetch('../../api/participantes.php', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                showNotification('Participante inscrito exitosamente', 'success');
-                closeModal('nuevoParticipanteModal');
-                setTimeout(() => location.reload(), 1200);
-            } else {
-                showNotification(data.message || 'Error al inscribir', 'error');
-            }
-        } catch(err) {
-            showNotification('Error de conexión', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-        }
-    });
-    </script>
 </body>
 
 </html>

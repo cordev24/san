@@ -44,8 +44,14 @@ $globalStats = $stmtStats->fetch(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Gestión de Pagos</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -170,15 +176,16 @@ $globalStats = $stmtStats->fetch(PDO::FETCH_ASSOC);
 <body>
     <?php include '../../assets/icons/feather-sprite.svg'; ?>
 
-    <?php
-    $headerLogoHref  = '../../dashboard.php';
-    $headerLogoutHref = '../../logout.php';
-    $headerBackUrl   = '../../dashboard.php';
-    $headerBackLabel = 'Volver al Dashboard';
-    include '../../includes/header.php';
-    ?>
-
     <div class="main-content">
+        <!-- Header -->
+        <?php
+        $headerLogoHref  = '../../dashboard.php';
+        $headerLogoutHref = '../../logout.php';
+        $headerBackUrl   = '../../dashboard.php';
+        $headerBackLabel = 'Volver al Dashboard';
+        include '../../includes/header.php';
+        ?>
+
         <div style="padding: var(--space-8); max-width: 1400px; margin: 0 auto;">
 
             <!-- Page Title -->

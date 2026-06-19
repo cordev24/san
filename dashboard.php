@@ -8,8 +8,14 @@ $tasa_bcv = getBcvRate();
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Dashboard</title>
 
     <!-- Offline Styles -->
@@ -72,6 +78,68 @@ $tasa_bcv = getBcvRate();
         <!-- User Dashboard Content -->
         <div style="padding: var(--space-8); max-width: 1600px; margin: 0 auto;">
 
+            <?php
+            // Alerta de API caída para administradores
+            if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') {
+                $stmtApiStatus = $pdo->query("SELECT valor FROM configuracion WHERE clave = 'bcv_api_status'");
+                $statusRow = $stmtApiStatus->fetch();
+                if ($statusRow && $statusRow['valor'] === 'down') {
+                    // Obtener la tasa y fecha más recientes para mostrarla en el banner
+                    $lastRateVal = 75.00;
+                    $lastRateDate = '-';
+                    $stmtLastTasa = $pdo->query("SELECT tasa, fecha FROM tasas_cambio ORDER BY fecha DESC, id DESC LIMIT 1");
+                    if ($rowLastTasa = $stmtLastTasa->fetch()) {
+                        $lastRateVal = (float)$rowLastTasa['tasa'];
+                        $lastRateDate = $rowLastTasa['fecha'];
+                    }
+                    ?>
+                    <div class="animate-slide-up" style="
+                        background: rgba(239, 68, 68, 0.1);
+                        border: 1px solid var(--color-salmon);
+                        border-radius: var(--radius-lg);
+                        padding: var(--space-4) var(--space-6);
+                        margin-bottom: var(--space-6);
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: var(--space-4);
+                        backdrop-filter: blur(10px);
+                    ">
+                        <div style="display: flex; align-items: center; gap: var(--space-3);">
+                            <div style="
+                                width: 36px;
+                                height: 36px;
+                                border-radius: var(--radius-md);
+                                background: rgba(239, 68, 68, 0.15);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: var(--color-salmon);
+                                flex-shrink: 0;
+                            ">
+                                <svg style="width: 20px; height: 20px; stroke: currentColor; stroke-width: 2;">
+                                    <use href="#icon-alert-triangle"></use>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 style="font-weight: 700; color: var(--color-text-primary); font-size: var(--font-size-sm); margin-bottom: 2px;">
+                                    La API del Banco Central de Venezuela (BCV) no está disponible
+                                </h4>
+                                <p style="color: var(--color-text-secondary); font-size: var(--font-size-xs);">
+                                    Se está utilizando la última tasa registrada de <strong>Bs. <?php echo number_format($lastRateVal, 2); ?></strong> del <strong><?php echo $lastRateDate; ?></strong>. Por favor, registre la tasa manualmente para evitar pérdidas.
+                                </p>
+                            </div>
+                        </div>
+                        <a href="modules/comprobantes/index.php" class="btn btn-salmon" style="font-size: var(--font-size-xs); padding: var(--space-2) var(--space-4); flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
+                            <svg style="width: 14px; height: 14px; stroke: currentColor;"><use href="#icon-edit"></use></svg>
+                            Registrar Tasa Manual
+                        </a>
+                    </div>
+                    <?php
+                }
+            }
+            ?>
+
             <!-- SECTION: CATEGORÍAS DE GRUPOS SAN -->
             <div class="dashboard-section" style="margin-bottom: var(--space-10);">
                 <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
@@ -83,7 +151,7 @@ $tasa_bcv = getBcvRate();
                     <!-- Dynamic Groups Loop -->
                     <?php
                     $stmt = $pdo->query("
-                        SELECT gs.*, p.nombre as producto_nombre, p.categoria_id, c.nombre as categoria_nombre, c.color as categoria_color
+                        SELECT gs.*, p.nombre as producto_nombre, p.imagen as producto_imagen, p.categoria_id, c.nombre as categoria_nombre, c.color as categoria_color
                         FROM grupos_san gs
                         JOIN productos p ON gs.producto_id = p.id
                         JOIN categorias c ON p.categoria_id = c.id
@@ -116,8 +184,19 @@ $tasa_bcv = getBcvRate();
                     ?>
                         <!-- <?php echo htmlspecialchars($grupo['nombre']); ?> Group -->
                         <div class="bento-box <?php echo $bento_class; ?> module-card animate-slide-up"
-                            style="animation-delay: <?php echo $delay; ?>ms; cursor: pointer;"
+                            style="animation-delay: <?php echo $delay; ?>ms; cursor: pointer; overflow: hidden;"
                             onclick="location.href='modules/categoria/grupo.php?id=<?php echo $cat_id; ?>&grupo_id=<?php echo $grupo_id; ?>'">
+
+                            <?php if (!empty($grupo['producto_imagen'])): ?>
+                            <div style="margin: -24px -24px 16px -24px; height: 160px; background: var(--color-background); border-bottom: 1px solid var(--glass-border); position:relative; cursor:zoom-in; overflow:hidden; padding: 12px; display: flex; align-items: center; justify-content: center;"
+                                 onclick="event.stopPropagation(); viewGallery(<?php echo (int)$grupo['producto_id']; ?>, '<?php echo htmlspecialchars(addslashes($grupo['producto_nombre'])); ?>')">
+                                <img src="<?php echo htmlspecialchars(ltrim($grupo['producto_imagen'] ?? '', '/')); ?>" alt="<?php echo htmlspecialchars($grupo['producto_nombre']); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;">
+                                    <svg style="width:11px;height:11px;stroke:#fff;stroke-width:2.5;"><use href="#icon-image"></use></svg>Ver galería
+                                </span>
+                            </div>
+                            <?php endif; ?>
+
 
                             <div class="bento-header">
                                 <div class="bento-title">
@@ -418,6 +497,7 @@ $tasa_bcv = getBcvRate();
             </div>
         </div>
     </div>
+    <script src="assets/js/shared.js"></script>
 </body>
 
 </html>

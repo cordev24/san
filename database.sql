@@ -13,6 +13,10 @@ CREATE TABLE usuarios (
     email VARCHAR(100) UNIQUE,
     pregunta_secreta TEXT,
     respuesta_secreta VARCHAR(255),
+    pregunta_secreta_2 TEXT,
+    respuesta_secreta_2 VARCHAR(255),
+    pregunta_secreta_3 TEXT,
+    respuesta_secreta_3 VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -124,6 +128,7 @@ CREATE TABLE pagos (
     FOREIGN KEY (participante_id) REFERENCES participantes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- @deprecated: El módulo de turnos aleatorios fue reemplazado por asignación de orden de inscripción.
 -- Tabla de Turnos (Sorteos)
 CREATE TABLE turnos (
     id INT AUTO_INCREMENT PRIMARY KEY,

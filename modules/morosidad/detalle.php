@@ -67,8 +67,14 @@ function severityClass($dias) {
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan — <?php echo htmlspecialchars($participante['nombre'] . ' ' . $participante['apellido']); ?> (Mora)</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -703,7 +709,7 @@ function severityClass($dias) {
                                     <svg class="icon"><use href="#icon-users"></use></svg>
                                     Ir al Grupo
                                 </a>
-                                <a href="index.php" class="btn btn-outline">
+                                <a href="index.php" class="btn btn-outline" onclick="if(document.referrer) { window.history.back(); return false; }">
                                     <svg class="icon"><use href="#icon-arrow-left"></use></svg>
                                     Volver a Morosidad
                                 </a>

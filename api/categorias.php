@@ -79,6 +79,11 @@ function getCategoria()
         return;
     }
 
+    // Obtener productos asociados a la categoría
+    $stmtProd = $pdo->prepare("SELECT * FROM productos WHERE categoria_id = ? AND activo = 1 ORDER BY nombre ASC");
+    $stmtProd->execute([$id]);
+    $categoria['productos'] = $stmtProd->fetchAll();
+
     jsonResponse(true, 'Categoría obtenida', ['categoria' => $categoria]);
 }
 

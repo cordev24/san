@@ -68,8 +68,14 @@ if ($grupo_seleccionado) {
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Pagos <?php echo htmlspecialchars($categoria['nombre']); ?></title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -366,16 +372,12 @@ if ($grupo_seleccionado) {
                         placeholder="Notas adicionales (opcional)"></textarea>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('registrarPagoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-violeta"><svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
                         Registrar Pago
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('registrarPagoModal')"
-                        style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>

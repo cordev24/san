@@ -24,16 +24,18 @@ if (!$perfil) {
     exit;
 }
 
-// Fetch groups membership
+// Fetch groups membership with category info
 $stmtGrupos = $pdo->prepare("
     SELECT 
         p.id as participante_id, p.activo, p.ha_recibido, p.fecha_entrega,
         gs.id as grupo_id, gs.nombre as grupo_nombre, gs.estado as grupo_estado, 
-        gs.monto_cuota, gs.frecuencia,
-        pr.nombre as producto_nombre
+        gs.monto_cuota, gs.frecuencia, gs.numero_cuotas, gs.ronda_actual,
+        pr.nombre as producto_nombre, pr.id as producto_id,
+        c.id as categoria_id, c.nombre as categoria_nombre
     FROM participantes p
     JOIN grupos_san gs ON p.grupo_san_id = gs.id
     JOIN productos pr ON gs.producto_id = pr.id
+    JOIN categorias c ON pr.categoria_id = c.id
     WHERE p.cedula = ?
     ORDER BY gs.created_at DESC
 ");
@@ -44,8 +46,14 @@ $membresias = $stmtGrupos->fetchAll(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Perfil Participante</title>
 
     <!-- Offline Styles -->
@@ -140,8 +148,8 @@ $membresias = $stmtGrupos->fetchAll(PDO::FETCH_ASSOC);
 
     <?php
     $headerLogoHref   = 'index.php';
-    $headerActionText = 'Volver al Directorio';
-    $headerActionHref = 'index.php';
+    $headerBackLabel = 'Volver al Directorio';
+    $headerBackUrl = 'index.php';
     include '../../includes/header.php';
     ?>
 
@@ -198,7 +206,7 @@ $membresias = $stmtGrupos->fetchAll(PDO::FETCH_ASSOC);
                                     <span class="badge" style="background:#ff6464;color:white;">Inhabilitado</span>
                                 <?php endif; ?>
                             </div>
-                            <a href="../categoria/pagos.php?grupo_id=<?php echo $mem['grupo_id']; ?>" class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;">
+                            <a href="../categoria/pagos.php?id=<?php echo $mem['categoria_id']; ?>&amp;grupo_id=<?php echo $mem['grupo_id']; ?>" class="btn btn-outline" style="font-size: 12px; padding: 6px 12px;">
                                 Ver Pagos del Participante
                             </a>
                         </div>

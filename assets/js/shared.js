@@ -237,3 +237,264 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ── Impresión global de comprobantes ──────────────────────────────────────────
+function imprimirRecibo(id) {
+    window.open(`../../api/comprobantes.php?action=recibo&id=${id}`, '_blank');
+}
+
+function descargarComprobantePDF(id) {
+    window.open(`../../api/comprobantes.php?action=pdf&id=${id}`, '_blank');
+}
+
+// ── Global Gallery Lightbox ───────────────────────────────────────────────────
+// Injects modal HTML once into the DOM, then reuses it from any page/depth.
+
+function ensureGalleryModal() {
+    if (document.getElementById('globalGalleryModal')) return;
+
+    const html = `
+    <style>
+        #globalGalleryModal .ggm-content {
+            background: var(--color-surface,#1a1a1a);
+            border: 1px solid var(--glass-border,rgba(255,255,255,.1));
+            border-radius: var(--radius-xl,16px);
+            padding: var(--space-6,24px);
+            max-width: 900px;
+            width: 96vw;
+            max-height: 96vh;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4,16px);
+            position: relative;
+        }
+        @media (max-width: 768px) {
+            #globalGalleryModal .ggm-content {
+                width: 100vw;
+                height: 100vh;
+                max-width: none;
+                max-height: none;
+                border-radius: 0;
+                padding: var(--space-4, 16px);
+                border: none;
+            }
+            #ggm-main-wrap { max-height: 65vh !important; }
+        }
+    </style>
+    <div id="globalGalleryModal" class="modal-overlay" style="z-index:9999;">
+        <div class="ggm-content">
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:var(--space-3,12px);">
+                    <div style="
+                        width:36px;height:36px;border-radius:var(--radius-md,8px);
+                        background:var(--color-primary-tint,rgba(139,92,246,.15));
+                        border:1px solid var(--color-primary-glow,rgba(139,92,246,.3));
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                    ">
+                        <svg style="width:18px;height:18px;stroke:var(--color-primary,#8b5cf6);stroke-width:2;">
+                            <use href="#icon-image"></use>
+                        </svg>
+                    </div>
+                    <div>
+                        <div id="ggm-title" style="font-weight:700;font-size:var(--font-size-lg,18px);color:var(--color-text-primary,#fff);"></div>
+                        <div id="ggm-counter" style="font-size:var(--font-size-xs,12px);color:var(--color-text-tertiary,#666);margin-top:2px;"></div>
+                    </div>
+                </div>
+                <button onclick="closeGalleryModal()" style="
+                    width:36px;height:36px;border:1px solid var(--glass-border,rgba(255,255,255,.1));
+                    border-radius:var(--radius-md,8px);background:transparent;cursor:pointer;
+                    display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary,#aaa);
+                    transition:all .15s;
+                " onmouseover="this.style.background='var(--color-surface-hover,rgba(255,255,255,.05))'"
+                   onmouseout="this.style.background='transparent'">
+                    <svg style="width:18px;height:18px;stroke:currentColor;stroke-width:2;">
+                        <use href="#icon-x"></use>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Main image -->
+            <div id="ggm-main-wrap" style="
+                flex: 1 1 auto;
+                min-height: 400px; /* Minimum height ensures it does not collapse */
+                border-radius: var(--radius-lg,12px);
+                background: var(--color-background,#0d0d0d);
+                position: relative;
+                overflow: hidden;
+                cursor: zoom-in;
+            " onwheel="ggmZoom(event)">
+                <img id="ggm-main" src="" alt="" style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    padding: 16px; /* Safety margin */
+                    box-sizing: border-box;
+                    transition: opacity .2s, transform 0.15s ease-out;
+                    border-radius: var(--radius-md,8px);
+                ">
+                <!-- Prev / Next arrows -->
+                <button id="ggm-prev" onclick="ggmNav(-1)" style="
+                    position:absolute;left:var(--space-3,12px);top:50%;transform:translateY(-50%);
+                    width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
+                    background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+                    display:flex;align-items:center;justify-content:center;
+                    color:#fff;transition:all .15s;
+                ">
+                    <svg style="width:20px;height:20px;stroke:currentColor;stroke-width:2.5;"><use href="#icon-chevron-left"></use></svg>
+                </button>
+                <button id="ggm-next" onclick="ggmNav(1)" style="
+                    position:absolute;right:var(--space-3,12px);top:50%;transform:translateY(-50%);
+                    width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
+                    background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+                    display:flex;align-items:center;justify-content:center;
+                    color:#fff;transition:all .15s;
+                ">
+                    <svg style="width:20px;height:20px;stroke:currentColor;stroke-width:2.5;"><use href="#icon-chevron-right"></use></svg>
+                </button>
+            </div>
+
+            <!-- Thumbnails strip -->
+            <div id="ggm-thumbs" style="
+                display:flex;gap:var(--space-2,8px);overflow-x:auto;
+                padding-bottom:4px;flex-shrink:0;
+            "></div>
+        </div>
+    </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+
+    // Close on backdrop click
+    document.getElementById('globalGalleryModal').addEventListener('click', function(e) {
+        if (e.target === this) closeGalleryModal();
+    });
+}
+
+// State
+let _ggmImages = [];
+let _ggmIndex  = 0;
+
+function ggmSetIndex(i) {
+    _ggmIndex = i;
+    const img  = document.getElementById('ggm-main');
+    const wrap = document.getElementById('ggm-main-wrap');
+    const thumbs = document.getElementById('ggm-thumbs');
+    const counter = document.getElementById('ggm-counter');
+
+    img.style.opacity = '0';
+    setTimeout(() => {
+        _ggmScale = 1;
+        img.style.transform = 'scale(1)';
+        img.src = _ggmImages[i].ruta;
+        img.style.opacity = '1';
+    }, 120);
+
+    counter.textContent = `${i + 1} / ${_ggmImages.length}`;
+
+    Array.from(thumbs.children).forEach((t, idx) => {
+        t.style.border = idx === i
+            ? '2px solid var(--color-primary,#8b5cf6)'
+            : '2px solid transparent';
+        t.style.opacity = idx === i ? '1' : '0.6';
+    });
+
+    // Show/hide arrows
+    const showNav = _ggmImages.length > 1;
+    document.getElementById('ggm-prev').style.display = showNav ? 'flex' : 'none';
+    document.getElementById('ggm-next').style.display = showNav ? 'flex' : 'none';
+}
+
+function ggmNav(dir) {
+    let next = (_ggmIndex + dir + _ggmImages.length) % _ggmImages.length;
+    ggmSetIndex(next);
+}
+
+function closeGalleryModal() {
+    const m = document.getElementById('globalGalleryModal');
+    if (m) m.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+let _ggmScale = 1;
+function ggmZoom(e) {
+    e.preventDefault();
+    _ggmScale += e.deltaY * -0.002;
+    _ggmScale = Math.min(Math.max(1, _ggmScale), 5); // No menos de 1
+    const img = document.getElementById('ggm-main');
+    if(img) img.style.transform = `scale(${_ggmScale})`;
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    const m = document.getElementById('globalGalleryModal');
+    if (!m || !m.classList.contains('active')) return;
+    if (e.key === 'ArrowRight') ggmNav(1);
+    if (e.key === 'ArrowLeft')  ggmNav(-1);
+    if (e.key === 'Escape')     closeGalleryModal();
+});
+
+/**
+ * Opens the gallery lightbox for a product.
+ * Works from any page depth — uses absolute API path.
+ * @param {number} productoId
+ * @param {string} title
+ */
+async function viewGallery(productoId, title) {
+    ensureGalleryModal();
+
+    try {
+        const res  = await fetch(`/api/productos.php?action=get&id=${productoId}`);
+        const data = await res.json();
+
+        if (!data.success) {
+            showNotification(data.message || 'No se pudo cargar la galería', 'error');
+            return;
+        }
+
+        const producto = data.data.producto;
+        let imagenes   = producto.imagenes || [];
+
+        // Fallback: si no hay galería pero sí portada
+        if (imagenes.length === 0 && producto.imagen) {
+            imagenes = [{ ruta: producto.imagen }];
+        }
+
+        if (imagenes.length === 0) {
+            showNotification('Este producto no tiene imágenes cargadas', 'info');
+            return;
+        }
+
+        // Build thumb strip
+        const thumbsEl = document.getElementById('ggm-thumbs');
+        thumbsEl.innerHTML = '';
+        _ggmImages = imagenes;
+
+        imagenes.forEach((img, idx) => {
+            const t = document.createElement('img');
+            t.src = img.ruta;  // absolute path from DB
+            t.alt = `Imagen ${idx + 1}`;
+            t.style.cssText = `
+                width:72px;height:72px;object-fit:cover;flex-shrink:0;
+                border-radius:var(--radius-md,8px);cursor:pointer;
+                transition:all .15s;border:2px solid transparent;
+            `;
+            t.onclick = () => ggmSetIndex(idx);
+            t.onerror = () => { t.style.opacity = '0.3'; };
+            thumbsEl.appendChild(t);
+        });
+
+        document.getElementById('ggm-title').textContent = title || producto.nombre;
+        ggmSetIndex(0);
+
+        // Open
+        document.getElementById('globalGalleryModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+    } catch (err) {
+        console.error('viewGallery error:', err);
+        showNotification('Error de conexión al cargar la galería', 'error');
+    }
+}

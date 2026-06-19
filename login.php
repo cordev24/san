@@ -2,8 +2,14 @@
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Iniciar Sesión</title>
 
     <!-- Offline Styles -->
@@ -17,8 +23,8 @@
         .login-container {
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: var(--space-4);
+            box-sizing: border-box;
             position: relative;
         }
 
@@ -26,11 +32,41 @@
             width: 100%;
             max-width: 420px;
             padding: var(--space-8);
+            margin: auto;
         }
 
         .login-logo {
             text-align: center;
             margin-bottom: var(--space-8);
+        }
+
+        .logo-mark {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto var(--space-4);
+            background: linear-gradient(135deg, var(--color-violeta), hsl(260, 70%, 50%));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px hsla(270, 80%, 65%, 0.25);
+            position: relative;
+        }
+
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, hsla(270, 80%, 65%, 0.3), hsla(160, 60%, 60%, 0.1));
+            z-index: -1;
+        }
+
+        .logo-mark svg {
+            width: 28px;
+            height: 28px;
+            stroke: white;
+            stroke-width: 2;
         }
 
         .login-logo h1 {
@@ -41,6 +77,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: var(--space-2);
+            letter-spacing: -0.02em;
         }
 
         .login-logo p {
@@ -70,10 +107,12 @@
     <!-- Icon Sprite -->
     <?php include 'assets/icons/feather-sprite.svg'; ?>
 
-    <div class="main-content">
-        <div class="login-container">
-            <div class="bento-box bento-floating login-box">
+    <div class="login-container">
+        <div class="bento-box bento-floating login-box">
                 <div class="login-logo">
+                    <div class="logo-mark">
+                        <svg><use href="#icon-dollar-sign"></use></svg>
+                    </div>
                     <h1>MySan</h1>
                     <p>Sistema de Administración de Ahorros Grupales</p>
                 </div>
@@ -111,13 +150,35 @@
                     </button>
                 </form>
 
-                <div style="margin-top: var(--space-4); text-align: center;">
+                <div style="margin-top: var(--space-5); text-align: center; display: flex; flex-direction: column; gap: var(--space-3);">
                     <a href="recuperar-password.php"
                         style="color: var(--color-menta); font-size: var(--font-size-sm); text-decoration: underline;">
                         ¿Olvidaste tu contraseña?
                     </a>
+                    <div style="display: flex; align-items: center; gap: var(--space-3); opacity: 0.4;">
+                        <span style="flex:1; height:1px; background: var(--glass-border);"></span>
+                        <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">o</span>
+                        <span style="flex:1; height:1px; background: var(--glass-border);"></span>
+                    </div>
+                    <a href="registro.php"
+                        style="color: var(--color-text-secondary); font-size: var(--font-size-sm); transition: color var(--transition-base);"
+                        onmouseover="this.style.color='var(--color-violeta)'"
+                        onmouseout="this.style.color='var(--color-text-secondary)'">
+                        ¿No tienes cuenta? <strong style="color: var(--color-violeta);">Regístrate aquí</strong>
+                    </a>
+                    <div style="display: flex; align-items: center; gap: var(--space-3); opacity: 0.4;">
+                        <span style="flex:1; height:1px; background: var(--glass-border);"></span>
+                        <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">o</span>
+                        <span style="flex:1; height:1px; background: var(--glass-border);"></span>
+                    </div>
+                    <a href="catalogo.php"
+                        style="color: var(--color-text-secondary); font-size: var(--font-size-sm); transition: color var(--transition-base);"
+                        onmouseover="this.style.color='var(--color-menta)'"
+                        onmouseout="this.style.color='var(--color-text-secondary)'">
+                        <svg class="icon" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px; stroke: currentColor;"><use href="#icon-arrow-left"></use></svg>
+                        Volver al Catálogo
+                    </a>
                 </div>
-            </div>
         </div>
     </div>
 

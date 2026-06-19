@@ -11,7 +11,8 @@ $categoria_id = $categoria['id'];
 
 // Get telefonia products
 $stmt = $pdo->prepare("
-    SELECT p.*, c.nombre as categoria_nombre, c.color
+    SELECT p.*, c.nombre as categoria_nombre, c.color,
+           (SELECT COUNT(*) FROM productos_imagenes pi WHERE pi.producto_id = p.id) as imagenes_count
     FROM productos p
     JOIN categorias c ON p.categoria_id = c.id
     WHERE c.nombre = 'Telefonia' AND p.activo = TRUE
@@ -21,7 +22,7 @@ $productos = $stmt->fetchAll();
 
 // Get active groups
 $stmt = $pdo->prepare("
-    SELECT gs.*, p.nombre as producto_nombre, p.marca as producto_marca, p.modelo as producto_modelo
+    SELECT gs.*, p.nombre as producto_nombre, p.imagen as producto_imagen, p.marca as producto_marca, p.modelo as producto_modelo
     FROM grupos_san gs
     JOIN productos p ON gs.producto_id = p.id
     JOIN categorias c ON p.categoria_id = c.id
@@ -34,8 +35,14 @@ $grupos = $stmt->fetchAll();
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Telefonia</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -148,6 +155,7 @@ $grupos = $stmt->fetchAll();
             flex-direction: column;
             gap: var(--space-4);
             position: relative;
+            overflow: hidden;
         }
 
         .group-card:hover {
@@ -245,6 +253,53 @@ $grupos = $stmt->fetchAll();
             border-color: #ff6464;
             color: #ff6464;
         }
+
+        /* ── Image support for product card ── */
+        .card-img-strip {
+            position: relative;
+            margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) var(--space-3);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            overflow: hidden;
+            height: 180px;
+            background: var(--color-background);
+            cursor: zoom-in;
+        }
+
+        .card-img-strip img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-base);
+        }
+
+        .product-card:hover .card-img-strip img {
+            transform: scale(1.05);
+        }
+
+        .card-img-strip .img-count-badge {
+            position: absolute;
+            bottom: var(--space-2);
+            right: var(--space-2);
+            background: rgba(0,0,0,0.65);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: var(--radius-full);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-img-strip .img-count-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .card-img-strip--fallback {
+            display: none;
+        }
     </style>
 </head>
 
@@ -334,11 +389,20 @@ $grupos = $stmt->fetchAll();
                                             <button class="btn-action btn-action-danger"
                                                 onclick="event.stopPropagation(); eliminarGrupo(<?php echo $grupo['id']; ?>)"
                                                 title="Eliminar Grupo">
-                                                <svg class="icon" style="width: 16px; height: 16px;">
+                                                <svg class="icon">
                                                     <use href="#icon-trash-2"></use>
                                                 </svg>
                                             </button>
                                         </div>
+                                        <?php if (!empty($grupo['producto_imagen'])): ?>
+                                        <div style="margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) 0; height: 140px; background: var(--color-background); border-bottom: 1px solid var(--glass-border); position:relative; cursor:zoom-in; overflow:hidden; padding: 12px; display: flex; align-items: center; justify-content: center;"
+                                             onclick="event.stopPropagation(); viewGallery(<?php echo (int)$grupo['producto_id']; ?>, '<?php echo htmlspecialchars(addslashes($grupo['producto_nombre'])); ?>')">
+                                            <img src="../../<?php echo htmlspecialchars(ltrim($grupo['producto_imagen'] ?? '', '/')); ?>" alt="<?php echo htmlspecialchars($grupo['producto_nombre']); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                            <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;">
+                                                <svg style="width:11px;height:11px;stroke:#fff;stroke-width:2.5;"><use href="#icon-image"></use></svg>Ver galería
+                                            </span>
+                                        </div>
+                                        <?php endif; ?>
                                         <div class="group-header">
                                             <div class="group-icon">
                                                 <svg class="icon-lg" style="stroke: var(--color-menta);">
@@ -409,6 +473,20 @@ $grupos = $stmt->fetchAll();
                                             </svg>
                                         </button>
                                     </div>
+                                    <?php if ($producto['imagen']): ?>
+                                        <div class="card-img-strip" onclick="event.stopPropagation(); viewGallery(<?php echo $producto['id']; ?>, '<?php echo htmlspecialchars(addslashes($producto['nombre'])); ?>')">
+                                            <img src="../../<?php echo htmlspecialchars(ltrim($producto['imagen'] ?? '', '/')); ?>"
+                                                 alt="<?php echo htmlspecialchars($producto['nombre']); ?>"
+                                                 loading="lazy"
+                                                 onerror="this.parentElement.classList.add('card-img-strip--fallback')">
+                                            <?php if (($producto['imagenes_count'] ?? 0) > 1): ?>
+                                                <span class="img-count-badge">
+                                                    <svg><use href="#icon-grid"></use></svg>
+                                                    +<?php echo (int)$producto['imagenes_count'] - 1; ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
                                     <div class="product-header">
                                         <div class="product-icon">
                                             <svg class="icon-lg" style="stroke: var(--color-menta);">
@@ -451,14 +529,15 @@ $grupos = $stmt->fetchAll();
                     </svg>
                 </button>
             </div>
-            <form id="nuevoGrupoForm">
+            <form id="nuevoGrupoForm" data-siguiente-num="<?php echo count($grupos) + 1; ?>">
                 <div class="form-group">
                     <label class="form-label">Producto *</label>
                     <select id="producto_id" name="producto_id" class="form-select" required>
                         <option value="">-- Selecciona un producto --</option>
                         <?php foreach ($productos as $producto): ?>
                             <option value="<?php echo $producto['id']; ?>"
-                                data-valor="<?php echo $producto['valor_total']; ?>">
+                                data-valor="<?php echo $producto['valor_total']; ?>"
+                                data-nombre="<?php echo htmlspecialchars($producto['nombre']); ?>">
                                 <?php echo htmlspecialchars($producto['nombre']); ?> -
                                 <?php echo formatMoneyBcv($producto['valor_total']); ?>
                             </option>
@@ -499,16 +578,12 @@ $grupos = $stmt->fetchAll();
                     </div>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('nuevoGrupoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta"><svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
                         Crear Grupo
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoGrupoModal')"
-                        style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>
@@ -568,16 +643,12 @@ $grupos = $stmt->fetchAll();
                     <textarea name="direccion" class="form-input" rows="3" placeholder="Dirección completa"></textarea>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoParticipanteModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta"><svg class="icon">
                             <use href="#icon-user-plus"></use>
                         </svg>
                         Inscribir
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoParticipanteModal')"
-                        style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>
@@ -625,16 +696,12 @@ $grupos = $stmt->fetchAll();
                         placeholder="1200.00">
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoProductoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta"><svg class="icon">
                             <use href="#icon-plus"></use>
                         </svg>
                         Agregar
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevoProductoModal')"
-                        style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>
@@ -682,16 +749,12 @@ $grupos = $stmt->fetchAll();
                         step="0.01">
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editarProductoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta"><svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
                         Guardar Cambios
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editarProductoModal')"
-                        style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>
@@ -730,16 +793,12 @@ $grupos = $stmt->fetchAll();
                     </select>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editarGrupoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta"><svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
                         Guardar Cambios
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editarGrupoModal')"
-                        style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>
@@ -749,6 +808,7 @@ $grupos = $stmt->fetchAll();
     </div>
 
     <!-- Shared Scripts -->
+    <script src="../../assets/js/shared.js"></script>
     <script src="../../assets/js/grupos.js?v=3"></script>
     <script src="../../assets/js/participantes.js"></script>
     <script src="../../assets/js/productos.js"></script>

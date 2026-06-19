@@ -36,7 +36,7 @@ $participante_id = $participante['participante_id'];
 
 // ── Fetch group info ──────────────────────────────────────────────────────
 $stmt = $pdo->prepare("
-    SELECT gs.*, pr.nombre as producto_nombre, c.nombre as categoria_nombre, c.color as categoria_color,
+    SELECT gs.*, pr.nombre as producto_nombre, pr.imagen as producto_imagen, c.nombre as categoria_nombre, c.color as categoria_color,
            (SELECT COUNT(*) FROM participantes WHERE grupo_san_id = gs.id AND activo = 1) as total_miembros
     FROM grupos_san gs
     JOIN productos pr ON gs.producto_id = pr.id
@@ -138,8 +138,14 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan — <?php echo htmlspecialchars($grupo['nombre']); ?></title>
 
     <link rel="stylesheet" href="assets/fonts/inter.css">
@@ -176,6 +182,8 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-decoration: none;
+            writing-mode: horizontal-tb;
+            transform: none;
         }
 
         @media (max-width: 768px) {
@@ -506,18 +514,18 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
             <a href="dashboard_participante.php" class="header-logo">MySan</a>
 
             <div class="user-nav">
-                <!-- Back link -->
-                <a href="dashboard_participante.php" class="btn btn-outline" style="font-size:var(--font-size-xs);padding:var(--space-2) var(--space-3);white-space:nowrap;text-decoration:none;">
-                    <svg class="icon"><use href="#icon-arrow-left"></use></svg>
-                    Volver
+                <!-- Unirse a un San -->
+                <a href="sanes-disponibles.php" class="btn btn-menta" style="font-size:var(--font-size-xs); padding: var(--space-2) var(--space-3); white-space:nowrap; text-decoration:none;">
+                    <svg class="icon"><use href="#icon-user-plus"></use></svg>
+                    Unirse a un San
                 </a>
 
                 <!-- Notificaciones -->
                 <?php include 'includes/notificaciones_participante.php'; ?>
 
-                <div style="border-left:1px solid var(--glass-border);padding-left:var(--space-4);margin-left:var(--space-2);">
-                    <div style="font-weight:bold;font-size:var(--font-size-sm);"><?php echo htmlspecialchars($user['nombre']); ?></div>
-                    <a href="logout.php" style="color:var(--color-salmon);font-size:var(--font-size-xs);text-decoration:none;">Cerrar Sesión</a>
+                <div style="border-left: 1px solid var(--glass-border); padding-left: var(--space-4); margin-left: var(--space-2);">
+                    <div style="font-weight: bold; font-size: var(--font-size-sm);"><?php echo htmlspecialchars($user['nombre']); ?></div>
+                    <a href="logout.php" style="color: var(--color-salmon); font-size: var(--font-size-xs); text-decoration: none;">Cerrar Sesión</a>
                 </div>
             </div>
         </div>
@@ -526,15 +534,44 @@ $grupo_estado_color_hex = $estado_color[$grupo['estado']] ?? 'var(--color-text-t
     <!-- ══ MAIN CONTENT ═══════════════════════════════════════════════════ -->
     <div class="page-container">
 
+
+
         <!-- ══ HERO ══════════════════════════════════════════════════════ -->
         <div class="grupo-hero">
             <div class="grupo-hero-banner"></div>
             <div class="grupo-hero-body">
                 <div class="grupo-hero-left">
-                    <div class="grupo-hero-icon">
-                        <svg style="width:32px;height:32px;stroke:var(--color-primary);stroke-width:1.8;">
-                            <use href="#icon-grid"></use>
-                        </svg>
+                    <div class="grupo-hero-gallery" style="display: flex; flex-direction: column; gap: 8px;">
+                        <?php
+                        $stmtImg = $pdo->prepare("SELECT ruta FROM productos_imagenes WHERE producto_id = ? ORDER BY orden ASC, id ASC");
+                        $stmtImg->execute([$grupo['producto_id']]);
+                        $imagenes = $stmtImg->fetchAll(PDO::FETCH_COLUMN);
+                        
+                        if (empty($imagenes) && !empty($grupo['producto_imagen'])) {
+                            $imagenes[] = $grupo['producto_imagen'];
+                        }
+                        
+                        if (!empty($imagenes)):
+                        ?>
+                        <div class="grupo-hero-icon" style="overflow: hidden; background: var(--color-background); border: 2px solid var(--glass-border); position: relative; cursor: zoom-in; display: flex; align-items: center; justify-content: center; padding: 6px; width: 100px; height: 100px;"
+                             onclick="event.stopPropagation(); viewGallery(<?php echo (int)$grupo['producto_id']; ?>, '<?php echo htmlspecialchars(addslashes($grupo['producto_nombre'])); ?>')">
+                            <img id="hero-main-img" src="<?php echo htmlspecialchars(ltrim($imagenes[0] ?? '', '/')); ?>" alt="Producto" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            <span style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;padding:4px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+                                <svg style="width:12px;height:12px;stroke:#fff;stroke-width:2.5;"><use href="#icon-zoom-in"></use></svg>
+                            </span>
+                        </div>
+                        <?php if(count($imagenes) > 1): ?>
+                        <div class="hero-thumbs" style="display:flex;gap:4px;overflow-x:auto;max-width:100px;">
+                            <?php foreach ($imagenes as $idx => $ruta): ?>
+                                <img src="<?php echo htmlspecialchars(ltrim($ruta ?? '', '/')); ?>" alt="Miniatura <?php echo $idx+1; ?>" style="width:30px;height:30px;min-width:30px;object-fit:cover;border-radius:4px;border:1px solid var(--glass-border);cursor:pointer;" onclick="document.getElementById('hero-main-img').src=this.src;" />
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+                        <?php else: ?>
+                        <div class="grupo-hero-icon" style="overflow: hidden; background: var(--color-background); border: 2px solid var(--glass-border); display: flex; align-items: center; justify-content: center; padding: 6px;">
+                            <svg style="width:32px;height:32px;stroke:var(--color-primary);stroke-width:1.8;"><use href="#icon-grid"></use></svg>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <div class="grupo-hero-name"><?php echo htmlspecialchars($grupo['nombre']); ?></div>

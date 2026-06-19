@@ -9,20 +9,20 @@
        ============================================ */
 
     /* Primary (El Azul preferido) */
-    --color-primary:       #1960c3;
-    --color-primary-mid:   #1f78f0;
-    --color-primary-light: #4994f5;
-    --color-primary-dim:   #104085;
-    --color-primary-glow:  rgba(25, 96, 195, 0.18);
-    --color-primary-tint:  rgba(25, 96, 195, 0.05);
+    --color-primary:       #3b82f6;
+    --color-primary-mid:   #2563eb;
+    --color-primary-light: #60a5fa;
+    --color-primary-dim:   #1d4ed8;
+    --color-primary-glow:  rgba(59, 130, 246, 0.25);
+    --color-primary-tint:  rgba(59, 130, 246, 0.1);
 
     /* Secondary (El Verde original) */
-    --color-secondary:       #06543f;
-    --color-secondary-mid:   #087557;
-    --color-secondary-light: #0a9670;
-    --color-secondary-dim:   #043628;
-    --color-secondary-glow:  rgba(6, 84, 63, 0.15);
-    --color-secondary-tint:  rgba(6, 84, 63, 0.05);
+    --color-secondary:       #10b981;
+    --color-secondary-mid:   #059669;
+    --color-secondary-light: #34d399;
+    --color-secondary-dim:   #047857;
+    --color-secondary-glow:  rgba(16, 185, 129, 0.25);
+    --color-secondary-tint:  rgba(16, 185, 129, 0.1);
 
     /* Accent (El Amarillo) */
     --color-accent:       #fcd34d;
@@ -71,37 +71,37 @@
     --color-salmon-glow: var(--color-accent-glow);
 
     /* ============================================
-       SURFACES
+       SURFACES (Light Mode Premium)
        ============================================ */
 
-    --color-background:         #f8fafc;   /* Slate/White background for blue harmony */
-    --color-surface:            #ffffff;   /* Pure white cards */
-    --color-surface-elevated:   #ffffff;
-    --color-surface-hover:      #f1f5f9;   /* Slate tint for hover */
-    --color-surface-section:    #e2e8f0;
+    --color-background:         #F8FAFC;   /* Soft slate/white background */
+    --color-surface:            #FFFFFF;   /* Pure white cards */
+    --color-surface-elevated:   #FFFFFF;
+    --color-surface-hover:      #F1F5F9;   /* Slate tint for hover */
+    --color-surface-section:    #E2E8F0;
 
     /* Glassmorphism */
     --glass-background: rgba(255, 255, 255, 0.85);
     --glass-border:     rgba(0, 0, 0, 0.08);
-    --glass-blur:       blur(16px);
+    --glass-blur:       blur(24px);
 
     /* ============================================
        TEXT COLORS
        ============================================ */
 
-    --color-text-primary:   #0a1c3a;   /* Dark navy blue for high contrast */
-    --color-text-secondary: #334155;   /* Slate 700 for secondary text */
-    --color-text-tertiary:  #64748b;   
-    --color-text-inverse:   #fcd34d;   /* Yellow accent text intended for dark backgrounds */
+    --color-text-primary:   #0F172A;   /* Slate 900 for high contrast */
+    --color-text-secondary: #475569;   /* Slate 600 for secondary text */
+    --color-text-tertiary:  #94A3B8;   
+    --color-text-inverse:   #FFFFFF;   /* White text intended for dark buttons/accents */
 
     /* ============================================
        STATUS COLORS
        ============================================ */
 
-    --color-success: var(--color-primary-mid);
-    --color-warning: var(--color-secondary);
-    --color-error:   hsl(0, 72%, 51%);
-    --color-info:    var(--color-electro);
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-error:   #EF4444;
+    --color-info:    #3B82F6;
 
     /* ============================================
        TYPOGRAPHY
@@ -153,12 +153,12 @@
     --radius-full:  9999px;
 
     /* ============================================
-       SHADOWS — Light mode warm shadows
+       SHADOWS — Light mode premium shadows
        ============================================ */
 
-    --shadow-sm: 0 1px 4px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,.10), 0 20px 48px rgba(0,0,0,.08);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.02);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,.08), 0 20px 48px rgba(0,0,0,.06);
 
     --shadow-glow-primary:   0 0 24px var(--color-primary-glow);
     --shadow-glow-secondary: 0 0 24px var(--color-secondary-glow);

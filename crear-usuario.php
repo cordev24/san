@@ -19,9 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
     $nombre = trim($_POST['nombre']);
     $email = trim($_POST['email']);
-    $pregunta_tipo = $_POST['pregunta_tipo'];
-    $pregunta_personalizada = trim($_POST['pregunta_personalizada'] ?? '');
-    $respuesta_secreta = trim($_POST['respuesta_secreta']);
+    
+    $pregunta_tipo_1 = $_POST['pregunta_tipo_1'] ?? '';
+    $pregunta_pers_1 = trim($_POST['pregunta_personalizada_1'] ?? '');
+    $respuesta_1     = trim($_POST['respuesta_1'] ?? '');
+
+    $pregunta_tipo_2 = $_POST['pregunta_tipo_2'] ?? '';
+    $pregunta_pers_2 = trim($_POST['pregunta_personalizada_2'] ?? '');
+    $respuesta_2     = trim($_POST['respuesta_2'] ?? '');
+
+    $pregunta_tipo_3 = $_POST['pregunta_tipo_3'] ?? '';
+    $pregunta_pers_3 = trim($_POST['pregunta_personalizada_3'] ?? '');
+    $respuesta_3     = trim($_POST['respuesta_3'] ?? '');
     
     $errors = [];
     
@@ -30,16 +39,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($password)) $errors[] = 'La contraseña es requerida';
     if (empty($nombre)) $errors[] = 'El nombre es requerido';
     if (empty($email)) $errors[] = 'El email es requerido';
-    if (empty($respuesta_secreta)) $errors[] = 'La respuesta secreta es requerida';
-    
-    // Determine security question
-    if ($pregunta_tipo === 'Personalizada') {
-        if (empty($pregunta_personalizada)) {
-            $errors[] = 'Debes escribir tu pregunta personalizada';
-        }
-        $pregunta_final = $pregunta_personalizada;
-    } else {
-        $pregunta_final = $pregunta_tipo;
+
+    // Resolviendo preguntas finales
+    $pregunta_final_1 = ($pregunta_tipo_1 === 'Personalizada') ? $pregunta_pers_1 : $pregunta_tipo_1;
+    $pregunta_final_2 = ($pregunta_tipo_2 === 'Personalizada') ? $pregunta_pers_2 : $pregunta_tipo_2;
+    $pregunta_final_3 = ($pregunta_tipo_3 === 'Personalizada') ? $pregunta_pers_3 : $pregunta_tipo_3;
+
+    if (empty($pregunta_final_1) || empty($respuesta_1) || 
+        empty($pregunta_final_2) || empty($respuesta_2) || 
+        empty($pregunta_final_3) || empty($respuesta_3)) {
+        $errors[] = 'Debes completar las 3 preguntas y respuestas de seguridad';
     }
     
     // Check if username already exists
@@ -65,8 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
             $stmt = $pdo->prepare("
-                INSERT INTO usuarios (username, password, nombre, email, pregunta_secreta, respuesta_secreta) 
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO usuarios (username, password, nombre, email, pregunta_secreta, respuesta_secreta, pregunta_secreta_2, respuesta_secreta_2, pregunta_secreta_3, respuesta_secreta_3) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             
             $stmt->execute([
@@ -74,8 +83,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hashed_password,
                 $nombre,
                 $email,
-                $pregunta_final,
-                $respuesta_secreta
+                $pregunta_final_1,
+                $respuesta_1,
+                $pregunta_final_2,
+                $respuesta_2,
+                $pregunta_final_3,
+                $respuesta_3
             ]);
             
             $success = 'Usuario creado exitosamente';
@@ -91,8 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Crear Usuario</title>
     
     <link rel="stylesheet" href="assets/fonts/inter.css">
@@ -265,56 +284,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </div>
                                 
+                                <div class="form-grid-full" style="margin-top: var(--space-4); border-top: 1px solid var(--glass-border); padding-top: var(--space-4);">
+                                    <h3 style="font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-2); display: flex; align-items: center; gap: 8px;">
+                                        <svg class="icon-sm" style="width:16px;height:16px;stroke:var(--color-menta);"><use href="#icon-shield"></use></svg>
+                                        Preguntas de Seguridad
+                                    </h3>
+                                </div>
+
+                                <!-- Pregunta 1 -->
                                 <div class="form-grid-full">
                                     <div class="form-group">
-                                        <label class="form-label" for="pregunta_tipo">Pregunta de Seguridad *</label>
-                                        <select 
-                                            id="pregunta_tipo" 
-                                            name="pregunta_tipo" 
-                                            class="form-select"
-                                            required
-                                            onchange="toggleCustomQuestion()"
-                                        >
+                                        <label class="form-label" for="pregunta_tipo_1">Pregunta de Seguridad 1 *</label>
+                                        <select id="pregunta_tipo_1" name="pregunta_tipo_1" class="form-select" required onchange="toggleCustomQuestion(1)">
                                             <option value="">-- Selecciona una pregunta --</option>
                                             <?php foreach ($preguntas_predefinidas as $pregunta): ?>
-                                                <option value="<?php echo htmlspecialchars($pregunta); ?>"
-                                                    <?php echo (isset($_POST['pregunta_tipo']) && $_POST['pregunta_tipo'] === $pregunta) ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($pregunta); ?>
-                                                </option>
+                                                <option value="<?php echo htmlspecialchars($pregunta); ?>" <?php echo (isset($_POST['pregunta_tipo_1']) && $_POST['pregunta_tipo_1'] === $pregunta) ? 'selected' : ''; ?>><?php echo htmlspecialchars($pregunta); ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
                                 </div>
-                                
-                                <div class="form-grid-full" id="customQuestionDiv" style="display: none;">
+                                <div class="form-grid-full" id="customQuestionDiv_1" style="display: none;">
                                     <div class="form-group">
-                                        <label class="form-label" for="pregunta_personalizada">Escribe tu Pregunta Personalizada</label>
-                                        <input 
-                                            type="text" 
-                                            id="pregunta_personalizada" 
-                                            name="pregunta_personalizada" 
-                                            class="form-input" 
-                                            placeholder="Ej: ¿Cuál es el nombre de tu abuelo?"
-                                            value="<?php echo htmlspecialchars($_POST['pregunta_personalizada'] ?? ''); ?>"
-                                        >
+                                        <label class="form-label" for="pregunta_personalizada_1">Pregunta Personalizada 1 *</label>
+                                        <input type="text" id="pregunta_personalizada_1" name="pregunta_personalizada_1" class="form-input" placeholder="Ej: ¿Cómo se llama tu mascota?" value="<?php echo htmlspecialchars($_POST['pregunta_personalizada_1'] ?? ''); ?>">
                                     </div>
                                 </div>
-                                
                                 <div class="form-grid-full">
                                     <div class="form-group">
-                                        <label class="form-label" for="respuesta_secreta">Respuesta Secreta *</label>
-                                        <input 
-                                            type="text" 
-                                            id="respuesta_secreta" 
-                                            name="respuesta_secreta" 
-                                            class="form-input" 
-                                            placeholder="Ingresa la respuesta a tu pregunta de seguridad"
-                                            required
-                                            value="<?php echo htmlspecialchars($_POST['respuesta_secreta'] ?? ''); ?>"
-                                        >
-                                        <small style="color: var(--color-text-tertiary); font-size: var(--font-size-xs); margin-top: var(--space-1); display: block;">
-                                            Esta respuesta se usará para recuperar tu contraseña
-                                        </small>
+                                        <label class="form-label" for="respuesta_1">Respuesta Secreta 1 *</label>
+                                        <input type="text" id="respuesta_1" name="respuesta_1" class="form-input" placeholder="Tu respuesta a la pregunta 1" required value="<?php echo htmlspecialchars($_POST['respuesta_1'] ?? ''); ?>">
+                                    </div>
+                                </div>
+
+                                <!-- Pregunta 2 -->
+                                <div class="form-grid-full" style="margin-top: var(--space-3); border-top: 1px dashed var(--glass-border); padding-top: var(--space-3);">
+                                    <div class="form-group">
+                                        <label class="form-label" for="pregunta_tipo_2">Pregunta de Seguridad 2 *</label>
+                                        <select id="pregunta_tipo_2" name="pregunta_tipo_2" class="form-select" required onchange="toggleCustomQuestion(2)">
+                                            <option value="">-- Selecciona una pregunta --</option>
+                                            <?php foreach ($preguntas_predefinidas as $pregunta): ?>
+                                                <option value="<?php echo htmlspecialchars($pregunta); ?>" <?php echo (isset($_POST['pregunta_tipo_2']) && $_POST['pregunta_tipo_2'] === $pregunta) ? 'selected' : ''; ?>><?php echo htmlspecialchars($pregunta); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-grid-full" id="customQuestionDiv_2" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label" for="pregunta_personalizada_2">Pregunta Personalizada 2 *</label>
+                                        <input type="text" id="pregunta_personalizada_2" name="pregunta_personalizada_2" class="form-input" placeholder="Ej: ¿Cuál fue tu primer carro?" value="<?php echo htmlspecialchars($_POST['pregunta_personalizada_2'] ?? ''); ?>">
+                                    </div>
+                                </div>
+                                <div class="form-grid-full">
+                                    <div class="form-group">
+                                        <label class="form-label" for="respuesta_2">Respuesta Secreta 2 *</label>
+                                        <input type="text" id="respuesta_2" name="respuesta_2" class="form-input" placeholder="Tu respuesta a la pregunta 2" required value="<?php echo htmlspecialchars($_POST['respuesta_2'] ?? ''); ?>">
+                                    </div>
+                                </div>
+
+                                <!-- Pregunta 3 -->
+                                <div class="form-grid-full" style="margin-top: var(--space-3); border-top: 1px dashed var(--glass-border); padding-top: var(--space-3);">
+                                    <div class="form-group">
+                                        <label class="form-label" for="pregunta_tipo_3">Pregunta de Seguridad 3 *</label>
+                                        <select id="pregunta_tipo_3" name="pregunta_tipo_3" class="form-select" required onchange="toggleCustomQuestion(3)">
+                                            <option value="">-- Selecciona una pregunta --</option>
+                                            <?php foreach ($preguntas_predefinidas as $pregunta): ?>
+                                                <option value="<?php echo htmlspecialchars($pregunta); ?>" <?php echo (isset($_POST['pregunta_tipo_3']) && $_POST['pregunta_tipo_3'] === $pregunta) ? 'selected' : ''; ?>><?php echo htmlspecialchars($pregunta); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-grid-full" id="customQuestionDiv_3" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label" for="pregunta_personalizada_3">Pregunta Personalizada 3 *</label>
+                                        <input type="text" id="pregunta_personalizada_3" name="pregunta_personalizada_3" class="form-input" placeholder="Ej: ¿Cuál es tu banda favorita?" value="<?php echo htmlspecialchars($_POST['pregunta_personalizada_3'] ?? ''); ?>">
+                                    </div>
+                                </div>
+                                <div class="form-grid-full">
+                                    <div class="form-group">
+                                        <label class="form-label" for="respuesta_3">Respuesta Secreta 3 *</label>
+                                        <input type="text" id="respuesta_3" name="respuesta_3" class="form-input" placeholder="Tu respuesta a la pregunta 3" required value="<?php echo htmlspecialchars($_POST['respuesta_3'] ?? ''); ?>">
                                     </div>
                                 </div>
                             </div>
@@ -337,10 +385,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script>
-        function toggleCustomQuestion() {
-            const select = document.getElementById('pregunta_tipo');
-            const customDiv = document.getElementById('customQuestionDiv');
-            const customInput = document.getElementById('pregunta_personalizada');
+        function toggleCustomQuestion(index) {
+            const select = document.getElementById('pregunta_tipo_' + index);
+            const customDiv = document.getElementById('customQuestionDiv_' + index);
+            const customInput = document.getElementById('pregunta_personalizada_' + index);
+            if (!select || !customDiv || !customInput) return;
             
             if (select.value === 'Personalizada') {
                 customDiv.style.display = 'block';
@@ -353,7 +402,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Check on page load
-        toggleCustomQuestion();
+        toggleCustomQuestion(1);
+        toggleCustomQuestion(2);
+        toggleCustomQuestion(3);
     </script>
 </body>
 </html>

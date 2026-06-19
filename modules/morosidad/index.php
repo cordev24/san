@@ -126,8 +126,14 @@ $gruposConMora = (int)$stmtGruposMora->fetchColumn();
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Morosidad</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -541,6 +547,8 @@ $gruposConMora = (int)$stmtGruposMora->fetchColumn();
         <?php
         $headerLogoHref   = '../../dashboard.php';
         $headerLogoutHref = '../../logout.php';
+        $headerBackUrl    = '../../dashboard.php';
+        $headerBackLabel  = 'Volver al Dashboard';
         include '../../includes/header.php';
         ?>
 

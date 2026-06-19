@@ -24,8 +24,14 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Directorio de Participantes</title>
 
     <!-- Offline Styles -->
@@ -36,6 +42,34 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../../assets/css/main.css">
 
     <style>
+        .btn-sm-icon {
+            background: transparent;
+            border: 1px solid var(--color-text-tertiary);
+            color: var(--color-text-secondary);
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+        }
+        .btn-sm-icon:hover {
+            background: var(--color-surface-hover);
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+        .btn-sm-icon--warning:hover {
+            color: var(--color-warning);
+            border-color: var(--color-warning);
+        }
+        .btn-sm-icon--danger:hover {
+            color: var(--color-error);
+            border-color: var(--color-error);
+        }
+
         .participantes-table {
             width: 100%;
             border-collapse: separate;
@@ -107,16 +141,16 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Icon Sprite -->
     <?php include '../../assets/icons/feather-sprite.svg'; ?>
 
-    <!-- Global Header -->
-    <?php
-    $headerLogoHref   = '../../dashboard.php';
-    $headerLogoutHref = '../../logout.php';
-    $headerBackUrl    = '../../dashboard.php';
-    $headerBackLabel  = 'Volver al Dashboard';
-    include '../../includes/header.php';
-    ?>
-
     <div class="main-content">
+        <!-- Header -->
+        <?php
+        $headerLogoHref   = '../../dashboard.php';
+        $headerLogoutHref = '../../logout.php';
+        $headerBackUrl    = '../../dashboard.php';
+        $headerBackLabel  = 'Volver al Dashboard';
+        include '../../includes/header.php';
+        ?>
+
         <div style="padding: var(--space-8); max-width: 1200px; margin: 0 auto;">
             
             <div class="dashboard-section" style="margin-bottom: var(--space-6);">
@@ -202,14 +236,14 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </td>
                                         <td style="text-align: right;">
                                             <div style="display: flex; gap: var(--space-2); justify-content: flex-end;">
-                                                <a href="perfil.php?cedula=<?php echo htmlspecialchars($cli['cedula']); ?>" class="btn btn-outline" style="padding: 6px; min-width: 0; min-height: 0; color: var(--color-primary);" title="Ver Perfil Completo">
-                                                    <svg class="icon" style="width:14px; height:14px; stroke-width: 2.5; fill: none; stroke: currentColor;"><use href="#icon-eye"></use></svg>
+                                                <a href="perfil.php?cedula=<?php echo htmlspecialchars($cli['cedula']); ?>" class="btn-sm-icon" title="Ver Perfil Completo">
+                                                    <svg class="icon" style="width:15px;height:15px;"><use href="#icon-eye"></use></svg>
                                                 </a>
-                                                <button class="btn btn-outline" style="padding: 6px; min-width: 0; min-height: 0; color: var(--color-warning);" title="Editar Info Global" onclick="openEditModal('<?php echo htmlspecialchars($cli['cedula']); ?>')">
-                                                    <svg class="icon" style="width:14px; height:14px; stroke-width: 2.5; fill: none; stroke: currentColor;"><use href="#icon-edit"></use></svg>
+                                                <button class="btn-sm-icon btn-sm-icon--warning" title="Editar Info Global" onclick="openEditModal('<?php echo htmlspecialchars($cli['cedula']); ?>')">
+                                                    <svg class="icon" style="width:15px;height:15px;"><use href="#icon-edit"></use></svg>
                                                 </button>
-                                                <button class="btn btn-outline" style="padding: 6px; min-width: 0; min-height: 0; color: var(--color-error);" title="Inhabilitar Participante" onclick="disableGlobal('<?php echo htmlspecialchars($cli['cedula']); ?>')">
-                                                    <svg class="icon" style="width:14px; height:14px; stroke-width: 2.5; fill: none; stroke: currentColor;"><use href="#icon-trash-2"></use></svg>
+                                                <button class="btn-sm-icon btn-sm-icon--danger" title="Inhabilitar Participante" onclick="disableGlobal('<?php echo htmlspecialchars($cli['cedula']); ?>')">
+                                                    <svg class="icon" style="width:15px;height:15px;"><use href="#icon-trash-2"></use></svg>
                                                 </button>
                                             </div>
                                         </td>
@@ -258,10 +292,9 @@ $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <textarea id="edit_direccion" name="direccion" class="form-input" rows="3" style="resize: vertical;"></textarea>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeModal('editGlobalModal')">Cancelar</button>
-                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
-                        <svg class="icon"><use href="#icon-save"></use></svg>
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('editGlobalModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-violeta"><svg class="icon"><use href="#icon-save"></use></svg>
                         Guardar Cambios
                     </button>
                 </div>

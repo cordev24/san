@@ -75,6 +75,20 @@ class MySanPDF extends FPDF
 
 try {
     switch ($action) {
+        case 'get_recibo':
+            $pago_id = (int)($_GET['pago_id'] ?? 0);
+            if ($pago_id <= 0) {
+                echo json_encode(['success' => false, 'message' => 'ID de pago requerido']);
+                exit;
+            }
+            $stmt = $pdo->prepare("SELECT id FROM pagos WHERE id = ?");
+            $stmt->execute([$pago_id]);
+            if (!$stmt->fetch()) {
+                echo json_encode(['success' => false, 'message' => 'Pago no encontrado']);
+                exit;
+            }
+            echo json_encode(['success' => true, 'message' => 'Pago encontrado']);
+            break;
         case 'recibo':
             generarRecibo();
             break;
@@ -98,10 +112,10 @@ function generarRecibo()
     if (!$pago_id)
         die('ID de pago requerido');
 
-    $stmt = $pdo->prepare("SELECT p.*, part.nombre, part.apellido, part.cedula, g.nombre as grupo_nombre 
-                            FROM pagos p 
-                            JOIN participantes part ON p.participante_id = part.id 
-                            JOIN grupos_san g ON part.grupo_san_id = g.id 
+    $stmt = $pdo->prepare("SELECT p.*, part.nombre, part.apellido, part.cedula, part.usuario_id, g.nombre as grupo_nombre
+                            FROM pagos p
+                            JOIN participantes part ON p.participante_id = part.id
+                            JOIN grupos_san g ON part.grupo_san_id = g.id
                             WHERE p.id = ?");
     $stmt->execute([$pago_id]);
     $pago = $stmt->fetch();
@@ -109,12 +123,23 @@ function generarRecibo()
     if (!$pago)
         die('Pago no encontrado');
 
+    // Ownership gate (FR-1, FR-2)
+    if ($pago['usuario_id'] != $_SESSION['user_id'] && (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin')) {
+        http_response_code(403);
+        die('Acceso denegado');
+    }
+
+    // Calcular equivalencia usando la función del informe §6.3.2
+    $tasa = (float)($pago['tasa_aplicada'] ?? 0);
+    $monto_usd = (float)$pago['monto'];
+    $monto_bs  = (float)($pago['monto_bs_pagado'] ?? ($monto_usd * $tasa));
+
     $pdf = new MySanPDF();
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
     // Receipt Badge
-    $pdf->SetFillColor(56, 217, 169); // Menta
+    $pdf->SetFillColor(56, 217, 169);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Arial', 'B', 12);
     $pdf->Cell(60, 10, utf8_decode('RECIBO DE PAGO DIGITAL'), 0, 1, 'C', true);
@@ -134,17 +159,30 @@ function generarRecibo()
     $pdf->LabelValue('Concepto:', 'Pago de Cuota #' . $pago['numero_cuota']);
     $pdf->LabelValue('Metodo de Pago:', $pago['metodo_pago'] ?? 'N/D');
     $pdf->LabelValue('Fecha de Proceso:', $pago['fecha_pago'] ?? date('Y-m-d'));
+    if (!empty($pago['referencia_pago'])) {
+        $pdf->LabelValue('Referencia:', $pago['referencia_pago']);
+    }
+
+    // Desglose Multimoneda (informe §6.1.2 RF-4 / Anexo C)
+    $pdf->SectionTitle('DESGLOSE MULTIMONEDA (BCV)');
+    $pdf->LabelValue('Monto Cuota USD:', '$' . number_format($monto_usd, 2));
+    $pdf->LabelValue('Tasa BCV Aplicada:', 'Bs ' . number_format($tasa, 2) . ' / $1 USD');
+    $pdf->LabelValue('Monto Pagado Bs:', 'Bs ' . number_format($monto_bs, 2));
 
     // Amount Box
-    $pdf->Ln(10);
-    $pdf->SetFillColor(132, 94, 247); // Violeta
+    $pdf->Ln(5);
+    $pdf->SetFillColor(132, 94, 247);
     $pdf->SetTextColor(255, 255, 255);
-    $pdf->SetFont('Arial', 'B', 14);
-    $pdf->Cell(100, 15, ' TOTAL PAGADO:', 0, 0, 'L', true);
-    $pdf->Cell(0, 15, formatMoneyCustomRate($pago['monto'], $pago['tasa_aplicada'] ?? 0) . ' ', 0, 1, 'R', true);
+    $pdf->SetFont('Arial', 'B', 12);
+    $pdf->Cell(100, 12, ' TOTAL USD ACREDITADO:', 0, 0, 'L', true);
+    $pdf->Cell(0, 12, '$ ' . number_format($monto_usd, 2) . '  ', 0, 1, 'R', true);
 
-    $pdf->Ln(30);
-    // Signature
+    $pdf->SetFillColor(56, 217, 169);
+    $pdf->SetFont('Arial', 'B', 10);
+    $pdf->Cell(100, 10, ' EQUIVALENTE PAGADO (Bs):', 0, 0, 'L', true);
+    $pdf->Cell(0, 10, 'Bs ' . number_format($monto_bs, 2) . '  ', 0, 1, 'R', true);
+
+    $pdf->Ln(20);
     $pdf->SetTextColor(33, 37, 41);
     $pdf->SetFont('Arial', '', 10);
     $pdf->Cell(0, 5, 'Electronizado por MySan Admin', 0, 1, 'C');

@@ -1,21 +1,34 @@
 <?php
 require_once 'config/database.php';
 
+// ── Query: Grupos San abiertos con cupos disponibles ──
 $stmt = $pdo->query("
-    SELECT p.*, c.nombre as categoria_nombre, c.color
-    FROM productos p
-    JOIN categorias c ON p.categoria_id = c.id
-    WHERE p.activo = TRUE
-    ORDER BY p.created_at DESC
+    SELECT
+        gs.*,
+        p.nombre       as producto_nombre,
+        p.marca        as producto_marca,
+        p.modelo       as producto_modelo,
+        p.valor_total  as producto_valor,
+        p.imagen       as producto_imagen,
+        c.id           as categoria_id,
+        c.nombre       as categoria_nombre,
+        c.color        as categoria_color
+    FROM grupos_san gs
+    JOIN productos p    ON gs.producto_id = p.id
+    JOIN categorias c   ON p.categoria_id = c.id
+    WHERE gs.estado = 'abierto'
+      AND gs.cupos_ocupados < gs.cupos_totales
+    ORDER BY gs.created_at DESC
 ");
-$productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$grupos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// ── Categorías para el filtro ──
 $stmtCat = $pdo->query("SELECT * FROM categorias ORDER BY nombre ASC");
 $categorias = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
 
 $tasa_bcv = getBcvRate();
 
-// Category palette: warm, prosperous, trust-building
+// ── Paletas e iconos por categoría ──
 $color_map = [
     'violeta' => ['bg' => '#F0EBFF', 'accent' => '#6D28D9', 'text' => '#4C1D95'],
     'menta'   => ['bg' => '#ECFDF5', 'accent' => '#059669', 'text' => '#065F46'],
@@ -44,10 +57,16 @@ function get_icon(string $cat): string {
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Productos — MySan</title>
-    <meta name="description" content="Explora el catálogo de productos financiables a través del sistema San. Sin intereses ocultos, pagos cómodos y sorteos transparentes.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grupos San Disponibles — MySan</title>
+    <meta name="description" content="Explora los grupos San activos con cupos disponibles. Unite, pagá cuotas cómodas y recibí tu producto mediante sorteos transparentes.">
 
     <link rel="stylesheet" href="assets/fonts/inter.css">
     <link rel="stylesheet" href="assets/css/reset.css">
@@ -59,11 +78,9 @@ function get_icon(string $cat): string {
         :root {
             --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-            /* Background: warm parchment, not cold black */
             --bg-base:    #FAF7F2;
             --bg-section: #F3EEE7;
 
-            /* Brand: rich emerald (trust) + gold (prosperity) */
             --brand-emerald:     #065F46;
             --brand-emerald-mid: #059669;
             --brand-emerald-lt:  #D1FAE5;
@@ -71,26 +88,22 @@ function get_icon(string $cat): string {
             --brand-gold-lt:     #FEF3C7;
             --brand-gold-glow:   #FCD34D;
 
-            /* Text */
             --txt-heading:   #1C1917;
             --txt-body:      #44403C;
             --txt-muted:     #78716C;
             --txt-on-dark:   #FAFAF9;
 
-            /* Surfaces */
             --card-bg:      #FFFFFF;
             --card-border:  rgba(0,0,0,.07);
             --card-shadow:  0 2px 8px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.06);
             --card-shadow-hover: 0 8px 24px rgba(0,0,0,.1), 0 24px 56px rgba(0,0,0,.1);
 
-            /* Radii */
             --r-sm:  10px;
             --r-md:  16px;
             --r-lg:  24px;
             --r-xl:  32px;
             --r-pill:9999px;
 
-            /* Transitions */
             --t: 260ms cubic-bezier(.22,1,.36,1);
         }
 
@@ -166,7 +179,6 @@ function get_icon(string $cat): string {
             padding: clamp(5rem,10vw,8rem) clamp(1.25rem,5vw,4rem) clamp(3rem,6vw,5rem);
             text-align: center;
 
-            /* Warm emerald-to-gold gradient */
             background: linear-gradient(160deg,
                 #064E3B 0%,
                 #065F46 35%,
@@ -174,7 +186,6 @@ function get_icon(string $cat): string {
                 #1D4ED8 100%);
         }
 
-        /* Decorative circles */
         .hero::before, .hero::after {
             content: '';
             position: absolute;
@@ -244,7 +255,7 @@ function get_icon(string $cat): string {
             font-size: clamp(.95rem, 2vw, 1.15rem);
             line-height: 1.7;
             color: rgba(255,255,255,.78);
-            max-width: 520px;
+            max-width: 540px;
             margin: 0 auto 2.25rem;
         }
 
@@ -331,6 +342,77 @@ function get_icon(string $cat): string {
             box-shadow: 0 4px 16px rgba(6,95,70,.3);
         }
 
+        /* ══ SEARCH BAR ══ */
+        .search-bar {
+            position: relative;
+            margin-bottom: 1.35rem;
+        }
+
+        .search-bar svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: var(--txt-muted);
+            fill: none;
+            stroke-width: 2;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: .85rem 1rem .85rem 2.75rem;
+            border-radius: var(--r-pill);
+            border: 1.5px solid rgba(0,0,0,.1);
+            background: #fff;
+            font-size: .95rem;
+            font-family: var(--font);
+            color: var(--txt-heading);
+            transition: all var(--t);
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--txt-muted);
+            opacity: .7;
+        }
+
+        .search-input:focus {
+            border-color: var(--brand-emerald-mid);
+            box-shadow: 0 0 0 4px rgba(5,150,105,.12);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: #F5F5F4;
+            color: var(--txt-muted);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--t);
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .search-clear.visible {
+            display: flex;
+        }
+
+        .search-clear:hover {
+            background: #E7E5E4;
+            color: var(--txt-heading);
+        }
+
         /* ══ CATALOG GRID ══ */
         .catalog-section {
             padding: 2rem clamp(1.25rem,5vw,4rem) 5rem;
@@ -340,32 +422,31 @@ function get_icon(string $cat): string {
 
         .catalog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
             gap: 1.5rem;
         }
 
-        /* ══ PRODUCT CARD ══ */
-        .product-card {
+        /* ══ GROUP CARD ══ */
+        .group-card {
             position: relative;
             display: flex;
             flex-direction: column;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: var(--r-lg);
-            padding: 1.75rem;
+            border-radius: var(--r-md);
             overflow: hidden;
             box-shadow: var(--card-shadow);
             transition: transform var(--t), box-shadow var(--t);
             animation: card-in .5s cubic-bezier(.22,1,.36,1) backwards;
         }
 
-        .product-card:hover {
-            transform: translateY(-6px);
+        .group-card:hover {
+            transform: translateY(-3px);
             box-shadow: var(--card-shadow-hover);
         }
 
         @keyframes card-in {
-            from { opacity:0; transform:translateY(24px); }
+            from { opacity:0; transform:translateY(16px); }
             to   { opacity:1; transform:translateY(0); }
         }
 
@@ -373,120 +454,203 @@ function get_icon(string $cat): string {
         .card-strip {
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 4px;
+            height: 3px;
             background: var(--c-accent, var(--brand-emerald));
-            border-radius: var(--r-lg) var(--r-lg) 0 0;
+            border-radius: var(--r-md) var(--r-md) 0 0;
         }
 
-        /* Colored icon chip inside card */
-        .card-icon-wrap {
-            width: 52px; height: 52px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            background: var(--c-bg, var(--brand-emerald-lt));
-            margin-bottom: 1.25rem;
+        /* Card body: horizontal layout */
+        .group-card .card-content {
+            display: flex;
+            gap: .85rem;
+            padding: .85rem;
+            flex: 1;
+        }
+
+        /* Left: square product image */
+        .card-product-img {
+            width: 80px;
+            min-width: 80px;
+            height: 80px;
+            border-radius: var(--r-sm);
+            overflow: hidden;
+            background: var(--c-bg, #F3F4F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--card-border);
             flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: .15rem;
         }
 
-        .card-icon-wrap svg {
-            width: 24px; height: 24px;
+        .card-product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 6px;
+            transition: transform var(--t);
+        }
+
+        .group-card:hover .card-product-img img {
+            transform: scale(1.06);
+        }
+
+        .card-product-img-placeholder svg {
+            width: 32px; height: 32px;
             stroke: var(--c-accent, var(--brand-emerald));
-            fill: none; stroke-width: 2;
+            fill: none; stroke-width: 1.5;
+            opacity: .3;
+        }
+
+        /* Right: info column */
+        .card-info-col {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
         }
 
         .card-cat {
-            font-size: .7rem;
+            font-size: .62rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .08em;
             color: var(--c-accent, var(--brand-emerald));
-            margin-bottom: .4rem;
+            margin-bottom: .1rem;
         }
 
         .card-name {
-            font-size: 1.2rem;
+            font-size: .88rem;
             font-weight: 800;
-            letter-spacing: -0.02em;
-            line-height: 1.3;
+            letter-spacing: -0.01em;
+            line-height: 1.25;
             color: var(--txt-heading);
-            margin-bottom: .75rem;
+            margin-bottom: .1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .card-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .4rem;
-            margin-bottom: .9rem;
-        }
-
-        .tag {
-            padding: .2rem .7rem;
-            border-radius: var(--r-pill);
+        .card-product {
             font-size: .7rem;
-            font-weight: 600;
-            background: var(--c-bg, var(--brand-emerald-lt));
-            color: var(--c-text, var(--brand-emerald));
-            border: 1px solid rgba(0,0,0,.06);
-        }
-
-        .card-desc {
-            font-size: .875rem;
             color: var(--txt-muted);
-            line-height: 1.6;
-            flex-grow: 1;
-            margin-bottom: 1.25rem;
+            margin-bottom: .4rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        /* Price box */
-        .price-box {
-            border-radius: var(--r-sm);
-            padding: 1rem 1.2rem;
-            margin-bottom: 1.2rem;
-            background: var(--c-bg, var(--brand-emerald-lt));
-            border: 1px solid rgba(0,0,0,.05);
+        .card-product svg {
+            width: 11px; height: 11px;
+            stroke: var(--txt-muted);
+            fill: none; stroke-width: 2;
+            flex-shrink: 0;
         }
 
-        .price-sublabel {
-            font-size: .7rem;
-            text-transform: uppercase;
-            letter-spacing: .07em;
-            color: var(--c-text, var(--brand-emerald));
+        /* Inline row: badge + price */
+        .card-row {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin-bottom: .45rem;
+        }
+
+        /* Spots badge */
+        .spots-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: .15rem .55rem;
+            border-radius: var(--r-pill);
+            font-size: .62rem;
             font-weight: 700;
-            margin-bottom: .35rem;
         }
 
-        .price-amount {
-            font-size: 2.1rem;
+        .spots-badge.available {
+            background: var(--brand-emerald-lt);
+            color: var(--brand-emerald);
+        }
+
+        .spots-badge.low {
+            background: #FEF3C7;
+            color: #B45309;
+        }
+
+        .spots-badge svg {
+            width: 11px; height: 11px;
+            stroke: currentColor; fill: none; stroke-width: 2.5;
+        }
+
+        /* Inline price */
+        .price-inline {
+            font-size: 1rem;
             font-weight: 800;
-            letter-spacing: -0.04em;
-            line-height: 1;
+            letter-spacing: -0.03em;
             color: var(--c-accent, var(--brand-emerald));
+            line-height: 1;
         }
 
-        .price-currency {
-            font-size: 1.1rem;
+        .price-inline .price-curr {
+            font-size: .65rem;
             font-weight: 700;
             vertical-align: super;
-            margin-right: 2px;
+        }
+
+        .price-inline .price-freq-label {
+            font-size: .62rem;
+            font-weight: 600;
+            color: var(--txt-muted);
+            margin-left: 2px;
         }
 
         .price-note {
-            font-size: .72rem;
-            color: var(--c-text, var(--brand-emerald));
-            margin-top: .4rem;
-            opacity: .7;
+            font-size: .62rem;
+            color: var(--txt-muted);
+            margin-bottom: .4rem;
+            opacity: .75;
         }
 
-        /* CTA button */
+        /* Detail chips */
+        .card-details {
+            display: flex;
+            gap: .35rem;
+            flex-wrap: wrap;
+        }
+
+        .detail-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: .62rem;
+            font-weight: 600;
+            color: var(--txt-muted);
+            padding: .15rem .5rem;
+            border-radius: var(--r-pill);
+            background: #F5F5F4;
+            border: 1px solid rgba(0,0,0,.05);
+        }
+
+        .detail-chip svg {
+            width: 10px; height: 10px;
+            stroke: currentColor; fill: none; stroke-width: 2.5;
+        }
+
+        /* CTA button — bottom, full width */
+        .card-footer {
+            padding: 0 .85rem .85rem;
+        }
+
         .btn-cta {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
-            padding: .85rem 1.25rem;
-            border-radius: var(--r-md);
-            font-size: .9rem;
+            padding: .55rem 1rem;
+            border-radius: var(--r-sm);
+            font-size: .8rem;
             font-weight: 700;
             letter-spacing: .01em;
             cursor: pointer;
@@ -657,6 +821,21 @@ function get_icon(string $cat): string {
         .footer a { color: var(--brand-emerald); text-decoration: none; font-weight: 600; }
         .footer a:hover { text-decoration: underline; }
 
+        /* ══ NO RESULTS ══ */
+        .no-results {
+            grid-column: 1/-1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 4rem 2rem;
+            background: #fff;
+            border-radius: var(--r-lg);
+            border: 1px dashed rgba(0,0,0,.1);
+            color: var(--txt-muted);
+            gap: .75rem;
+            text-align: center;
+            animation: fade-in .3s ease;
+        }
+
         @media (max-width: 640px) {
             .footer { justify-content: center; text-align: center; }
             .stat-divider { display: none; }
@@ -686,11 +865,11 @@ function get_icon(string $cat): string {
                 Sistema de ahorros San — 100% comunitario
             </div>
             <h1 class="hero-title">
-                Obtén lo que quieres,<br>
-                <span class="highlight">pagando poco a poco</span>
+                Grupos San con cupos<br>
+                <span class="highlight">disponibles ahora</span>
             </h1>
             <p class="hero-sub">
-                Unite a un Grupo San, paga cuotas cómodas junto a tu comunidad y participa en los sorteos de entrega. Sin intereses, sin bancos, sin complicaciones.
+                Elegí un grupo abierto, unite, pagá cuotas accesibles junto a tu comunidad y participá en los sorteos de entrega. Sin intereses, sin bancos, sin complicaciones.
             </p>
             <div class="hero-stats">
                 <div class="stat-item">
@@ -699,8 +878,8 @@ function get_icon(string $cat): string {
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item">
-                    <div class="stat-num"><?php echo count($productos); ?></div>
-                    <div class="stat-label">Productos</div>
+                    <div class="stat-num"><?php echo count($grupos); ?></div>
+                    <div class="stat-label">Grupos activos</div>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item">
@@ -713,9 +892,17 @@ function get_icon(string $cat): string {
 
     <!-- FILTER -->
     <div class="filter-section">
-        <p class="filter-label">Filtrar por categoria</p>
+        <div class="search-bar">
+            <svg><use href="#icon-search"></use></svg>
+            <input type="text" class="search-input" id="searchInput"
+                   placeholder="Buscá por grupo, producto o categoría..."
+                   autocomplete="off" spellcheck="false">
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" aria-label="Limpiar búsqueda">&times;</button>
+        </div>
+
+        <p class="filter-label">Filtrar por categoría</p>
         <div class="filter-chips" id="filterChips">
-            <button class="chip active" data-filter="all">Todos los productos</button>
+            <button class="chip active" data-filter="all">Todos los grupos</button>
             <?php foreach ($categorias as $cat): ?>
                 <button class="chip" data-filter="<?php echo $cat['id']; ?>">
                     <?php echo htmlspecialchars($cat['nombre']); ?>
@@ -727,20 +914,32 @@ function get_icon(string $cat): string {
     <!-- CATALOG -->
     <section class="catalog-section">
         <div class="catalog-grid" id="catalogGrid">
-            <?php if (empty($productos)): ?>
+            <?php if (empty($grupos)): ?>
                 <div class="empty-state">
-                    <svg style="width:48px;height:48px;stroke:currentColor;fill:none;stroke-width:1.2;opacity:.3;"><use href="#icon-package"></use></svg>
-                    <h3 style="font-size:1.1rem;font-weight:700;color:#57534E;">Sin productos disponibles</h3>
-                    <p style="font-size:.9rem;">Pronto agregaremos nuevos productos al catálogo.</p>
+                    <svg style="width:48px;height:48px;stroke:currentColor;fill:none;stroke-width:1.2;opacity:.3;"><use href="#icon-users"></use></svg>
+                    <h3 style="font-size:1.1rem;font-weight:700;color:#57534E;">Sin grupos disponibles</h3>
+                    <p style="font-size:.9rem;">Todos los grupos están completos por ahora. Volvé pronto, abrimos nuevos grupos regularmente.</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($productos as $i => $p):
-                    $pal   = get_palette($p['color'] ?? '');
-                    $icon  = get_icon($p['categoria_nombre'] ?? '');
-                    $delay = ($i % 9) * 60;
+                <?php
+                // Calculate total available spots across all groups
+                $total_cupos = 0;
+                foreach ($grupos as $g) {
+                    $total_cupos += $g['cupos_totales'] - $g['cupos_ocupados'];
+                }
                 ?>
-                    <div class="product-card"
-                         data-category="<?php echo $p['categoria_id']; ?>"
+                <?php foreach ($grupos as $i => $g):
+                    $pal        = get_palette($g['categoria_color'] ?? '');
+                    $icon       = get_icon($g['categoria_nombre'] ?? '');
+                    $delay      = ($i % 9) * 60;
+                    $disponibles = $g['cupos_totales'] - $g['cupos_ocupados'];
+                    $spots_class = $disponibles <= 2 ? 'low' : 'available';
+                ?>
+                    <div class="group-card"
+                         data-category="<?php echo $g['categoria_id']; ?>"
+                         data-search="<?php
+                            echo htmlspecialchars(mb_strtolower($g['nombre'] . ' ' . $g['producto_nombre'] . ' ' . ($g['producto_marca'] ?? '') . ' ' . ($g['producto_modelo'] ?? '') . ' ' . $g['categoria_nombre']), ENT_QUOTES, 'UTF-8');
+                         ?>"
                          style="
                             --c-bg:     <?php echo $pal['bg']; ?>;
                             --c-accent: <?php echo $pal['accent']; ?>;
@@ -750,132 +949,163 @@ function get_icon(string $cat): string {
 
                         <div class="card-strip"></div>
 
-                        <div class="card-icon-wrap">
-                            <svg><use href="#icon-<?php echo htmlspecialchars($icon); ?>"></use></svg>
-                        </div>
+                        <div class="card-content">
 
-                        <div class="card-cat"><?php echo htmlspecialchars($p['categoria_nombre']); ?></div>
-                        <h3 class="card-name"><?php echo htmlspecialchars($p['nombre']); ?></h3>
-
-                        <?php if ($p['marca'] || $p['modelo']): ?>
-                            <div class="card-tags">
-                                <?php if ($p['marca']): ?>
-                                    <span class="tag"><?php echo htmlspecialchars($p['marca']); ?></span>
-                                <?php endif; ?>
-                                <?php if ($p['modelo']): ?>
-                                    <span class="tag"><?php echo htmlspecialchars($p['modelo']); ?></span>
+                            <!-- Left: product image -->
+                            <div class="card-product-img">
+                                <?php if (!empty($g['producto_imagen'])): ?>
+                                    <img src="<?php echo htmlspecialchars(ltrim($g['producto_imagen'], '/')); ?>"
+                                         alt="<?php echo htmlspecialchars($g['producto_nombre']); ?>"
+                                         loading="lazy">
+                                <?php else: ?>
+                                    <div class="card-product-img-placeholder">
+                                        <svg><use href="#icon-package"></use></svg>
+                                    </div>
                                 <?php endif; ?>
                             </div>
-                        <?php endif; ?>
 
-                        <p class="card-desc">
-                            <?php echo !empty($p['descripcion']) ? htmlspecialchars($p['descripcion']) : 'Producto financiable a través del sistema San comunitario.'; ?>
-                        </p>
+                            <!-- Right: info column -->
+                            <div class="card-info-col">
+                                <div class="card-cat"><?php echo htmlspecialchars($g['categoria_nombre']); ?></div>
+                                <h3 class="card-name"><?php echo htmlspecialchars($g['nombre']); ?></h3>
 
-                        <div class="price-box">
-                            <div class="price-sublabel">Valor total del paquete</div>
-                            <div class="price-amount">
-                                <span class="price-currency">$</span><?php echo number_format($p['valor_total'], 2); ?>
-                            </div>
-                            <?php if ($tasa_bcv && $tasa_bcv > 0): ?>
-                                <div class="price-note">
-                                    Aprox. Bs. <?php echo number_format($p['valor_total'] * $tasa_bcv, 2, ',', '.'); ?> (Tasa BCV)
+                                <div class="card-product">
+                                    <svg><use href="#icon-package"></use></svg>
+                                    <?php echo htmlspecialchars($g['producto_nombre']); ?>
+                                    <?php if ($g['producto_marca']): ?> — <?php echo htmlspecialchars($g['producto_marca']); ?><?php endif; ?>
                                 </div>
-                            <?php endif; ?>
-                        </div>
 
-                        <button class="btn-cta"
-                                onclick="openModal('<?php echo htmlspecialchars(addslashes($p['nombre'])); ?>')">
-                            <span>Me interesa este producto</span>
-                            <svg><use href="#icon-arrow-right"></use></svg>
-                        </button>
+                                <!-- Badge + price inline -->
+                                <div class="card-row">
+                                    <div class="spots-badge <?php echo $spots_class; ?>">
+                                        <svg><use href="#icon-user-plus"></use></svg>
+                                        <?php echo $disponibles; ?> cupo<?php echo $disponibles !== 1 ? 's' : ''; ?>
+                                    </div>
+                                    <span class="price-inline">
+                                        <span class="price-curr">$</span><?php echo number_format($g['monto_cuota'], 2); ?>
+                                        <span class="price-freq-label"><?php echo $g['frecuencia']; ?></span>
+                                    </span>
+                                </div>
+
+                                <?php if ($tasa_bcv && $tasa_bcv > 0): ?>
+                                <div class="price-note">Aprox. Bs. <?php echo number_format($g['monto_cuota'] * $tasa_bcv, 2, ',', '.'); ?> (BCV)</div>
+                                <?php endif; ?>
+
+                                <div class="card-details">
+                                    <span class="detail-chip">
+                                        <svg><use href="#icon-calendar"></use></svg>
+                                        <?php echo $g['numero_cuotas']; ?> cuotas
+                                    </span>
+                                    <span class="detail-chip">
+                                        <svg><use href="#icon-users"></use></svg>
+                                        <?php echo $g['cupos_totales']; ?> cupos
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div><!-- /.card-content -->
+
+                        <div class="card-footer">
+                            <a href="registro.php?grupo_id=<?php echo $g['id']; ?>" class="btn-cta">
+                                <span>Quiero unirme</span>
+                                <svg><use href="#icon-arrow-right"></use></svg>
+                            </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
+
+            <!-- Dynamic no-results (shown/hidden via JS) -->
+            <div class="no-results" id="noResults" style="display:none;">
+                <svg style="width:48px;height:48px;stroke:currentColor;fill:none;stroke-width:1.2;opacity:.3;"><use href="#icon-search"></use></svg>
+                <h3 style="font-size:1.1rem;font-weight:700;color:#57534E;">Sin resultados</h3>
+                <p style="font-size:.9rem;" id="noResultsMsg">
+                    No hay grupos abiertos que coincidan con tu búsqueda. Probá con otro término o revisá los filtros de categoría.
+                </p>
+            </div>
         </div>
     </section>
 
     <!-- FOOTER -->
     <footer class="footer">
         <p>&copy; <?php echo date('Y'); ?> MySan — Sistema de Ahorros Grupales</p>
-        <p><a href="login.php">Acceso de administradores</a></p>
+        <?php if (isLoggedIn()): ?>
+            <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin'): ?>
+                <p><a href="dashboard.php">Panel de Administración</a></p>
+            <?php else: ?>
+                <p><a href="dashboard_participante.php">Mi Panel de Ahorros</a></p>
+            <?php endif; ?>
+        <?php endif; ?>
     </footer>
 
-    <!-- MODAL WHATSAPP -->
-    <div class="modal-overlay" id="contactModal">
-        <div class="modal-panel">
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-
-            <div class="modal-wa-icon">
-                <svg viewBox="0 0 24 24">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                </svg>
-            </div>
-
-            <h2 class="modal-title">Consulta sin compromiso</h2>
-            <p class="modal-body">
-                Para unirte a un Grupo San y financiar tu
-                <span class="modal-product-name" id="modalProductName">...</span>,
-                escríbenos por WhatsApp. Te contamos sobre cuotas, sorteos y cupos disponibles.
-            </p>
-
-            <a href="#" id="whatsappBtn" target="_blank" rel="noopener" class="btn-wa">
-                <svg viewBox="0 0 24 24">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                </svg>
-                Escribir por WhatsApp
-            </a>
-        </div>
-    </div>
-
     <script>
-        /* ── Filter ── */
-        const chips = document.querySelectorAll('.chip[data-filter]');
-        const cards = document.querySelectorAll('.product-card');
+        /* ── Combined Filter: search + category ── */
+        const chips       = document.querySelectorAll('.chip[data-filter]');
+        const cards       = document.querySelectorAll('.group-card');
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
 
+        function applyFilters() {
+            const q    = searchInput.value.trim().toLowerCase();
+            const chip = document.querySelector('.chip.active');
+            const f    = chip ? chip.dataset.filter : 'all';
+            let visible = 0;
+
+            // Show/hide clear button
+            searchClear.classList.toggle('visible', q.length > 0);
+
+            cards.forEach(card => {
+                const catMatch   = f === 'all' || card.dataset.category === f;
+                const searchable = card.dataset.search || '';
+                const textMatch  = q === '' || searchable.indexOf(q) !== -1;
+                const show       = catMatch && textMatch;
+
+                card.style.display = show ? 'flex' : 'none';
+                if (show) {
+                    card.style.animation = 'none';
+                    void card.offsetWidth;
+                    card.style.animationDelay = (visible % 9 * 60) + 'ms';
+                    card.style.animation = 'card-in .45s cubic-bezier(.22,1,.36,1) backwards';
+                    visible++;
+                }
+            });
+
+            // Toggle no-results message
+            const noResults = document.getElementById('noResults');
+            const allCards  = cards.length;
+            if (noResults) {
+                if (allCards > 0 && visible === 0) {
+                    noResults.style.display = 'flex';
+                } else {
+                    noResults.style.display = 'none';
+                }
+            }
+        }
+
+        // Category chips
         chips.forEach(chip => {
             chip.addEventListener('click', () => {
                 chips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-
-                const f = chip.dataset.filter;
-                let visible = 0;
-
-                cards.forEach(card => {
-                    const match = f === 'all' || card.dataset.category === f;
-                    card.style.display = match ? 'flex' : 'none';
-                    if (match) {
-                        card.style.animation = 'none';
-                        void card.offsetWidth;
-                        card.style.animationDelay = (visible % 9 * 60) + 'ms';
-                        card.style.animation = 'card-in .45s cubic-bezier(.22,1,.36,1) backwards';
-                        visible++;
-                    }
-                });
+                applyFilters();
             });
         });
 
-        /* ── Modal ── */
-        const modal     = document.getElementById('contactModal');
-        const nameEl    = document.getElementById('modalProductName');
-        const waBtn     = document.getElementById('whatsappBtn');
-        const phone     = '584243074602'; // Reemplaza con tu número
+        // Search input with debounce
+        let searchTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(applyFilters, 200);
+        });
 
-        function openModal(name) {
-            nameEl.textContent = name;
-            const msg = encodeURIComponent(`Hola, me interesa el producto "${name}" a través del sistema San. ¿Tienen cupos disponibles?`);
-            waBtn.href = `https://wa.me/${phone}?text=${msg}`;
-            modal.classList.add('open');
-            document.body.style.overflow = 'hidden';
+        // Clear search
+        function clearSearch() {
+            searchInput.value = '';
+            applyFilters();
+            searchInput.focus();
         }
 
-        function closeModal() {
-            modal.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        /* ── (modal de WhatsApp eliminado — ahora redirige a registro.php) ── */
     </script>
 </body>
 </html>

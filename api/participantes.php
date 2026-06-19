@@ -1,4 +1,6 @@
 <?php
+// @deprecated: El uso de la tabla 'turnos' y la asignación mediante sorteo se ha descontinuado.
+// La asignación actual se rige por el 'orden_inscripcion' según leivis-pg2.md.
 require_once '../config/database.php';
 requireLogin();
 
@@ -13,6 +15,9 @@ try {
             break;
         case 'join_group':
             joinGroup();
+            break;
+        case 'remove_from_group':
+            removeFromGroup();
             break;
         case 'list':
         case 'list_all':
@@ -567,5 +572,62 @@ function disableParticipanteGlobal()
     } catch(Exception $e) {
         $pdo->rollBack();
         jsonResponse(false, 'Error: ' . $e->getMessage());
+    }
+}
+
+function removeFromGroup()
+{
+    global $pdo;
+
+    $participante_id = $_POST['id'] ?? null;
+    $motivo_salida = trim($_POST['motivo_salida'] ?? '');
+
+    if (!$participante_id) {
+        jsonResponse(false, 'ID de participante requerido');
+        return;
+    }
+
+    if (empty($motivo_salida)) {
+        jsonResponse(false, 'Debe indicar el motivo de la salida');
+        return;
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        // Obtener grupo_san_id para este participante
+        $stmt = $pdo->prepare("SELECT grupo_san_id FROM participantes WHERE id = ?");
+        $stmt->execute([$participante_id]);
+        $part = $stmt->fetch();
+
+        if (!$part) {
+            $pdo->rollBack();
+            jsonResponse(false, 'Participante no encontrado');
+            return;
+        }
+
+        $grupo_san_id = $part['grupo_san_id'];
+
+        // 1. Marcar inactivo y guardar motivo
+        $stmt = $pdo->prepare("UPDATE participantes SET activo = 0, motivo_salida = ?, fecha_salida = CURDATE() WHERE id = ?");
+        $stmt->execute([$motivo_salida, $participante_id]);
+
+        // 2. Liberar el cupo
+        $stmt = $pdo->prepare("UPDATE grupos_san SET cupos_ocupados = cupos_ocupados - 1 WHERE id = ?");
+        $stmt->execute([$grupo_san_id]);
+
+        // 3. Eliminar pagos pendientes o atrasados (los pagados se mantienen como historial)
+        $stmt = $pdo->prepare("DELETE FROM pagos WHERE participante_id = ? AND estado IN ('pendiente', 'atrasado')");
+        $stmt->execute([$participante_id]);
+
+        // 4. Eliminar el turno (si no ha sido entregado)
+        $stmt = $pdo->prepare("DELETE FROM turnos WHERE participante_id = ? AND estado IN ('pendiente', 'asignado')");
+        $stmt->execute([$participante_id]);
+
+        $pdo->commit();
+        jsonResponse(true, 'Participante removido del grupo exitosamente');
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        jsonResponse(false, 'Error al remover participante: ' . $e->getMessage());
     }
 }

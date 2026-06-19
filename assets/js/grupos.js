@@ -150,6 +150,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const montoCuota = valorTotal / cantidad;
             montoCuotaDisplay.textContent = formatCurrency(montoCuota);
+
+            // Auto-fill nombre de grupo
+            const nombreInput = document.querySelector('#nuevoGrupoForm input[name="nombre"]');
+            if (nombreInput && selectedOption.value !== "") {
+                const form = document.getElementById('nuevoGrupoForm');
+                const sigNum = form.getAttribute('data-siguiente-num') || 1;
+                const nombreProducto = selectedOption.getAttribute('data-nombre') || "";
+                nombreInput.value = `Grupo ${sigNum} - ${nombreProducto}`.trim();
+            } else if (nombreInput && selectedOption.value === "") {
+                nombreInput.value = "";
+            }
         }
 
         productoSelect.addEventListener('change', calculateMontoCuota);

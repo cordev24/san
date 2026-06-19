@@ -216,3 +216,5 @@ function deleteGrupo()
 
     jsonResponse(true, 'Grupo eliminado exitosamente');
 }
+
+

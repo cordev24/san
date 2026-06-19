@@ -11,8 +11,14 @@ $categoriasList = $stmt->fetchAll();
 <html lang="es">
 
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan - Gestión de Categorías</title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -171,7 +177,7 @@ $categoriasList = $stmt->fetchAll();
                         <?php else: ?>
                             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4);">
                                 <?php foreach ($categoriasList as $cat): ?>
-                                    <div class="category-card" style="border-color: var(--color-<?php echo htmlspecialchars($cat['color']); ?>)40;">
+                                    <div class="category-card" style="border-color: var(--color-<?php echo htmlspecialchars($cat['color']); ?>)40;" onclick="window.location.href='detalle.php?id=<?php echo $cat['id']; ?>';">
                                         <div class="card-actions">
                                             <button class="btn-action" onclick="event.stopPropagation(); loadCategoriaForEdit(<?php echo $cat['id']; ?>)" title="Editar">
                                                 <svg class="icon-sm"><use href="#icon-edit"></use></svg>
@@ -228,12 +234,9 @@ $categoriasList = $stmt->fetchAll();
                         <option value="salmon">Salmón</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        Guardar
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('nuevaCategoriaModal')" style="flex: 1;">
-                        Cancelar
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('nuevaCategoriaModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta">Guardar
                     </button>
                 </div>
             </form>
@@ -267,12 +270,9 @@ $categoriasList = $stmt->fetchAll();
                         <option value="salmon">Salmón</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-menta" style="flex: 1;">
-                        Guardar Cambios
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editarCategoriaModal')" style="flex: 1;">
-                        Cancelar
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('editarCategoriaModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-menta">Guardar Cambios
                     </button>
                 </div>
             </form>

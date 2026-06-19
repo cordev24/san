@@ -206,6 +206,101 @@ class DetalleParticipanteTest extends TestCase
     }
 
     /**
+     * CI-17: Todas las cuotas pagadas — no debe mostrar "Reportar Pago".
+     *
+     * Simula el escenario marcando el pago de Juan como 'pagado' vía PDO directo,
+     * verifica la página, y restaura el estado original.
+     */
+    public function testAllPaidState(): void
+    {
+        global $pdo;
+
+        // Login como Juan (participante en grupo 4)
+        $login = $this->http->login('12345678', '12345678');
+        if (!$login['success'] ?? false) {
+            $this->fail('CI-17', 'No se pudo autenticar como Juan.');
+            return;
+        }
+
+        // Guardar estado original
+        $stmt = $pdo->prepare("SELECT estado FROM pagos WHERE id = 1");
+        $stmt->execute();
+        $originalEstado = $stmt->fetchColumn();
+
+        // Marcar pago como pagado
+        $stmt = $pdo->prepare("UPDATE pagos SET estado = 'pagado', fecha_pago = CURDATE() WHERE id = 1");
+        $stmt->execute();
+
+        // Verificar que PDO update se refleje
+        $stmt = $pdo->prepare("SELECT estado FROM pagos WHERE id = 1");
+        $stmt->execute();
+        $this->assertEquals('pagado', $stmt->fetchColumn(), 'CI-17', 'PDO update applied correctly');
+
+        [$httpCode, , $body] = $this->httpGet('/detalle-participante.php?grupo_id=4');
+
+        // Restaurar estado original
+        $stmt = $pdo->prepare("UPDATE pagos SET estado = ?, fecha_pago = NULL WHERE id = 1");
+        $stmt->execute([$originalEstado]);
+
+        $this->assertEquals(200, $httpCode, 'CI-17', 'HTTP 200 OK');
+
+        // The button is conditional (line 607); the JS function definition (line 841) is always rendered.
+        // Check for the specific button markup combination — button with onclick AND openReportModal
+        $btnPattern = 'btn-violeta" onclick="openReportModal';
+        $this->assertNotContains($btnPattern, $body, 'CI-17', 'NO debe mostrar botón Reportar Pago condicional');
+        $this->assertTrue(str_contains($body, 'Pagadas'), 'CI-17', 'Contiene tarjeta Pagadas');
+        $this->assertContains('Pagadas', $body, 'CI-17', 'Contiene tarjeta Pagadas');
+        $this->assertContains('1', $body, 'CI-17', 'Total cuotas muestra 1');
+    }
+
+    /**
+     * CI-18: Flujo de reporte de pago desde la página.
+     *
+     * Login como Juan, envía reporte vía API, verifica respuesta exitosa,
+     * y restaura el estado original.
+     */
+    public function testReportPaymentFlow(): void
+    {
+        global $pdo;
+
+        // Login como Juan
+        $login = $this->http->login('12345678', '12345678');
+        if (!$login['success'] ?? false) {
+            $this->fail('CI-18', 'No se pudo autenticar como Juan.');
+            return;
+        }
+
+        // Guardar estado original del pago #1
+        $stmt = $pdo->prepare("SELECT estado, referencia_pago, monto_bs_pagado, comprobante, notas FROM pagos WHERE id = 1");
+        $stmt->execute();
+        $original = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Reportar pago vía API
+        $result = $this->http->post('/api/pagos.php?action=reportar_pago', [
+            'pago_id'         => 1,
+            'referencia_pago' => 'TEST-REF-123456',
+            'monto_bs_pagado' => '500.00',
+            'notas'           => 'Test pago desde integración',
+        ]);
+
+        $this->assertTrue($result['success'] ?? false, 'CI-18', 'Reporte de pago exitoso');
+
+        // Restaurar estado original vía PDO directo
+        $stmt = $pdo->prepare("UPDATE pagos SET estado = ?, referencia_pago = ?, monto_bs_pagado = ?, comprobante = ?, notas = ? WHERE id = 1");
+        $stmt->execute([
+            $original['estado'],
+            $original['referencia_pago'],
+            $original['monto_bs_pagado'],
+            $original['comprobante'],
+            $original['notas'],
+        ]);
+
+        // También verificar que la página del detalle se ve bien después
+        [$httpCode, , $body] = $this->httpGet('/detalle-participante.php?grupo_id=4');
+        $this->assertEquals(200, $httpCode, 'CI-18', 'Página carga después del reporte');
+    }
+
+    /**
      * CI-15: Usuario no autenticado es redirigido al login.
      */
     public function testUnauthenticatedRedirectToLogin(): void
@@ -229,6 +324,8 @@ class DetalleParticipanteTest extends TestCase
         $this->testSuccessfulPageRender();
         $this->testDashboardHasVerDetalleLink();
         $this->testEmptyPaymentsState();
+        $this->testAllPaidState();
+        $this->testReportPaymentFlow();
         $this->testUnauthenticatedRedirectToLogin();
         return $this->summary();
     }

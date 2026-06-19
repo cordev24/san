@@ -93,6 +93,8 @@ CREATE TABLE `grupos_san` (
   `estado` enum('en_espera','abierto','en_curso','finalizado') DEFAULT 'en_espera',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `ronda_actual` int DEFAULT '1',
+  `enlace_invitacion` varchar(64) UNIQUE NULL COMMENT 'Token único para auto-registro de participantes',
+  `estado_enlace` enum('activo','inactivo') DEFAULT 'activo' COMMENT 'Habilitar/deshabilitar el link de invitación',
   PRIMARY KEY (`id`),
   KEY `producto_id` (`producto_id`),
   CONSTRAINT `grupos_san_ibfk_1` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE
@@ -113,29 +115,7 @@ UNLOCK TABLES;
 -- Table structure for table `mensajes`
 --
 
-DROP TABLE IF EXISTS `mensajes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `mensajes` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `sender_id` int NOT NULL,
-  `receiver_id` int NOT NULL,
-  `asunto` varchar(255) NOT NULL,
-  `cuerpo` text NOT NULL,
-  `leido` tinyint(1) DEFAULT '0',
-  `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `mensajes`
---
-
-LOCK TABLES `mensajes` WRITE;
-/*!40000 ALTER TABLE `mensajes` DISABLE KEYS */;
-/*!40000 ALTER TABLE `mensajes` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Tabla mensajes eliminada: la comunicación externa se realiza vía WhatsApp (ver informe sección 6.1.4)
 
 --
 -- Table structure for table `notificaciones`
@@ -180,9 +160,11 @@ CREATE TABLE `pagos` (
   `tasa_aplicada` decimal(10,4) DEFAULT NULL,
   `fecha_pago` date DEFAULT NULL,
   `fecha_vencimiento` date NOT NULL,
-  `estado` enum('pendiente','pagado','atrasado') DEFAULT 'pendiente',
+  `estado` enum('pendiente','pendiente_verificacion','pagado','atrasado') DEFAULT 'pendiente'
+    COMMENT 'pendiente=sin pago, pendiente_verificacion=participante reportó comprobante, pagado=admin aprobó, atrasado=vencido sin pago',
   `metodo_pago` varchar(50) DEFAULT NULL,
-  `comprobante` varchar(255) DEFAULT NULL,
+  `comprobante` varchar(255) DEFAULT NULL COMMENT 'Path relativo al archivo de comprobante subido por participante',
+  `referencia_pago` varchar(100) DEFAULT NULL COMMENT 'Número de referencia / confirmación del pago',
   `notas` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -222,6 +204,8 @@ CREATE TABLE `participantes` (
   `activo` tinyint DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `usuario_id` int DEFAULT NULL,
+  `tipo_registro` enum('autonomo','asistido') DEFAULT 'asistido'
+    COMMENT 'autonomo=se registró via enlace único, asistido=registrado manualmente por el admin',
   PRIMARY KEY (`id`),
   UNIQUE KEY `cedula` (`cedula`),
   KEY `grupo_san_id` (`grupo_san_id`),

@@ -30,8 +30,14 @@ $tasa_bcv_hoy = getBcvRate();
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mi Panel - MySan</title>
     
     <link rel="stylesheet" href="assets/fonts/inter.css">
@@ -67,6 +73,8 @@ $tasa_bcv_hoy = getBcvRate();
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-decoration: none;
+            writing-mode: horizontal-tb;
+            transform: none;
         }
 
         @media (max-width: 768px) {
@@ -93,46 +101,53 @@ $tasa_bcv_hoy = getBcvRate();
             padding: var(--space-8);
         }
 
+        /* ── Grid de cards ── */
+        .sanes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-4);
+        }
+
         .san-card {
             background: var(--color-surface);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-6);
-            margin-bottom: var(--space-6);
+            padding: var(--space-4);
         }
 
         .san-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             border-bottom: 1px solid var(--glass-border);
-            padding-bottom: var(--space-4);
-            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-3);
+            margin-bottom: var(--space-3);
+            gap: var(--space-2);
         }
         
         .san-title {
-            font-size: var(--font-size-2xl);
+            font-size: var(--font-size-base);
             font-weight: var(--font-weight-bold);
             color: var(--color-primary);
+            line-height: 1.3;
         }
 
         .payment-status {
             display: flex;
-            gap: var(--space-4);
-            margin-bottom: var(--space-6);
+            gap: var(--space-3);
         }
         
         .payment-box {
             background: var(--color-surface-section);
             border: 1px solid var(--glass-border);
-            padding: var(--space-4);
+            padding: var(--space-3);
             border-radius: var(--radius-md);
             flex: 1;
             text-align: center;
         }
 
         .payment-box.alert {
-            background: rgba(239, 68, 68, 0.08); /* light red */
+            background: rgba(239, 68, 68, 0.08);
             border-color: var(--color-error);
         }
 
@@ -142,9 +157,9 @@ $tasa_bcv_hoy = getBcvRate();
         }
         
         .value-large {
-            font-size: var(--font-size-3xl);
+            font-size: var(--font-size-xl);
             font-weight: var(--font-weight-bold);
-            margin: var(--space-2) 0;
+            margin: var(--space-1) 0;
             color: var(--color-text-primary);
         }
     </style>
@@ -246,6 +261,7 @@ $tasa_bcv_hoy = getBcvRate();
             </div>
         </div>
         <?php else: ?>
+            <div class="sanes-grid">
             <?php foreach ($mis_sanes as $san): 
                 // Fetch next pending payment
                 $stmtPago = $pdo->prepare("
@@ -289,46 +305,44 @@ $tasa_bcv_hoy = getBcvRate();
 
                     <div class="payment-status">
                         <?php if ($prox_pago): ?>
-                            <div class="payment-box <?php echo $prox_pago['estado'] == 'atrasado' ? 'alert' : ''; ?>" style="border-radius:var(--radius-lg);padding:var(--space-5);">
-                                <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2);">
-                                    <svg style="width:16px;height:16px;stroke:var(--color-text-tertiary);"><use href="#icon-<?php echo $prox_pago['estado'] == 'atrasado' ? 'alert-triangle' : 'calendar'; ?>"></use></svg>
-                                    <span style="color:var(--color-text-tertiary);font-size:var(--font-size-sm);font-weight:500;">Próxima Cuota (#<?php echo $prox_pago['numero_cuota']; ?>)</span>
+                            <div class="payment-box <?php echo $prox_pago['estado'] == 'atrasado' ? 'alert' : ''; ?>" style="border-radius:var(--radius-md);">
+                                <div style="display:flex;align-items:center;gap:var(--space-1);margin-bottom:var(--space-2);">
+                                    <svg style="width:13px;height:13px;stroke:var(--color-text-tertiary);"><use href="#icon-<?php echo $prox_pago['estado'] == 'atrasado' ? 'alert-triangle' : 'calendar'; ?>"></use></svg>
+                                    <span style="color:var(--color-text-tertiary);font-size:var(--font-size-xs);font-weight:500;">Cuota #<?php echo $prox_pago['numero_cuota']; ?></span>
                                 </div>
-                                <div style="display:flex;align-items:baseline;gap:var(--space-2);margin-bottom:var(--space-1);">
-                                    <span class="value-large" style="margin:0;font-size:var(--font-size-4xl);">$<?php echo number_format($prox_pago['monto'], 2); ?></span>
+                                <div style="display:flex;align-items:baseline;gap:var(--space-1);margin-bottom:var(--space-1);">
+                                    <span class="value-large">$<?php echo number_format($prox_pago['monto'], 2); ?></span>
+                                    <?php if ($tasa_bcv_hoy > 0): ?>
                                     <span style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">≈ Bs <?php echo number_format($prox_pago['monto'] * $tasa_bcv_hoy, 2); ?></span>
+                                    <?php endif; ?>
                                 </div>
-                                <div style="font-size:var(--font-size-sm);color:<?php
+                                <div style="font-size:var(--font-size-xs);color:<?php
                                     if ($prox_pago['estado'] == 'atrasado') echo 'var(--color-error)';
                                     else echo 'var(--color-text-secondary)';
-                                ?>;display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-3);">
-                                    <svg style="width:14px;height:14px;"><use href="#icon-clock"></use></svg>
-                                    Vence: <?php echo date('d/m/Y', strtotime($prox_pago['fecha_vencimiento'])); ?>
+                                ?>;display:flex;align-items:center;gap:var(--space-1);margin-bottom:var(--space-3);">
+                                    <svg style="width:12px;height:12px;"><use href="#icon-clock"></use></svg>
+                                    <?php echo date('d/m/Y', strtotime($prox_pago['fecha_vencimiento'])); ?>
                                     <?php if ($prox_pago['estado'] == 'atrasado'): ?> · <strong>Atrasado</strong><?php endif; ?>
                                 </div>
                                 <button
                                     class="btn btn-violeta"
-                                    style="width:100%;font-size:var(--font-size-sm);padding:var(--space-3);"
+                                    style="width:100%;font-size:var(--font-size-xs);padding:var(--space-2) var(--space-3);"
                                     onclick="openReportModal(<?php echo $prox_pago['id']; ?>, <?php echo $prox_pago['numero_cuota']; ?>, <?php echo $prox_pago['monto']; ?>, <?php echo $san['grupo_id']; ?>)">
-                                    <svg style="width:14px;height:14px;"><use href="#icon-download"></use></svg>
+                                    <svg style="width:12px;height:12px;"><use href="#icon-download"></use></svg>
                                     Reportar Pago
                                 </button>
-                                <?php if ($tasa_bcv_hoy > 0): ?>
-                                <div style="margin-top:var(--space-2);font-size:var(--font-size-xs);color:var(--color-text-tertiary);opacity:0.7;">
-                                    Tasa BCV: Bs <?php echo number_format($tasa_bcv_hoy, 2); ?> / $
-                                </div>
-                                <?php endif; ?>
                             </div>
                         <?php else: ?>
-                            <div class="payment-box success" style="border-radius:var(--radius-lg);padding:var(--space-5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-2);">
-                                <svg style="width:40px;height:40px;stroke:var(--color-success);"><use href="#icon-check"></use></svg>
-                                <div style="color:var(--color-success);font-weight:700;font-size:var(--font-size-lg);">¡Estás al día!</div>
-                                <div style="font-size:var(--font-size-sm);color:var(--color-text-tertiary);">No tienes cuotas pendientes.</div>
+                            <div class="payment-box success" style="border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-2);">
+                                <svg style="width:28px;height:28px;stroke:var(--color-success);"><use href="#icon-check"></use></svg>
+                                <div style="color:var(--color-success);font-weight:700;font-size:var(--font-size-sm);">¡Al día!</div>
+                                <div style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);">Sin cuotas pendientes.</div>
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
+            </div><!-- /.sanes-grid -->
         <?php endif; ?>
     </div>
 

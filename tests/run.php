@@ -146,10 +146,10 @@ if ($runInt) {
         TESTS_DIR . '/Integration/AuthTest.php'          => 'CI-01, CI-02',
         TESTS_DIR . '/Integration/GruposTest.php'        => 'CI-03, CI-04, CI-09',
         TESTS_DIR . '/Integration/ParticipantesTest.php' => 'CI-05',
-        TESTS_DIR . '/Integration/PagosTest.php'         => 'CI-06, CI-07',
-        TESTS_DIR . '/Integration/TurnosTest.php'        => 'CI-08',
-        TESTS_DIR . '/Integration/ComprobantesTest.php'  => 'CI-10',
-        TESTS_DIR . '/Integration/DetalleParticipanteTest.php' => 'CI-11, CI-12, CI-13, CI-14, CI-15',
+        TESTS_DIR . '/Integration/PagosTest.php'         => 'CI-06, CI-07, CI-08',
+        TESTS_DIR . '/Integration/TurnosTest.php'        => 'CI-09',
+        TESTS_DIR . '/Integration/ComprobantesTest.php'  => 'CI-10, CI-11',
+        TESTS_DIR . '/Integration/DetalleParticipanteTest.php' => 'CI-11, CI-12, CI-13, CI-14, CI-15, CI-16, CI-17, CI-18',
     ];
 
     foreach ($integrationSuites as $file => $label) {

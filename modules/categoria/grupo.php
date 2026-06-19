@@ -10,6 +10,7 @@ $categoria_id = isset($_GET['id'])      ? (int)$_GET['id']      : 0;
 $stmt = $pdo->prepare("
     SELECT gs.*,
            p.nombre  AS producto_nombre,
+           p.imagen  AS producto_imagen,
            p.marca   AS producto_marca,
            p.modelo  AS producto_modelo,
            p.valor_total,
@@ -52,6 +53,16 @@ $stmt = $pdo->prepare("
 $stmt->execute([$grupo_id]);
 $participantes = $stmt->fetchAll();
 
+// ── Participantes removidos ──────────────────────────────────────────────────
+$stmt = $pdo->prepare("
+    SELECT *
+    FROM participantes 
+    WHERE grupo_san_id = ? AND activo = 0 AND motivo_salida IS NOT NULL
+    ORDER BY fecha_salida DESC, id DESC
+");
+$stmt->execute([$grupo_id]);
+$participantes_removidos = $stmt->fetchAll();
+
 // ── Stats globales del grupo ──────────────────────────────────────────────────
 $stmt = $pdo->prepare("
     SELECT
@@ -91,8 +102,14 @@ $color = htmlspecialchars($grupo['categoria_color']);
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D0D0D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../../manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MySan — <?php echo htmlspecialchars($grupo['nombre']); ?></title>
 
     <link rel="stylesheet" href="../../assets/fonts/inter.css">
@@ -419,10 +436,18 @@ $color = htmlspecialchars($grupo['categoria_color']);
                 <div class="grupo-hero-banner"></div>
                 <div class="grupo-hero-body">
                     <div class="grupo-hero-left">
-                        <div class="grupo-hero-icon">
+                        <div class="grupo-hero-icon" style="overflow: hidden; background: var(--color-background); border: 2px solid var(--glass-border); position: relative; cursor: zoom-in; display: flex; align-items: center; justify-content: center; padding: 6px;"
+                             onclick="event.stopPropagation(); viewGallery(<?php echo (int)$grupo['producto_id']; ?>, '<?php echo htmlspecialchars(addslashes($grupo['producto_nombre'])); ?>')">
+                            <?php if (!empty($grupo['producto_imagen'])): ?>
+                                <img src="../../<?php echo htmlspecialchars(ltrim($grupo['producto_imagen'] ?? '', '/')); ?>" alt="Producto" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                <span style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;padding:4px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+                                    <svg style="width:12px;height:12px;stroke:#fff;stroke-width:2.5;"><use href="#icon-zoom-in"></use></svg>
+                                </span>
+                            <?php else: ?>
                             <svg style="width:32px;height:32px;stroke:var(--color-primary);stroke-width:1.8;">
                                 <use href="#icon-users"></use>
                             </svg>
+                            <?php endif; ?>
                         </div>
                         <div>
                             <div class="grupo-hero-name"><?php echo htmlspecialchars($grupo['nombre']); ?></div>
@@ -543,6 +568,7 @@ $color = htmlspecialchars($grupo['categoria_color']);
                 </div>
             </div>
 
+
             <!-- ══ PARTICIPANTES ════════════════════════════════════════ -->
             <div class="section-card">
                 <div class="section-header">
@@ -582,6 +608,7 @@ $color = htmlspecialchars($grupo['categoria_color']);
                                     <th>Progreso de Pago</th>
                                     <th>Estado</th>
                                     <th>Monto Pagado</th>
+                                    <th style="text-align:right;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -637,6 +664,11 @@ $color = htmlspecialchars($grupo['categoria_color']);
                                     <td style="font-weight:700;color:var(--color-primary);">
                                         <?php echo formatMoneyBcv($p['monto_pagado']); ?>
                                     </td>
+                                    <td style="text-align:right;">
+                                        <button class="btn-action" style="color:var(--color-salmon);" title="Remover participante" onclick="confirmarRemocion(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars(addslashes($p['nombre'] . ' ' . $p['apellido'])); ?>')">
+                                            <svg class="icon"><use href="#icon-x"></use></svg>
+                                        </button>
+                                    </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -644,6 +676,54 @@ $color = htmlspecialchars($grupo['categoria_color']);
                     </div>
                 <?php endif; ?>
             </div>
+
+            <?php if (count($participantes_removidos) > 0): ?>
+            <!-- ══ PARTICIPANTES REMOVIDOS ════════════════════════════════════════ -->
+            <div class="section-card" style="border-left: 4px solid var(--color-salmon); margin-top: var(--space-6);">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--color-salmon);">
+                        <svg style="width:20px;height:20px;stroke:currentColor;stroke-width:2;">
+                            <use href="#icon-users"></use>
+                        </svg>
+                        Participantes Removidos
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="part-table">
+                        <thead>
+                            <tr>
+                                <th>Participante</th>
+                                <th>Cédula</th>
+                                <th>Fecha Salida</th>
+                                <th>Motivo de Remoción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($participantes_removidos as $pr): 
+                                $initials = strtoupper(substr($pr['nombre'], 0, 1) . substr($pr['apellido'], 0, 1));
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="participant-name-cell">
+                                        <div class="participant-avatar" style="background:var(--color-surface);color:var(--color-text-secondary);"><?php echo $initials; ?></div>
+                                        <div>
+                                            <div style="font-weight:600;color:var(--color-text-secondary);"><?php echo htmlspecialchars($pr['nombre'] . ' ' . $pr['apellido']); ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="color:var(--color-text-secondary);"><?php echo htmlspecialchars($pr['cedula']); ?></td>
+                                <td style="color:var(--color-text-secondary);"><?php echo date('d/m/Y', strtotime($pr['fecha_salida'])); ?></td>
+                                <td style="color:var(--color-text-secondary);font-size:13px;max-width:300px;white-space:normal;line-height:1.4;">
+                                    <?php echo nl2br(htmlspecialchars($pr['motivo_salida'])); ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- ══ ÚLTIMOS PAGOS ════════════════════════════════════════ -->
             <div class="section-card">
@@ -726,20 +806,16 @@ $color = htmlspecialchars($grupo['categoria_color']);
                     <select id="edit_grupo_estado" name="estado" class="form-select">
                         <option value="en_espera">En Espera</option>
                         <option value="abierto">Abierto</option>
-                        <option value="cerrado">Cerrado</option>
                         <option value="finalizado">Finalizado</option>
                     </select>
                 </div>
 
-                <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6);">
-                    <button type="submit" class="btn btn-violeta" style="flex: 1;">
-                        <svg class="icon">
+                <div style="display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-6);">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('editarGrupoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-violeta"><svg class="icon">
                             <use href="#icon-check-circle"></use>
                         </svg>
                         Guardar Cambios
-                    </button>
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editarGrupoModal')" style="flex: 1;">
-                        Cancelar
                     </button>
                 </div>
             </form>
@@ -886,6 +962,43 @@ $color = htmlspecialchars($grupo['categoria_color']);
         </div>
     </div>
 
+    <!-- ══ MODAL REMOVER PARTICIPANTE ════════════════════════════════════════ -->
+    <div id="removerParticipanteModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Remover Participante</h2>
+                <button class="modal-close" onclick="closeModal('removerParticipanteModal')">
+                    <svg class="icon"><use href="#icon-x"></use></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="removerParticipanteForm">
+                    <input type="hidden" id="rem_participante_id" name="id">
+                    
+                    <p style="margin-bottom: var(--space-4); color: var(--color-text-secondary);">
+                        ¿Estás seguro de que deseas remover a <strong id="rem_participante_nombre" style="color: var(--color-text-primary);"></strong> de este grupo?
+                    </p>
+                    
+                    <div style="background: rgba(255,100,100,0.1); border-left: 4px solid var(--color-salmon); padding: var(--space-3); border-radius: var(--radius-sm); margin-bottom: var(--space-4);">
+                        <p style="font-size: 13px; color: var(--color-text-secondary); margin: 0;">
+                            <strong>Atención:</strong> Sus pagos completados se mantendrán en el historial, pero sus pagos pendientes, atrasados y turno serán cancelados. El cupo del grupo se liberará.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rem_motivo">Motivo de la Salida *</label>
+                        <textarea id="rem_motivo" name="motivo_salida" class="form-control" rows="3" required placeholder="Ej. No puede seguir pagando las cuotas..."></textarea>
+                    </div>
+                    
+                    <div style="display:flex;gap:var(--space-2);margin-top:var(--space-5);">
+                        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal('removerParticipanteModal')">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" style="flex:1;background:var(--color-salmon);">Confirmar Remoción</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="../../assets/js/shared.js"></script>
     <script src="../../assets/js/grupos.js"></script>
 
@@ -1018,6 +1131,42 @@ $color = htmlspecialchars($grupo['categoria_color']);
                     alert.style.display = '';
                     alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
+            }
+        } catch(err) {
+            showNotification('Error de conexión', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+        }
+    });
+
+    // Funciones para remover participante
+    function confirmarRemocion(id, nombre) {
+        document.getElementById('rem_participante_id').value = id;
+        document.getElementById('rem_participante_nombre').textContent = nombre;
+        document.getElementById('rem_motivo').value = '';
+        openModal('removerParticipanteModal');
+    }
+
+    document.getElementById('removerParticipanteForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+
+        const formData = new FormData(this);
+        formData.set('action', 'remove_from_group');
+
+        try {
+            const res = await fetch('../../api/participantes.php', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                showNotification(data.message, 'success');
+                closeModal('removerParticipanteModal');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showNotification(data.message || 'Error al remover', 'error');
             }
         } catch(err) {
             showNotification('Error de conexión', 'error');

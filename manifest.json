@@ -1,0 +1,22 @@
+{
+  "name": "MySan",
+  "short_name": "MySan",
+  "description": "Sistema de Administración de Ahorros Grupales",
+  "start_url": "./dashboard.php",
+  "display": "standalone",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
