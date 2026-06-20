@@ -114,16 +114,28 @@ $productos = $stmtProd->fetchAll();
                                 No hay productos en esta categoría.
                             </p>
                         <?php else: ?>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4);">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4);">
                                 <?php foreach ($productos as $p): ?>
-                                    <div class="product-card" id="prod-<?php echo $p['id']; ?>">
-                                        <div class="product-info">
-                                            <span class="product-name"><?php echo htmlspecialchars($p['nombre']); ?></span>
-                                            <span class="product-meta"><?php echo htmlspecialchars($p['marca'] . ' ' . $p['modelo']); ?> - $<?php echo number_format($p['valor_total'], 2); ?></span>
+                                    <div class="product-card" id="prod-<?php echo $p['id']; ?>" style="flex-direction: column; align-items: stretch; padding: 0; overflow: hidden;">
+                                        <?php if (!empty($p['imagen'])): ?>
+                                            <div style="height: 160px; background: var(--color-background); border-bottom: 1px solid var(--glass-border);">
+                                                <img src="../../<?php echo htmlspecialchars(ltrim($p['imagen'], '/')); ?>" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                                            </div>
+                                        <?php else: ?>
+                                            <div style="height: 160px; background: var(--glass-background); border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary);">
+                                                <svg class="icon" style="width: 48px; height: 48px; opacity: 0.3;"><use href="#icon-image"></use></svg>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div style="padding: var(--space-4); display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3);">
+                                            <div class="product-info" style="flex: 1;">
+                                                <span class="product-name"><?php echo htmlspecialchars($p['nombre']); ?></span>
+                                                <span class="product-meta"><?php echo htmlspecialchars($p['marca'] . ' ' . $p['modelo']); ?></span>
+                                                <span style="display: block; font-weight: 700; color: var(--color-<?php echo htmlspecialchars($categoria['color']); ?>); margin-top: var(--space-2); font-size: var(--font-size-lg);">$<?php echo number_format($p['valor_total'], 2); ?></span>
+                                            </div>
+                                            <button class="btn-action-danger" onclick="detachProduct(<?php echo $p['id']; ?>)" title="Desvincular de la categoría">
+                                                <svg class="icon"><use href="#icon-x"></use></svg>
+                                            </button>
                                         </div>
-                                        <button class="btn-action-danger" onclick="detachProduct(<?php echo $p['id']; ?>)" title="Desvincular de la categoría">
-                                            <svg class="icon"><use href="#icon-x"></use></svg>
-                                        </button>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
