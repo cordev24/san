@@ -32,10 +32,8 @@ $preguntas_predefinidas = [
     <style>
         .reg-container {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-6);
+            display: block;
+            padding: 60px var(--space-4);
             position: relative;
         }
 
@@ -52,6 +50,7 @@ $preguntas_predefinidas = [
         .reg-card {
             width: 100%;
             max-width: 520px;
+            margin: 0 auto;
             background: var(--color-surface);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);

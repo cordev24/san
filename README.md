@@ -203,6 +203,20 @@ $password = password_hash('nueva_contraseña', PASSWORD_DEFAULT);
 // Insertar en tabla usuarios
 ```
 
+### Reset de Base de Datos (Limpieza Total)
+
+Si necesitas borrar todos los datos transaccionales (pagos, grupos, participantes, usuarios) para dejar el sistema como nuevo y forzar la pantalla de instalación inicial:
+
+```bash
+# Desde la terminal, en la raíz del proyecto:
+php scripts/reset_db.php
+
+# Si estás ejecutando el proyecto con Docker:
+docker exec mysan-web php scripts/reset_db.php
+```
+
+*Nota: Este script no borrará tus catálogos de productos ni categorías, solo los datos de uso.*
+
 ## 📊 Base de Datos
 
 ### Tablas Principales

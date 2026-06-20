@@ -1,3 +1,22 @@
+<?php
+require_once 'config/database.php';
+
+try {
+    $stmt = $pdo->query("SELECT COUNT(*) FROM usuarios");
+    if ($stmt->fetchColumn() == 0) {
+        header('Location: install.php');
+        exit;
+    }
+} catch (Exception $e) {
+    header('Location: install.php');
+    exit;
+}
+
+if (isLoggedIn()) {
+    header('Location: dashboard.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -22,7 +41,7 @@
     <style>
         .login-container {
             min-height: 100vh;
-            display: flex;
+            display: block;
             padding: var(--space-4);
             box-sizing: border-box;
             position: relative;
@@ -32,7 +51,14 @@
             width: 100%;
             max-width: 420px;
             padding: var(--space-8);
-            margin: auto;
+            margin: 60px auto;
+            box-shadow: var(--shadow-lg), var(--shadow-glow-violeta);
+            animation: float-static 3s ease-in-out infinite;
+        }
+
+        @keyframes float-static {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .login-logo {
@@ -108,7 +134,7 @@
     <?php include 'assets/icons/feather-sprite.svg'; ?>
 
     <div class="login-container">
-        <div class="bento-box bento-floating login-box">
+        <div class="bento-box login-box">
                 <div class="login-logo">
                     <div class="logo-mark">
                         <svg><use href="#icon-dollar-sign"></use></svg>
