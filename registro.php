@@ -292,6 +292,40 @@ $preguntas_predefinidas = [
             background: var(--glass-border);
             margin: var(--space-5) 0;
         }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: var(--space-6);
+        }
+        .step-dot {
+            width: 32px;
+            height: 4px;
+            background: var(--glass-border);
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+        .step-dot.active {
+            background: var(--color-violeta);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-secondary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--color-text-primary);
+        }
+        .step-content {
+            animation: fadeSlideUp 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -359,10 +393,10 @@ $preguntas_predefinidas = [
 
                     <!-- Cuerpo del formulario -->
                     <div class="reg-body">
-                        <div class="step-indicator">
-                            <div class="step-dot active"></div>
-                            <div class="step-dot active"></div>
-                            <div class="step-dot"></div>
+                                                <div class="step-indicator">
+                            <div class="step-dot active" id="dot-1"></div>
+                            <div class="step-dot" id="dot-2"></div>
+                            <div class="step-dot" id="dot-3"></div>
                         </div>
 
                         <div id="formAlert" class="alert-box alert-error"></div>
@@ -370,166 +404,187 @@ $preguntas_predefinidas = [
                         <form id="regForm" enctype="multipart/form-data">
                             <input type="hidden" id="grupoIdField" name="grupo_id" value="0">
 
-                            <!-- Nombre y Apellido -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="nombre">Nombre *</label>
-                                    <input type="text" id="nombre" name="nombre" class="form-input"
-                                           placeholder="Ej: María" required autocomplete="given-name">
+                            <!-- PASO 1: Datos Personales -->
+                            <div id="step1" class="step-content">
+                                <!-- Nombre y Apellido -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="nombre">Nombre *</label>
+                                        <input type="text" id="nombre" name="nombre" class="form-input"
+                                               placeholder="Ej: María" required autocomplete="given-name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="apellido">Apellido *</label>
+                                        <input type="text" id="apellido" name="apellido" class="form-input"
+                                               placeholder="Ej: González" required autocomplete="family-name">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="apellido">Apellido *</label>
-                                    <input type="text" id="apellido" name="apellido" class="form-input"
-                                           placeholder="Ej: González" required autocomplete="family-name">
-                                </div>
-                            </div>
 
-                            <!-- Usuario y Email -->
-                            <div class="form-row">
+                                <!-- Cédula -->
                                 <div class="form-group">
-                                    <label class="form-label" for="username">
-                                        Usuario *
+                                    <label class="form-label" for="cedula">
+                                        Número de Cédula *
                                     </label>
-                                    <input type="text" id="username" name="username" class="form-input"
-                                           placeholder="Ej: mgonzalez" required autocomplete="username">
+                                    <input type="text" id="cedula" name="cedula" class="form-input"
+                                           placeholder="Ej: V-12345678" required autocomplete="off">
+                                </div>
+
+                                <!-- Teléfono y Dirección -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="telefono">Teléfono</label>
+                                        <input type="tel" id="telefono" name="telefono" class="form-input"
+                                               placeholder="Ej: 0414-1234567" required autocomplete="tel">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="direccion">Dirección *</label>
+                                        <input type="text" id="direccion" name="direccion" class="form-input"
+                                               placeholder="Ciudad / Sector" required autocomplete="street-address">
+                                    </div>
+                                </div>
+
+                                <div class="step-actions" style="display: flex; justify-content: flex-end; margin-top: var(--space-6);">
+                                    <button type="button" class="btn btn-violeta" onclick="nextStep(1)">
+                                        Siguiente <svg class="icon"><use href="#icon-arrow-right"></use></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- PASO 2: Credenciales -->
+                            <div id="step2" class="step-content" style="display: none;">
+                                <!-- Usuario y Email -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="username">Usuario *</label>
+                                        <input type="text" id="username" name="username" class="form-input"
+                                               placeholder="Ej: mgonzalez" required autocomplete="username">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="email">
+                                            <svg class="icon" style="vertical-align:middle; width:14px; height:14px; margin-right:5px;">
+                                                <use href="#icon-mail"></use>
+                                            </svg>
+                                            Correo electrónico *
+                                        </label>
+                                        <input type="email" id="email" name="email" class="form-input"
+                                               placeholder="Ej: maria@correo.com" required autocomplete="email">
+                                    </div>
+                                </div>
+
+                                <!-- Contraseña -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="password">Contraseña *</label>
+                                        <input type="password" id="password" name="password" class="form-input"
+                                               placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="password2">Confirmar *</label>
+                                        <input type="password" id="password2" name="password2" class="form-input"
+                                               placeholder="Repite tu contraseña" required autocomplete="new-password">
+                                    </div>
+                                </div>
+
+                                <div class="step-actions" style="display: flex; justify-content: space-between; margin-top: var(--space-6);">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                                        <svg class="icon"><use href="#icon-arrow-left"></use></svg> Anterior
+                                    </button>
+                                    <button type="button" class="btn btn-violeta" onclick="nextStep(2)">
+                                        Siguiente <svg class="icon"><use href="#icon-arrow-right"></use></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- PASO 3: Preguntas de Seguridad -->
+                            <div id="step3" class="step-content" style="display: none;">
+                                <h3 style="font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-4); display: flex; align-items: center; gap: 8px;">
+                                    <svg style="width: 16px; height: 16px; stroke: var(--color-menta); stroke-width: 2.5;"><use href="#icon-shield"></use></svg>
+                                    Capa de Seguridad
+                                </h3>
+
+                                <!-- Pregunta 1 -->
+                                <div class="form-group">
+                                    <label class="form-label" for="pregunta_tipo_1">Pregunta de Seguridad 1 *</label>
+                                    <select id="pregunta_tipo_1" name="pregunta_tipo_1" class="form-select pregunta-select" required>
+                                        <option value="">-- Selecciona una pregunta --</option>
+                                        <?php foreach ($preguntas_predefinidas as $pregunta): ?>
+                                            <option value="<?php echo htmlspecialchars($pregunta); ?>"><?php echo htmlspecialchars($pregunta); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div id="customQuestionDiv_1" class="form-group" style="display: none;">
+                                    <label class="form-label" for="pregunta_personalizada_1">Pregunta Personalizada 1 *</label>
+                                    <input type="text" id="pregunta_personalizada_1" name="pregunta_personalizada_1" class="form-input" placeholder="Ej: ¿Cómo se llama tu mascota?">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="email">
-                                        <svg class="icon" style="vertical-align:middle; width:14px; height:14px; margin-right:5px;">
-                                            <use href="#icon-mail"></use>
-                                        </svg>
-                                        Correo electrónico *
+                                    <label class="form-label" for="respuesta_1">Respuesta Secreta 1 *</label>
+                                    <input type="text" id="respuesta_1" name="respuesta_1" class="form-input" placeholder="Tu respuesta a la pregunta 1" required autocomplete="off">
+                                </div>
+
+                                <div class="form-section-divider"></div>
+
+                                <!-- Pregunta 2 -->
+                                <div class="form-group">
+                                    <label class="form-label" for="pregunta_tipo_2">Pregunta de Seguridad 2 *</label>
+                                    <select id="pregunta_tipo_2" name="pregunta_tipo_2" class="form-select pregunta-select" required>
+                                        <option value="">-- Selecciona una pregunta --</option>
+                                        <?php foreach ($preguntas_predefinidas as $pregunta): ?>
+                                            <option value="<?php echo htmlspecialchars($pregunta); ?>"><?php echo htmlspecialchars($pregunta); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div id="customQuestionDiv_2" class="form-group" style="display: none;">
+                                    <label class="form-label" for="pregunta_personalizada_2">Pregunta Personalizada 2 *</label>
+                                    <input type="text" id="pregunta_personalizada_2" name="pregunta_personalizada_2" class="form-input" placeholder="Ej: ¿Cuál fue tu primer carro?">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="respuesta_2">Respuesta Secreta 2 *</label>
+                                    <input type="text" id="respuesta_2" name="respuesta_2" class="form-input" placeholder="Tu respuesta a la pregunta 2" required autocomplete="off">
+                                </div>
+
+                                <div class="form-section-divider"></div>
+
+                                <!-- Pregunta 3 -->
+                                <div class="form-group">
+                                    <label class="form-label" for="pregunta_tipo_3">Pregunta de Seguridad 3 *</label>
+                                    <select id="pregunta_tipo_3" name="pregunta_tipo_3" class="form-select pregunta-select" required>
+                                        <option value="">-- Selecciona una pregunta --</option>
+                                        <?php foreach ($preguntas_predefinidas as $pregunta): ?>
+                                            <option value="<?php echo htmlspecialchars($pregunta); ?>"><?php echo htmlspecialchars($pregunta); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div id="customQuestionDiv_3" class="form-group" style="display: none;">
+                                    <label class="form-label" for="pregunta_personalizada_3">Pregunta Personalizada 3 *</label>
+                                    <input type="text" id="pregunta_personalizada_3" name="pregunta_personalizada_3" class="form-input" placeholder="Ej: ¿Cuál es tu banda favorita?">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="respuesta_3">Respuesta Secreta 3 *</label>
+                                    <input type="text" id="respuesta_3" name="respuesta_3" class="form-input" placeholder="Tu respuesta a la pregunta 3" required autocomplete="off">
+                                </div>
+
+                                <div class="form-group" style="margin-top: var(--space-4); margin-bottom: var(--space-4);">
+                                    <label style="display: flex; align-items: flex-start; gap: var(--space-2); cursor: pointer;">
+                                        <input type="checkbox" name="terminos" id="terminos" required style="margin-top: 4px;">
+                                        <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.4;">
+                                            He leído y acepto los <a href="javascript:void(0)" onclick="openTosModal()" style="color: var(--color-violeta); text-decoration: underline;">Términos y Condiciones de Servicio</a> *
+                                        </span>
                                     </label>
-                                    <input type="email" id="email" name="email" class="form-input"
-                                           placeholder="Ej: maria@correo.com" required autocomplete="email">
+                                </div>
+
+                                <div class="step-actions" style="display: flex; justify-content: space-between; margin-top: var(--space-6);">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                                        <svg class="icon"><use href="#icon-arrow-left"></use></svg> Anterior
+                                    </button>
+                                    <button type="submit" id="submitBtn" class="btn btn-violeta">
+                                        <span id="submitBtnText">Crear Cuenta</span>
+                                        <svg class="icon"><use href="#icon-user-plus"></use></svg>
+                                    </button>
                                 </div>
                             </div>
-
-                            <!-- Cédula -->
-                            <div class="form-group">
-                                <label class="form-label" for="cedula">
-                                    Número de Cédula *
-                                </label>
-                                <input type="text" id="cedula" name="cedula" class="form-input"
-                                       placeholder="Ej: V-12345678" required autocomplete="off">
-                            </div>
-
-                            <div class="form-section-divider"></div>
-
-                            <!-- Teléfono y Dirección -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="telefono">Teléfono</label>
-                                    <input type="tel" id="telefono" name="telefono" class="form-input"
-                                           placeholder="Ej: 0414-1234567" required autocomplete="tel">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="direccion">Dirección *</label>
-                                    <input type="text" id="direccion" name="direccion" class="form-input"
-                                           placeholder="Ciudad / Sector" required autocomplete="street-address">
-                                </div>
-                            </div>
-
-                            <div class="form-section-divider"></div>
-
-                            <!-- Contraseña -->
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="password">Contraseña *</label>
-                                    <input type="password" id="password" name="password" class="form-input"
-                                           placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="password2">Confirmar *</label>
-                                    <input type="password" id="password2" name="password2" class="form-input"
-                                           placeholder="Repite tu contraseña" required autocomplete="new-password">
-                                </div>
-                            </div>
-
-                            <div class="form-section-divider"></div>
-
-                            <h3 style="font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-4); display: flex; align-items: center; gap: 8px;">
-                                <svg style="width: 16px; height: 16px; stroke: var(--color-menta); stroke-width: 2.5;"><use href="#icon-shield"></use></svg>
-                                Capa de Seguridad: Preguntas de Seguridad
-                            </h3>
-
-                            <!-- Pregunta 1 -->
-                            <div class="form-group">
-                                <label class="form-label" for="pregunta_tipo_1">Pregunta de Seguridad 1 *</label>
-                                <select id="pregunta_tipo_1" name="pregunta_tipo_1" class="form-select" required onchange="toggleCustomQuestion(1)">
-                                    <option value="">-- Selecciona una pregunta --</option>
-                                    <?php foreach ($preguntas_predefinidas as $pregunta): ?>
-                                        <option value="<?php echo htmlspecialchars($pregunta); ?>"><?php echo htmlspecialchars($pregunta); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div id="customQuestionDiv_1" class="form-group" style="display: none;">
-                                <label class="form-label" for="pregunta_personalizada_1">Pregunta Personalizada 1 *</label>
-                                <input type="text" id="pregunta_personalizada_1" name="pregunta_personalizada_1" class="form-input" placeholder="Ej: ¿Cómo se llama tu mascota?">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="respuesta_1">Respuesta Secreta 1 *</label>
-                                <input type="text" id="respuesta_1" name="respuesta_1" class="form-input" placeholder="Tu respuesta a la pregunta 1" required autocomplete="off">
-                            </div>
-
-                            <div class="form-section-divider"></div>
-
-                            <!-- Pregunta 2 -->
-                            <div class="form-group">
-                                <label class="form-label" for="pregunta_tipo_2">Pregunta de Seguridad 2 *</label>
-                                <select id="pregunta_tipo_2" name="pregunta_tipo_2" class="form-select" required onchange="toggleCustomQuestion(2)">
-                                    <option value="">-- Selecciona una pregunta --</option>
-                                    <?php foreach ($preguntas_predefinidas as $pregunta): ?>
-                                        <option value="<?php echo htmlspecialchars($pregunta); ?>"><?php echo htmlspecialchars($pregunta); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div id="customQuestionDiv_2" class="form-group" style="display: none;">
-                                <label class="form-label" for="pregunta_personalizada_2">Pregunta Personalizada 2 *</label>
-                                <input type="text" id="pregunta_personalizada_2" name="pregunta_personalizada_2" class="form-input" placeholder="Ej: ¿Cuál fue tu primer carro?">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="respuesta_2">Respuesta Secreta 2 *</label>
-                                <input type="text" id="respuesta_2" name="respuesta_2" class="form-input" placeholder="Tu respuesta a la pregunta 2" required autocomplete="off">
-                            </div>
-
-                            <div class="form-section-divider"></div>
-
-                            <!-- Pregunta 3 -->
-                            <div class="form-group">
-                                <label class="form-label" for="pregunta_tipo_3">Pregunta de Seguridad 3 *</label>
-                                <select id="pregunta_tipo_3" name="pregunta_tipo_3" class="form-select" required onchange="toggleCustomQuestion(3)">
-                                    <option value="">-- Selecciona una pregunta --</option>
-                                    <?php foreach ($preguntas_predefinidas as $pregunta): ?>
-                                        <option value="<?php echo htmlspecialchars($pregunta); ?>"><?php echo htmlspecialchars($pregunta); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div id="customQuestionDiv_3" class="form-group" style="display: none;">
-                                <label class="form-label" for="pregunta_personalizada_3">Pregunta Personalizada 3 *</label>
-                                <input type="text" id="pregunta_personalizada_3" name="pregunta_personalizada_3" class="form-input" placeholder="Ej: ¿Cuál es tu banda favorita?">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="respuesta_3">Respuesta Secreta 3 *</label>
-                                <input type="text" id="respuesta_3" name="respuesta_3" class="form-input" placeholder="Tu respuesta a la pregunta 3" required autocomplete="off">
-                            </div>
-
-                            <div class="form-group" style="margin-top: var(--space-4); margin-bottom: var(--space-4);">
-                                <label style="display: flex; align-items: flex-start; gap: var(--space-2); cursor: pointer;">
-                                    <input type="checkbox" name="terminos" id="terminos" required style="margin-top: 4px;">
-                                    <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.4;">
-                                        He leído y acepto los <a href="terminos.php" target="_blank" style="color: var(--color-violeta); text-decoration: underline;">Términos y Condiciones de Servicio</a> *
-                                    </span>
-                                </label>
-                            </div>
-
-                            <button type="submit" id="submitBtn" class="btn btn-violeta" style="width:100%; margin-top: var(--space-2);">
-                                <span id="submitBtnText">Crear Cuenta</span>
-                                <svg class="icon"><use href="#icon-user-plus"></use></svg>
-                            </button>
                         </form>
 
-                        <div style="margin-top: var(--space-5); text-align:center; display: flex; flex-direction: column; gap: var(--space-3);">
+<div style="margin-top: var(--space-5); text-align:center; display: flex; flex-direction: column; gap: var(--space-3);">
                             <div style="display: flex; align-items: center; gap: var(--space-3); opacity: 0.4;">
                                 <span style="flex:1; height:1px; background: var(--glass-border);"></span>
                                 <span style="font-size: var(--font-size-xs); color: var(--color-text-tertiary);">o</span>
@@ -561,9 +616,121 @@ $preguntas_predefinidas = [
         </div>
     </div>
 
-
+    <!-- Modal Términos -->
+    <div id="tosModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: var(--space-4);">
+        <div class="modal-content" style="background: var(--color-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); width: 100%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: fadeSlideUp 0.3s ease-out;">
+            <div class="modal-header" style="padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+                <h2 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin: 0;">Términos y Condiciones</h2>
+                <button type="button" onclick="closeTosModal()" style="background: transparent; border: none; color: var(--color-text-secondary); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                    <svg class="icon"><use href="#icon-x"></use></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="tosModalBody" style="padding: var(--space-6); overflow-y: auto; color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.6;">
+                <div style="text-align:center; padding: var(--space-8);">
+                    <div class="loader-ring"></div>
+                    <p>Cargando términos...</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: var(--space-4) var(--space-6); border-top: 1px solid var(--glass-border); display: flex; justify-content: flex-end; background: rgba(255,255,255,0.02);">
+                <button type="button" class="btn btn-violeta" onclick="closeTosModal()">Entendido</button>
+            </div>
+        </div>
+    </div>
 
     <script>
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function updateStepIndicator() {
+            for (let i = 1; i <= totalSteps; i++) {
+                const dot = document.getElementById('dot-' + i);
+                if (dot) {
+                    if (i <= currentStep) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                }
+            }
+        }
+
+        function showStep(step) {
+            for (let i = 1; i <= totalSteps; i++) {
+                const el = document.getElementById('step' + i);
+                if (el) {
+                    el.style.display = (i === step) ? 'block' : 'none';
+                }
+            }
+            currentStep = step;
+            updateStepIndicator();
+        }
+
+        function validateStep(step) {
+            const stepEl = document.getElementById('step' + step);
+            const inputs = stepEl.querySelectorAll('input, select');
+            let valid = true;
+            for (const input of inputs) {
+                if (!input.checkValidity()) {
+                    input.reportValidity();
+                    valid = false;
+                    break;
+                }
+            }
+            
+            if (valid && step === 2) {
+                const p1 = document.getElementById('password').value;
+                const p2 = document.getElementById('password2').value;
+                if (p1 !== p2) {
+                    showFormAlert("Las contraseñas no coinciden");
+                    return false;
+                } else if (p1.length < 6) {
+                    showFormAlert("La contraseña debe tener al menos 6 caracteres");
+                    return false;
+                } else {
+                    hideFormAlert();
+                }
+            }
+            
+            return valid;
+        }
+
+        function nextStep(step) {
+            if (validateStep(step)) {
+                hideFormAlert();
+                showStep(step + 1);
+            }
+        }
+
+        function prevStep(step) {
+            hideFormAlert();
+            showStep(step - 1);
+        }
+
+        function updateQuestionOptions() {
+            const selects = [
+                document.getElementById('pregunta_tipo_1'),
+                document.getElementById('pregunta_tipo_2'),
+                document.getElementById('pregunta_tipo_3')
+            ];
+            
+            const selectedValues = selects.map(s => s.value).filter(v => v !== '' && v !== 'Personalizada');
+            
+            selects.forEach(select => {
+                const currentValue = select.value;
+                Array.from(select.options).forEach(option => {
+                    if (option.value === '' || option.value === 'Personalizada') return;
+                    
+                    if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                        option.style.display = 'none';
+                        option.disabled = true;
+                    } else {
+                        option.style.display = '';
+                        option.disabled = false;
+                    }
+                });
+            });
+        }
+
         function toggleCustomQuestion(index) {
             const select = document.getElementById('pregunta_tipo_' + index);
             const customDiv = document.getElementById('customQuestionDiv_' + index);
@@ -578,6 +745,51 @@ $preguntas_predefinidas = [
                 customInput.required = false;
                 customInput.value = '';
             }
+        }
+
+        let tosLoaded = false;
+        function openTosModal() {
+            const modal = document.getElementById('tosModal');
+            modal.style.display = 'flex';
+            if (!tosLoaded) {
+                fetch('terminos.php')
+                    .then(res => res.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const content = doc.querySelector('.bento-content');
+                        if (content) {
+                            const header = content.querySelector('.page-header');
+                            if (header) header.style.display = 'none';
+                            
+                            // Adjust styles to match modal
+                            const h3s = content.querySelectorAll('.tos-section h3');
+                            h3s.forEach(h3 => {
+                                h3.style.fontSize = 'var(--font-size-md)';
+                                h3.style.fontWeight = 'var(--font-weight-bold)';
+                                h3.style.color = 'var(--color-violeta)';
+                                h3.style.marginBottom = 'var(--space-2)';
+                            });
+                            
+                            const sections = content.querySelectorAll('.tos-section');
+                            sections.forEach(sec => {
+                                sec.style.marginBottom = 'var(--space-4)';
+                            });
+
+                            document.getElementById('tosModalBody').innerHTML = content.innerHTML;
+                        } else {
+                            document.getElementById('tosModalBody').innerHTML = '<p>No se pudieron cargar los términos.</p>';
+                        }
+                        tosLoaded = true;
+                    })
+                    .catch(() => {
+                        document.getElementById('tosModalBody').innerHTML = '<p>Error de conexión al cargar los términos.</p>';
+                    });
+            }
+        }
+
+        function closeTosModal() {
+            document.getElementById('tosModal').style.display = 'none';
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -659,9 +871,18 @@ $preguntas_predefinidas = [
         }
 
         // Inicializar preguntas de seguridad
-        toggleCustomQuestion(1);
-        toggleCustomQuestion(2);
-        toggleCustomQuestion(3);
+        [1, 2, 3].forEach(i => {
+            const select = document.getElementById('pregunta_tipo_' + i);
+            if(select) {
+                select.addEventListener('change', () => {
+                    toggleCustomQuestion(i);
+                    updateQuestionOptions();
+                });
+                toggleCustomQuestion(i);
+            }
+        });
+        updateQuestionOptions();
+        showStep(1);
 
         // Envío del formulario
         document.getElementById('regForm').addEventListener('submit', async (e) => {
