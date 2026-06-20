@@ -13,27 +13,35 @@ class MySanPDF extends FPDF
         'salmon' => [255, 128, 128],
         'dark' => [33, 37, 41],
         'gray' => [173, 181, 189],
-        'light' => [248, 249, 250]
+        'light' => [248, 249, 250],
+        'bg_main' => [255, 255, 255],
+        'bg_surface' => [240, 240, 240],
+        'text_primary' => [33, 37, 41],
+        'text_secondary' => [100, 100, 100]
     ];
 
     function Header()
     {
+        // Dark background
+        $this->SetFillColor($this->colors['bg_main'][0], $this->colors['bg_main'][1], $this->colors['bg_main'][2]);
+        $this->Rect(0, 0, 210, 297, 'F');
+
         // Decorative Bar
         $this->SetFillColor($this->colors['violeta'][0], $this->colors['violeta'][1], $this->colors['violeta'][2]);
-        $this->Rect(0, 0, 210, 15, 'F');
+        $this->Rect(0, 0, 210, 10, 'F');
 
         // Logo / Title
-        $this->SetY(20);
+        $this->SetY(15);
         $this->SetFont('Arial', 'B', 24);
         $this->SetTextColor($this->colors['violeta'][0], $this->colors['violeta'][1], $this->colors['violeta'][2]);
         $this->Cell(0, 10, 'MySan', 0, 1, 'L');
 
         $this->SetFont('Arial', 'I', 10);
-        $this->SetTextColor($this->colors['gray'][0], $this->colors['gray'][1], $this->colors['gray'][2]);
+        $this->SetTextColor($this->colors['text_secondary'][0], $this->colors['text_secondary'][1], $this->colors['text_secondary'][2]);
         $this->Cell(0, 5, 'Sistema de Administracion de Ahorros Grupales', 0, 1, 'L');
 
         $this->Ln(10);
-        $this->SetDrawColor($this->colors['violeta'][0], $this->colors['violeta'][1], $this->colors['violeta'][2]);
+        $this->SetDrawColor($this->colors['bg_surface'][0], $this->colors['bg_surface'][1], $this->colors['bg_surface'][2]);
         $this->Line(10, $this->GetY(), 200, $this->GetY());
         $this->Ln(10);
     }
@@ -42,33 +50,33 @@ class MySanPDF extends FPDF
     {
         $this->SetY(-25);
         $this->SetFont('Arial', 'I', 8);
-        $this->SetTextColor($this->colors['gray'][0], $this->colors['gray'][1], $this->colors['gray'][2]);
+        $this->SetTextColor($this->colors['text_secondary'][0], $this->colors['text_secondary'][1], $this->colors['text_secondary'][2]);
         $this->Cell(0, 10, 'Este documento es un comprobante oficial generado por MySan. Validado electronicamente.', 0, 1, 'C');
 
         $this->SetY(-15);
         $this->SetFont('Arial', '', 8);
-        $this->SetTextColor(100, 100, 100);
+        $this->SetTextColor($this->colors['text_secondary'][0], $this->colors['text_secondary'][1], $this->colors['text_secondary'][2]);
         $this->Cell(0, 10, 'Pagina ' . $this->PageNo() . ' de {nb}', 0, 0, 'C');
     }
 
     function LabelValue($label, $value, $ln = 1)
     {
         $this->SetFont('Arial', 'B', 11);
-        $this->SetTextColor($this->colors['dark'][0], $this->colors['dark'][1], $this->colors['dark'][2]);
-        $this->Cell(50, 10, utf8_decode($label), 0, 0);
+        $this->SetTextColor($this->colors['text_primary'][0], $this->colors['text_primary'][1], $this->colors['text_primary'][2]);
+        $this->Cell(50, 10, mb_convert_encoding($label, 'ISO-8859-1', 'UTF-8'), 0, 0);
 
         $this->SetFont('Arial', '', 11);
-        $this->SetTextColor(50, 50, 50);
-        $this->Cell(0, 10, utf8_decode($value), 0, $ln);
+        $this->SetTextColor($this->colors['text_secondary'][0], $this->colors['text_secondary'][1], $this->colors['text_secondary'][2]);
+        $this->Cell(0, 10, mb_convert_encoding($value, 'ISO-8859-1', 'UTF-8'), 0, $ln);
     }
 
     function SectionTitle($title)
     {
         $this->Ln(5);
         $this->SetFont('Arial', 'B', 12);
-        $this->SetFillColor($this->colors['light'][0], $this->colors['light'][1], $this->colors['light'][2]);
+        $this->SetFillColor($this->colors['bg_surface'][0], $this->colors['bg_surface'][1], $this->colors['bg_surface'][2]);
         $this->SetTextColor($this->colors['violeta'][0], $this->colors['violeta'][1], $this->colors['violeta'][2]);
-        $this->Cell(0, 10, '  ' . utf8_decode($title), 0, 1, 'L', true);
+        $this->Cell(0, 10, '  ' . mb_convert_encoding($title, 'ISO-8859-1', 'UTF-8'), 0, 1, 'L', true);
         $this->Ln(3);
     }
 }
@@ -140,9 +148,9 @@ function generarRecibo()
 
     // Receipt Badge
     $pdf->SetFillColor(56, 217, 169);
-    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetTextColor(13, 13, 13);
     $pdf->SetFont('Arial', 'B', 12);
-    $pdf->Cell(60, 10, utf8_decode('RECIBO DE PAGO DIGITAL'), 0, 1, 'C', true);
+    $pdf->Cell(60, 10, mb_convert_encoding('RECIBO DE PAGO DIGITAL', 'ISO-8859-1', 'UTF-8'), 0, 1, 'C', true);
 
     $pdf->Ln(5);
     $pdf->SetTextColor(33, 37, 41);
@@ -178,12 +186,13 @@ function generarRecibo()
     $pdf->Cell(0, 12, '$ ' . number_format($monto_usd, 2) . '  ', 0, 1, 'R', true);
 
     $pdf->SetFillColor(56, 217, 169);
+    $pdf->SetTextColor(13, 13, 13);
     $pdf->SetFont('Arial', 'B', 10);
     $pdf->Cell(100, 10, ' EQUIVALENTE PAGADO (Bs):', 0, 0, 'L', true);
     $pdf->Cell(0, 10, 'Bs ' . number_format($monto_bs, 2) . '  ', 0, 1, 'R', true);
 
     $pdf->Ln(20);
-    $pdf->SetTextColor(33, 37, 41);
+    $pdf->SetTextColor(100, 100, 100);
     $pdf->SetFont('Arial', '', 10);
     $pdf->Cell(0, 5, 'Electronizado por MySan Admin', 0, 1, 'C');
     $pdf->Cell(0, 5, date('d/m/Y H:i:s'), 0, 1, 'C');
@@ -227,7 +236,7 @@ function generarCertificadoEntrega()
         $part['cedula'] . ", ha completado satisfactoriamente los requisitos del grupo de ahorro [" .
         $part['grupo_nombre'] . "] y recibe en este acto el producto detallado a continuacion:";
 
-    $pdf->MultiCell(0, 8, utf8_decode($cuerpo), 0, 'J');
+    $pdf->MultiCell(0, 8, mb_convert_encoding($cuerpo, 'ISO-8859-1', 'UTF-8'), 0, 'J');
     $pdf->Ln(10);
 
     $pdf->SectionTitle('ESPECIFICACIONES DEL PRODUCTO');
@@ -238,13 +247,15 @@ function generarCertificadoEntrega()
 
     $pdf->Ln(15);
     $pdf->SetFont('Arial', 'I', 10);
-    $pdf->MultiCell(0, 6, utf8_decode("El beneficiario declara recibir el producto a su entera satisfaccion y conforme a las especificaciones acordadas al inicio del plan de ahorro."), 0, 'C');
+    $pdf->MultiCell(0, 6, mb_convert_encoding("El beneficiario declara recibir el producto a su entera satisfaccion y conforme a las especificaciones acordadas al inicio del plan de ahorro.", 'ISO-8859-1', 'UTF-8'), 0, 'C');
 
     $pdf->Ln(40);
     // Signatures
+    $pdf->SetTextColor(33, 37, 41);
     $pdf->SetFont('Arial', 'B', 10);
     $pdf->Cell(90, 8, '__________________________', 0, 0, 'C');
     $pdf->Cell(90, 8, '__________________________', 0, 1, 'C');
+    $pdf->SetTextColor(100, 100, 100);
     $pdf->Cell(90, 5, 'Por MySan (Sello y Firma)', 0, 0, 'C');
     $pdf->Cell(90, 5, 'El Beneficiario', 0, 1, 'C');
 
@@ -275,6 +286,7 @@ function generarReporteFinanciero()
     $pdf->SetTextColor(33, 37, 41);
     $pdf->Cell(0, 15, 'ESTADO FINANCIERO CONSOLIDADO', 0, 1, 'C');
     $pdf->SetFont('Arial', '', 11);
+    $pdf->SetTextColor(100, 100, 100);
     $pdf->Cell(0, 5, 'Corte al: ' . date('d/m/Y H:i'), 0, 1, 'C');
     $pdf->Ln(15);
 
@@ -289,27 +301,28 @@ function generarReporteFinanciero()
 
     // Table Content
     $pdf->SetTextColor(33, 37, 41);
+    $pdf->SetDrawColor(200, 200, 200);
     $pdf->SetFont('Arial', '', 11);
     $pdf->SetFillColor(255, 255, 255);
 
-    $pdf->Cell(130, 10, ' Ingresos por Cuotas Consolidadas', 1, 0, 'L');
-    $pdf->Cell(60, 10, number_format($ingresos, 2) . ' ', 1, 1, 'R');
+    $pdf->Cell(130, 10, ' Ingresos por Cuotas Consolidadas', 1, 0, 'L', true);
+    $pdf->Cell(60, 10, number_format($ingresos, 2) . ' ', 1, 1, 'R', true);
 
-    $pdf->Cell(130, 10, ' Egresos por Adquisicion de Productos', 1, 0, 'L');
-    $pdf->Cell(60, 10, number_format($egresos, 2) . ' ', 1, 1, 'R');
+    $pdf->Cell(130, 10, ' Egresos por Adquisicion de Productos', 1, 0, 'L', true);
+    $pdf->Cell(60, 10, number_format($egresos, 2) . ' ', 1, 1, 'R', true);
 
     // Total Row
     $pdf->Ln(2);
     $pdf->SetFont('Arial', 'B', 14);
     $pdf->SetFillColor(56, 217, 169);
-    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetTextColor(13, 13, 13);
     $pdf->Cell(130, 15, ' UTILIDAD NETA DEL PERIODO', 0, 0, 'L', true);
     $pdf->Cell(60, 15, formatMoneyBcv($ganancias) . ' ', 0, 1, 'R', true);
 
     $pdf->Ln(20);
     $pdf->SetTextColor(100, 100, 100);
     $pdf->SetFont('Arial', 'I', 9);
-    $pdf->MultiCell(0, 5, utf8_decode("Este reporte es confidencial y para uso exclusivo de la administracion de MySan. La informacion aqui contenida esta sujeta a auditoria."), 0, 'C');
+    $pdf->MultiCell(0, 5, mb_convert_encoding("Este reporte es confidencial y para uso exclusivo de la administracion de MySan. La informacion aqui contenida esta sujeta a auditoria.", 'ISO-8859-1', 'UTF-8'), 0, 'C');
 
     $pdf->Output('I', 'Reporte_Financiero.pdf');
 }
