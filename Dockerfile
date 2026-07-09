@@ -36,14 +36,13 @@ RUN apt-get update && apt-get install -y \
     pdo_mysql \
     zip \
     gd \
+    && rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* \
+    && a2enmod mpm_prefork \
     && a2enmod rewrite \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Asegurar que solo un MPM esté activo (evita "More than one MPM loaded")
-RUN a2dismod mpm_event mpm_worker 2>/dev/null || true && a2enmod mpm_prefork
-
-# Habilitar mod_rewrite y configurar AllowOverride
+# Configurar AllowOverride para mod_rewrite
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # ============================================================
