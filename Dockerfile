@@ -90,5 +90,5 @@ RUN rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_wo
     a2enmod mpm_prefork && \
     echo "=== VERIFIED MPM ===" && ls -la /etc/apache2/mods-enabled/mpm_*
 
-# Iniciar Apache en foreground
-CMD ["apache2-foreground"]
+# Iniciar Apache en foreground con debug
+CMD ["bash", "-c", "echo '=== MPM AT RUNTIME ===' && ls -la /etc/apache2/mods-enabled/mpm_* && echo '=== CONFTEST ===' && apachectl configtest 2>&1 || true && echo '=== STARTING APACHE ===' && apache2-foreground"]
