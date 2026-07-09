@@ -84,11 +84,8 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# Forzar únicamente mpm_prefork y eliminar cualquier rastro de otros MPMs
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* && \
-    rm -f /etc/apache2/mods-available/mpm_event.* /etc/apache2/mods-available/mpm_worker.* && \
-    a2enmod mpm_prefork && \
-    echo "=== VERIFIED MPM ===" && ls -la /etc/apache2/mods-enabled/mpm_*
+# Asegurar que solo un MPM esté en mods-enabled en build
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* && a2enmod mpm_prefork
 
-# Iniciar Apache en foreground con debug
-CMD ["bash", "-c", "echo '=== MPM AT RUNTIME ===' && ls -la /etc/apache2/mods-enabled/mpm_* && echo '=== CONFTEST ===' && apachectl configtest 2>&1 || true && echo '=== STARTING APACHE ===' && apache2-foreground"]
+# Eliminar MPM conflictivos JUSTO antes de arrancar (Railway los restaura en runtime)
+CMD ["bash", "-c", "rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* && apache2-foreground"]
