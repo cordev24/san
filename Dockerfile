@@ -86,5 +86,8 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
+# Debug: verificar qué módulos MPM están habilitados
+RUN echo "=== MPM LOAD FILES ===" && ls -la /etc/apache2/mods-enabled/mpm_* && echo "=== MPM AVAILABLE ===" && ls -la /etc/apache2/mods-available/mpm_* && echo "=== APACHE VERSION ===" && apache2 -V 2>&1 | head -20
+
 # Iniciar Apache en foreground
 CMD ["apache2-foreground"]
