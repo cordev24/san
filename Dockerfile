@@ -36,8 +36,6 @@ RUN apt-get update && apt-get install -y \
     pdo_mysql \
     zip \
     gd \
-    && rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* \
-    && a2enmod mpm_prefork \
     && a2enmod rewrite \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -86,8 +84,11 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# Debug: verificar qué módulos MPM están habilitados
-RUN echo "=== MPM LOAD FILES ===" && ls -la /etc/apache2/mods-enabled/mpm_* && echo "=== MPM AVAILABLE ===" && ls -la /etc/apache2/mods-available/mpm_* && echo "=== APACHE VERSION ===" && apache2 -V 2>&1 | head -20
+# Forzar únicamente mpm_prefork y eliminar cualquier rastro de otros MPMs
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* && \
+    rm -f /etc/apache2/mods-available/mpm_event.* /etc/apache2/mods-available/mpm_worker.* && \
+    a2enmod mpm_prefork && \
+    echo "=== VERIFIED MPM ===" && ls -la /etc/apache2/mods-enabled/mpm_*
 
 # Iniciar Apache en foreground
 CMD ["apache2-foreground"]
